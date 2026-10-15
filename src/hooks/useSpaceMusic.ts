@@ -165,6 +165,97 @@ export function useSpaceMusic() {
     }
   }, [enabled, ensureContext, startScheduler, stopScheduler]);
 
+  const warpGainRef = useRef<GainNode | null>(null);
+  const warpOscsRef = useRef<OscillatorNode[]>([]);
+
+  const setRiftActive = useCallback((active: boolean) => {
+    const ctx = ensureContext();
+    if (!ctx) return;
+
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+
+    if (active) {
+      if (!warpGainRef.current) {
+        const wg = ctx.createGain();
+        wg.gain.setValueAtTime(0, now);
+
+        if (masterRef.current) {
+          wg.connect(masterRef.current);
+        } else {
+          wg.connect(ctx.destination);
+        }
+        warpGainRef.current = wg;
+
+        // Sub-bass resonance (deep warp core hum: 52Hz + 55.5Hz gentle binaural thrum)
+        const sub1 = ctx.createOscillator();
+        sub1.type = "sine";
+        sub1.frequency.setValueAtTime(52, now);
+
+        const sub2 = ctx.createOscillator();
+        sub2.type = "sine";
+        sub2.frequency.setValueAtTime(55.5, now);
+
+        const subGain = ctx.createGain();
+        subGain.gain.setValueAtTime(0.32, now);
+        sub1.connect(subGain);
+        sub2.connect(subGain);
+        subGain.connect(wg);
+
+        // Harmonic shimmer (slipstream atmosphere)
+        const saw = ctx.createOscillator();
+        saw.type = "triangle";
+        saw.frequency.setValueAtTime(104, now);
+
+        const bp = ctx.createBiquadFilter();
+        bp.type = "bandpass";
+        bp.frequency.setValueAtTime(880, now);
+        bp.Q.setValueAtTime(2.8, now);
+
+        const sawGain = ctx.createGain();
+        sawGain.gain.setValueAtTime(0.06, now);
+        saw.connect(bp).connect(sawGain).connect(wg);
+
+        sub1.start(now);
+        sub2.start(now);
+        saw.start(now);
+        warpOscsRef.current = [sub1, sub2, saw];
+      }
+
+      if (warpGainRef.current) {
+        warpGainRef.current.gain.cancelScheduledValues(now);
+        warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
+        warpGainRef.current.gain.linearRampToValueAtTime(0.42 * (volumeRef.current || 0.4), now + 1.6);
+      }
+
+      // Celestial entry chime (D-maj9 / celestial open harmony)
+      const chord = [N(62), N(66), N(69), N(73), N(76)];
+      chord.forEach((f, idx) => {
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, now + idx * 0.07);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.07 / chord.length, now + 0.2 + idx * 0.07);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 3.6);
+        osc.connect(g);
+        if (masterRef.current) g.connect(masterRef.current);
+        else g.connect(ctx.destination);
+        osc.start(now + idx * 0.07);
+        osc.stop(now + 4.0);
+      });
+    } else {
+      if (warpGainRef.current) {
+        warpGainRef.current.gain.cancelScheduledValues(now);
+        warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
+        warpGainRef.current.gain.linearRampToValueAtTime(0, now + 1.4);
+      }
+    }
+  }, [ensureContext]);
+
   const setVolume = useCallback((v: number) => {
     setVolumeState(v);
     if (masterRef.current && ctxRef.current) {
@@ -177,6 +268,13 @@ export function useSpaceMusic() {
   useEffect(() => {
     return () => {
       stopScheduler();
+      warpOscsRef.current.forEach((o) => {
+        try {
+          o.stop();
+        } catch {}
+      });
+      warpOscsRef.current = [];
+      warpGainRef.current = null;
       if (ctxRef.current) {
         ctxRef.current.close().catch(() => {});
         ctxRef.current = null;
@@ -185,5 +283,5 @@ export function useSpaceMusic() {
     };
   }, [stopScheduler]);
 
-  return { enabled, toggle, volume, setVolume };
+  return { enabled, toggle, volume, setVolume, setRiftActive };
 }

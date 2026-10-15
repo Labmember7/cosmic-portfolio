@@ -32,7 +32,9 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+import type { ErrorComponentProps } from "@tanstack/react-router";
+
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -72,16 +74,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Bacem's story" },
-      { name: "description", content: "A dynamic 3D portfolio application that visualizes your professional journey from a GitHub Markdown file." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Bacem's story" },
-      { property: "og:description", content: "A dynamic 3D portfolio application that visualizes your professional journey from a GitHub Markdown file." },
+      { title: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        name: "description",
+        content:
+          "Explore the 3D cosmic journey of Bacem Zarai — robotics, embedded systems, firmware, and computer vision engineer. Journey through career milestones, the interstellar rift, and autonomous perception projects.",
+      },
+      { name: "keywords", content: "Bacem Zarai, Robotics Engineer, Embedded Systems, Computer Vision, Autonomous Systems, ROS 2, C++, 3D Space Portfolio, Interactive Portfolio" },
+      { name: "author", content: "Bacem Zarai" },
+      { name: "robots", content: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" },
+      { property: "og:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        property: "og:description",
+        content:
+          "An interactive 3D space odyssey showcasing robotics engineering milestones, autonomous perception, and embedded systems projects.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Bacem's story" },
-      { name: "twitter:description", content: "A dynamic 3D portfolio application that visualizes your professional journey from a GitHub Markdown file." },
+      { property: "og:site_name", content: "Bacem Zarai Portfolio" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        name: "twitter:description",
+        content:
+          "An interactive 3D space odyssey showcasing robotics engineering milestones, autonomous perception, and embedded systems projects.",
+      },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/046badd7-8389-48d4-a060-c7c95e31df2a/id-preview-f3517df3--298b3062-03f9-4e7c-bb2a-6fb505753e52.lovable.app-1779668646759.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/046badd7-8389-48d4-a060-c7c95e31df2a/id-preview-f3517df3--298b3062-03f9-4e7c-bb2a-6fb505753e52.lovable.app-1779668646759.png" },
     ],

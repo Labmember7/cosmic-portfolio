@@ -34,11 +34,63 @@ export const Route = createFileRoute("/")({
   component: Portfolio,
   head: () => ({
     meta: [
-      { title: "A Cosmic Journey" },
+      { title: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
       {
         name: "description",
         content:
-          "A scripted 3D space journey: board the ship, travel past your experiences, dive through a wormhole, and reach a new galaxy of projects.",
+          "Explore the interactive 3D cosmic journey of Bacem Zarai — robotics, embedded systems, firmware, and computer vision engineer. Board the ship, traverse the interstellar rift, and discover autonomous perception projects.",
+      },
+      {
+        name: "keywords",
+        content:
+          "Bacem Zarai, Robotics Engineer, Embedded Systems, Computer Vision, Autonomous Systems, ROS 2, C++, 3D Space Portfolio, Interactive Portfolio, WebGL",
+      },
+      { name: "author", content: "Bacem Zarai" },
+      { name: "robots", content: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" },
+      { property: "og:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        property: "og:description",
+        content:
+          "An interactive 3D space odyssey showcasing robotics engineering milestones, autonomous perception, and embedded systems projects.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Bacem Zarai Portfolio" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        name: "twitter:description",
+        content:
+          "An interactive 3D space odyssey showcasing robotics engineering milestones, autonomous perception, and embedded systems projects.",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          "name": "Bacem Zarai — Interactive 3D Cosmic Portfolio",
+          "description":
+            "Interactive 3D space journey showcasing robotics, embedded systems, and computer vision projects.",
+          "mainEntity": {
+            "@type": "Person",
+            "name": "Bacem Zarai",
+            "jobTitle": "Embedded Systems, Robotics & Computer Vision Engineer",
+            "description":
+              "Engineer specializing in robotics, embedded systems, firmware, autonomous perception, ROS 2, and embedded C++.",
+            "knowsAbout": [
+              "Robotics",
+              "Embedded Systems",
+              "Computer Vision",
+              "ROS 2",
+              "C++",
+              "Autonomous Vehicles",
+              "Deep Learning",
+              "IoT",
+              "Control Systems"
+            ]
+          }
+        }),
       },
     ],
   }),
@@ -91,12 +143,12 @@ interface SceneLayout {
 function computeLayout(experiences: Experience[]): SceneLayout {
   const experienceZs = experiences.map((e, i) => (typeof e.z === "number" ? e.z! : EXP_FIRST_Z - i * EXP_SPACING));
   const minZ = experienceZs.length ? Math.min(...experienceZs) : EXP_FIRST_Z;
-  const wormholeZ = minZ - 40;
-  const galaxyZ = wormholeZ - 50;
-  const skillsZ = galaxyZ - 25;
-  const pantheonZ = skillsZ - 30;
-  const finaleZ = pantheonZ - 30;
-  const blackholeZ = finaleZ - 15;
+  const wormholeZ = minZ - 50;
+  const galaxyZ = wormholeZ - 75;
+  const skillsZ = galaxyZ - 45;
+  const pantheonZ = skillsZ - 50;
+  const finaleZ = pantheonZ - 65;
+  const blackholeZ = finaleZ - 25;
   return { experienceZs, wormholeZ, galaxyZ, skillsZ, pantheonZ, finaleZ, blackholeZ };
 }
 
@@ -142,16 +194,20 @@ function buildChapters(experiences: Experience[], layout: SceneLayout, brandDesc
   chapters.push(
     {
       id: "wormhole",
-      title: `${String(base + 1).padStart(2, "0")} · The Wormhole`,
-      caption: "Reality bends. We fold spacetime into a new galaxy.",
-      camera: [0, 0, layout.wormholeZ + 5],
-      lookAt: [0, 0, layout.wormholeZ - 20],
+      title: `${String(base + 1).padStart(2, "0")} · The Rift — Interstellar Wormhole`,
+      caption: "Spacetime folds into an Einstein-Rosen bridge. Traversing the interdimensional corridor into a new galaxy.",
+      camera: [0, 0, layout.wormholeZ - 16],
+      lookAt: [0, 0, layout.wormholeZ - 50],
+      via: {
+        camera: [0, 0, layout.wormholeZ + 27],
+        lookAt: [0, 0, layout.wormholeZ - 30],
+      },
     },
     {
       id: "galaxy",
-      title: `${String(base + 2).padStart(2, "0")} · The New Galaxy — Projects`,
-      caption: "A spiral of ideas built into things. Click any planet to open its story.",
-      camera: [0, 18, layout.galaxyZ + 30],
+      title: `${String(base + 2).padStart(2, "0")} · The Forge — Projects Galaxy`,
+      caption: "A luminous spiral of systems, firmware, and autonomous perception. Click any planet to open its story.",
+      camera: [0, 18, layout.galaxyZ + 32],
       lookAt: [0, 0, layout.galaxyZ - 5],
       via: {
         camera: [0, 0, layout.galaxyZ + 22],
@@ -161,22 +217,22 @@ function buildChapters(experiences: Experience[], layout: SceneLayout, brandDesc
     {
       id: "skills",
       title: `${String(base + 3).padStart(2, "0")} · The Skill Constellation`,
-      caption: "Above the galaxy, a constellation of tools and languages currently in orbit.",
+      caption: "Above the galaxy, a constellation of tools, frameworks, and languages currently in orbit.",
       camera: [0, 14, layout.skillsZ + 22],
       lookAt: [0, 8, layout.skillsZ - 10],
     },
     {
       id: "pantheon",
-      title: `${String(base + 4).padStart(2, "0")} · The Pantheon — Honors`,
+      title: `${String(base + 4).padStart(2, "0")} · The Pantheon — Hall of Honors`,
       caption:
-        "An orbiting hall of medals: certifications and achievements earned along the journey. Each glowing badge marks a milestone in the cosmos.",
-      camera: [9, 7.5, layout.pantheonZ + 18],
-      lookAt: [0, 0.4, layout.pantheonZ],
+        "The celestial hall of honors: verified certifications and engineering milestones. Click any floating crest to inspect its dossier.",
+      camera: [0, 9.5, layout.pantheonZ + 22],
+      lookAt: [0, 1.0, layout.pantheonZ],
     },
     {
       id: "finale",
       title: `${String(base + 5).padStart(2, "0")} · The Singularity`,
-      caption: "Every journey ends here. Look back at where you've been or jump straight to any chapter.",
+      caption: "Every cosmic journey arrives at the event horizon. Look back at where you've been, transmit a signal, or explore in free roam.",
       camera: [0, 1.2, layout.finaleZ + 7],
       lookAt: [0, 0, layout.finaleZ - 5],
     },
@@ -217,15 +273,24 @@ function CameraRig({ chapter }: { chapter: Chapter }) {
   }, [chapter]);
 
   useFrame((_, dt) => {
-    // Faster, consistent cinematic easing
-    const k = Math.min(1, dt * 1.1);
+    const isWormhole = chapter.id === "wormhole";
+    const cam = camera as THREE.PerspectiveCamera;
+
+    // Gentle cinematic FOV expansion during wormhole traversal (no disorienting distortion)
+    const targetFov = isWormhole ? 60 : 55;
+    if (Math.abs(cam.fov - targetFov) > 0.05) {
+      cam.fov = THREE.MathUtils.lerp(cam.fov, targetFov, Math.min(1, dt * 1.3));
+      cam.updateProjectionMatrix();
+    }
+
+    // Smooth, consistent cinematic easing
+    const k = Math.min(1, dt * 1.15);
     let tgtPos = finalPos;
     let tgtLook = finalLook;
     if (phase.current === "via" && viaPos && viaLook) {
       tgtPos = viaPos;
       tgtLook = viaLook;
-      // Switch earlier so we don't decelerate twice on the same path
-      if (camera.position.distanceTo(viaPos) < 8) {
+      if (camera.position.distanceTo(viaPos) < (isWormhole ? 10 : 8)) {
         phase.current = "final";
       }
     }
@@ -483,98 +548,458 @@ function BlackHole({
 /* WORMHOLE — true tunnel the camera flies through                    */
 /* ================================================================== */
 
-function Wormhole({ position }: { position: [number, number, number] }) {
+/* ================================================================== */
+/* ================================================================== */
+/* WORMHOLE — The Interstellar Hyper-Dimensional Rift                 */
+/* ================================================================== */
+
+function TachyonStream({ count = 380 }: { count?: number }) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const [positions, colors, speeds] = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const cols = new Float32Array(count * 3);
+    const spd = new Float32Array(count);
+
+    const cCyan = new THREE.Color("#38bdf8");
+    const cViolet = new THREE.Color("#c084fc");
+    const cGold = new THREE.Color("#ffd27a");
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 1.6 + Math.random() * 2.8;
+      const z = -26 + Math.random() * 52;
+      pos[i * 3] = Math.cos(angle) * r;
+      pos[i * 3 + 1] = Math.sin(angle) * r;
+      pos[i * 3 + 2] = z;
+
+      spd[i] = 14 + Math.random() * 18;
+
+      const p = (z + 26) / 52;
+      const color = p > 0.5 ? cCyan.clone().lerp(cViolet, (1 - p) * 2) : cViolet.clone().lerp(cGold, (0.5 - p) * 2);
+      cols[i * 3] = color.r;
+      cols[i * 3 + 1] = color.g;
+      cols[i * 3 + 2] = color.b;
+    }
+    return [pos, cols, spd];
+  }, [count]);
+
+  useFrame((_, dt) => {
+    if (!pointsRef.current) return;
+    const geo = pointsRef.current.geometry;
+    const pos = geo.attributes.position.array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      pos[i * 3 + 2] += speeds[i] * dt;
+      if (pos[i * 3 + 2] > 26) {
+        pos[i * 3 + 2] = -26;
+      }
+    }
+    geo.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.16}
+        vertexColors
+        transparent
+        opacity={0.85}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+function GravitationalRipples({ z = 24 }: { z?: number }) {
+  const ripple1 = useRef<THREE.Mesh>(null);
+  const ripple2 = useRef<THREE.Mesh>(null);
+  const ripple3 = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    const update = (mesh: THREE.Mesh | null, offset: number) => {
+      if (!mesh) return;
+      const phase = (t * 0.45 + offset) % 1;
+      const s = 1.0 + phase * 0.75;
+      mesh.scale.set(s, s, 1);
+      const m = mesh.material as THREE.MeshBasicMaterial;
+      if (m) m.opacity = (1 - phase) * 0.38;
+    };
+    update(ripple1.current, 0);
+    update(ripple2.current, 0.33);
+    update(ripple3.current, 0.66);
+  });
+
+  return (
+    <group position={[0, 0, z]}>
+      <mesh ref={ripple1}>
+        <ringGeometry args={[6.8, 7.05, 96]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+      <mesh ref={ripple2}>
+        <ringGeometry args={[6.8, 7.05, 96]} />
+        <meshBasicMaterial color="#818cf8" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+      <mesh ref={ripple3}>
+        <ringGeometry args={[6.8, 7.05, 96]} />
+        <meshBasicMaterial color="#c084fc" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
+function Wormhole({
+  position,
+  isWormhole = false,
+}: {
+  position: [number, number, number];
+  isWormhole?: boolean;
+}) {
   const groupRef = useRef<THREE.Group>(null);
   const innerRef = useRef<THREE.Mesh>(null);
+  const entranceDiscRef = useRef<THREE.Group>(null);
+  const exitDiscRef = useRef<THREE.Group>(null);
+  const portalDiscRef = useRef<THREE.Mesh>(null);
 
-  // Smooth seamless "speed-streaks" texture — vertical streaks along the tube length.
-  const tunnelTex = useMemo(() => {
+  // Hyperboloid funnel geometry (narrower throat at center, flared wide mouth at both ends)
+  const throatGeo = useMemo(() => {
+    const geo = new THREE.CylinderGeometry(5.2, 5.2, 56, 64, 32, true);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i);
+      const ny = y / 28; // -1 to +1
+      const flare = 1.0 + 0.62 * (ny * ny);
+      pos.setX(i, pos.getX(i) * flare);
+      pos.setZ(i, pos.getZ(i) * flare);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  const innerThroatGeo = useMemo(() => {
+    const geo = new THREE.CylinderGeometry(3.6, 3.6, 56, 48, 24, true);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i);
+      const ny = y / 28;
+      const flare = 1.0 + 0.52 * (ny * ny);
+      pos.setX(i, pos.getX(i) * flare);
+      pos.setZ(i, pos.getZ(i) * flare);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }, []);
+
+  // Seamless, high-resolution relativistic slipstream texture
+  const slipstreamTex = useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 1024;
+    c.height = 1024;
+    const g = c.getContext("2d")!;
+    g.fillStyle = "#02010e";
+    g.fillRect(0, 0, 1024, 1024);
+
+    // Deep cosmic blue-purple ambient wash
+    const wash = g.createLinearGradient(0, 0, 1024, 0);
+    wash.addColorStop(0, "rgba(20, 10, 60, 0.0)");
+    wash.addColorStop(0.25, "rgba(30, 15, 90, 0.45)");
+    wash.addColorStop(0.5, "rgba(70, 35, 170, 0.6)");
+    wash.addColorStop(0.75, "rgba(30, 15, 90, 0.45)");
+    wash.addColorStop(1, "rgba(20, 10, 60, 0.0)");
+    g.fillStyle = wash;
+    g.fillRect(0, 0, 1024, 1024);
+
+    // Flowing luminous nebula waves
+    for (let i = 0; i < 8; i++) {
+      const x = (i / 8) * 1024 + 64;
+      const radGrad = g.createRadialGradient(x, 512, 40, x, 512, 280);
+      const hue = 210 + i * 16;
+      radGrad.addColorStop(0, `hsla(${hue}, 92%, 68%, 0.25)`);
+      radGrad.addColorStop(0.6, `hsla(${hue + 35}, 85%, 58%, 0.12)`);
+      radGrad.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = radGrad;
+      g.fillRect(x - 280, 0, 560, 1024);
+    }
+
+    // 240 relativistic speed streaks running along Y (length of tube)
+    for (let i = 0; i < 240; i++) {
+      const x = Math.random() * 1024;
+      const w = 1.0 + Math.random() * 2.8;
+      const hue = 195 + Math.random() * 125;
+      const alpha = 0.22 + Math.random() * 0.45;
+      const grad = g.createLinearGradient(0, 0, 0, 1024);
+      grad.addColorStop(0, `hsla(${hue}, 95%, 75%, 0.0)`);
+      grad.addColorStop(0.15, `hsla(${hue}, 95%, 75%, ${alpha * 0.7})`);
+      grad.addColorStop(0.5, `hsla(${hue}, 95%, 82%, ${alpha})`);
+      grad.addColorStop(0.85, `hsla(${hue}, 95%, 75%, ${alpha * 0.7})`);
+      grad.addColorStop(1, `hsla(${hue}, 95%, 75%, 0.0)`);
+      g.fillStyle = grad;
+      g.fillRect(x, 0, w, 1024);
+    }
+
+    // Subtle quantum metric grid
+    g.strokeStyle = "rgba(120, 200, 255, 0.09)";
+    g.lineWidth = 1;
+    for (let y = 0; y < 1024; y += 64) {
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(1024, y);
+      g.stroke();
+    }
+
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(2, 2);
+    t.anisotropy = 16;
+    return t;
+  }, []);
+
+  // Destination galaxy portal aperture preview (anchoring visual target)
+  const destinationGalaxyTex = useMemo(() => {
     const c = document.createElement("canvas");
     c.width = 512;
     c.height = 512;
     const g = c.getContext("2d")!;
-    g.fillStyle = "#04031a";
+    g.fillStyle = "#000000";
     g.fillRect(0, 0, 512, 512);
-    // soft blue base wash
-    const wash = g.createLinearGradient(0, 0, 512, 0);
-    wash.addColorStop(0, "rgba(60,40,140,0.0)");
-    wash.addColorStop(0.5, "rgba(80,60,180,0.35)");
-    wash.addColorStop(1, "rgba(60,40,140,0.0)");
-    g.fillStyle = wash;
-    g.fillRect(0, 0, 512, 512);
-    // streaks running along Y (tube length) — seamless because they span full height
-    for (let i = 0; i < 140; i++) {
-      const x = Math.random() * 512;
-      const w = 0.8 + Math.random() * 2.2;
-      const hue = 200 + Math.random() * 120; // blues -> purples -> pinks
-      const alpha = 0.35 + Math.random() * 0.55;
-      const grad = g.createLinearGradient(0, 0, 0, 512);
-      grad.addColorStop(0, `hsla(${hue},95%,70%,${alpha * 0.0})`);
-      grad.addColorStop(0.5, `hsla(${hue},95%,75%,${alpha})`);
-      grad.addColorStop(1, `hsla(${hue},95%,70%,${alpha * 0.0})`);
-      g.fillStyle = grad;
-      g.fillRect(x, 0, w, 512);
+
+    const coreGrad = g.createRadialGradient(256, 256, 0, 256, 256, 240);
+    coreGrad.addColorStop(0, "rgba(255, 250, 230, 1.0)");
+    coreGrad.addColorStop(0.12, "rgba(255, 210, 120, 0.95)");
+    coreGrad.addColorStop(0.35, "rgba(255, 140, 60, 0.65)");
+    coreGrad.addColorStop(0.65, "rgba(180, 70, 240, 0.35)");
+    coreGrad.addColorStop(0.85, "rgba(50, 20, 120, 0.15)");
+    coreGrad.addColorStop(1, "rgba(0, 0, 0, 0.0)");
+    g.fillStyle = coreGrad;
+    g.beginPath();
+    g.arc(256, 256, 240, 0, Math.PI * 2);
+    g.fill();
+
+    g.save();
+    g.translate(256, 256);
+    for (let arm = 0; arm < 3; arm++) {
+      const armAngleOffset = (arm * Math.PI * 2) / 3;
+      for (let i = 0; i < 220; i++) {
+        const r = Math.pow(i / 220, 0.75) * 210;
+        const theta = armAngleOffset + (i / 220) * 4.2;
+        const x = Math.cos(theta) * r + (Math.random() - 0.5) * 16;
+        const y = Math.sin(theta) * r + (Math.random() - 0.5) * 16;
+        const dotSize = Math.max(0.5, (1 - r / 220) * 3.5 + Math.random() * 2);
+        const alpha = (1 - r / 240) * 0.85;
+        g.fillStyle = i % 2 === 0 ? `rgba(255, 220, 140, ${alpha})` : `rgba(200, 150, 255, ${alpha})`;
+        g.beginPath();
+        g.arc(x, y, dotSize, 0, Math.PI * 2);
+        g.fill();
+      }
     }
-    const t = new THREE.CanvasTexture(c);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(2, 2);
-    t.anisotropy = 8;
-    return t;
+    g.restore();
+
+    return new THREE.CanvasTexture(c);
   }, []);
 
-  useFrame((_, dt) => {
-    // forward flow — scroll along the tube length only (no flicker)
-    tunnelTex.offset.y -= dt * 0.45;
-    if (innerRef.current) innerRef.current.rotation.y += dt * 0.05;
+  useFrame((state, dt) => {
+    // Silky, smooth forward slipstream flow
+    slipstreamTex.offset.y -= dt * 0.22;
+
+    if (innerRef.current) {
+      innerRef.current.rotation.y += dt * 0.03;
+    }
+    if (entranceDiscRef.current) {
+      entranceDiscRef.current.rotation.z += dt * 0.08;
+    }
+    if (exitDiscRef.current) {
+      exitDiscRef.current.rotation.z -= dt * 0.06;
+    }
+    if (portalDiscRef.current) {
+      portalDiscRef.current.rotation.z += dt * 0.05;
+    }
   });
 
   return (
     <group position={position} ref={groupRef}>
-      {/* main tunnel — open cylinder along Z */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[4, 4, 40, 64, 1, true]} />
+      {/* 1. Spacetime Gravitational Shockwave Ripples at Entrance */}
+      <GravitationalRipples z={25.5} />
+
+      {/* 2. Entrance Event Horizon Accretion Ring Complex (z = +25.5) */}
+      <group position={[0, 0, 25.5]} ref={entranceDiscRef}>
+        {/* Outer Accretion Disc */}
+        <mesh>
+          <ringGeometry args={[6.8, 9.6, 96]} />
+          <meshBasicMaterial
+            color="#38bdf8"
+            transparent
+            opacity={0.42}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        {/* Tilted Counter-Rotating Chromatic Disc */}
+        <mesh rotation={[Math.PI / 2.3, 0.16, 0]}>
+          <ringGeometry args={[7.2, 8.4, 80]} />
+          <meshBasicMaterial
+            color="#818cf8"
+            transparent
+            opacity={0.28}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        {/* Razor-thin Photon Sphere */}
+        <mesh>
+          <ringGeometry args={[6.72, 6.86, 128]} />
+          <meshBasicMaterial
+            color="#e0f2fe"
+            transparent
+            opacity={0.92}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <pointLight color="#38bdf8" intensity={1.5} distance={22} />
+      </group>
+
+      {/* 3. Main Hyperboloid Throat Cylinder (Outer Dimension Slipstream) */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} geometry={throatGeo}>
         <meshBasicMaterial
-          map={tunnelTex}
+          map={slipstreamTex}
           side={THREE.BackSide}
           transparent
-          opacity={0.95}
+          opacity={0.92}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      {/* inner soft glow tube — gives depth, rotates slowly */}
-      <mesh ref={innerRef} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[2.6, 2.6, 40, 48, 1, true]} />
+      {/* 4. Secondary Concentric Parallax Sheath (Atmospheric Depth) */}
+      <mesh ref={innerRef} rotation={[Math.PI / 2, 0, 0]} geometry={innerThroatGeo}>
         <meshBasicMaterial
           color="#9aa8ff"
           side={THREE.BackSide}
           transparent
-          opacity={0.18}
+          opacity={0.16}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
         />
       </mesh>
 
-      {/* light rings along the length — evenly spaced, subtle */}
-      {Array.from({ length: 14 }).map((_, i) => {
-        const z = -19 + i * 2.85;
-        const hue = 220 + (i / 14) * 100;
+      {/* 5. 16 Quantum Chrono-Gate Harmonic Rings Along Corridor */}
+      {Array.from({ length: 16 }).map((_, i) => {
+        const z = -22 + i * 2.93;
+        const ny = z / 28;
+        const r = 3.6 + 2.2 * (ny * ny);
+
+        const p = i / 15;
+        const hue = p > 0.5 ? 200 + (1 - p) * 140 : 40 + p * 120;
+        const ringColor = new THREE.Color(`hsl(${hue}, 92%, 70%)`);
+
         return (
-          <mesh key={i} position={[0, 0, z]}>
-            <torusGeometry args={[3.95, 0.04, 12, 96]} />
-            <meshBasicMaterial
-              color={new THREE.Color(`hsl(${hue}, 90%, 70%)`)}
-              transparent
-              opacity={0.55}
-              blending={THREE.AdditiveBlending}
-              depthWrite={false}
-            />
-          </mesh>
+          <group key={i} position={[0, 0, z]}>
+            {/* Main Luminous Gate Ring */}
+            <mesh>
+              <torusGeometry args={[r, 0.04, 16, 96]} />
+              <meshBasicMaterial
+                color={ringColor}
+                transparent
+                opacity={0.5}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
+            </mesh>
+            {/* Secondary Thin Halo */}
+            <mesh>
+              <torusGeometry args={[r * 1.05, 0.015, 12, 64]} />
+              <meshBasicMaterial
+                color="#ffffff"
+                transparent
+                opacity={0.25}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
+            </mesh>
+            {/* 4 Orbiting Quantum Node Beacons */}
+            {[0, 1, 2, 3].map((nodeIdx) => {
+              const nodeAngle = (nodeIdx * Math.PI) / 2 + (i % 2 === 0 ? 0.3 : -0.3);
+              return (
+                <mesh
+                  key={nodeIdx}
+                  position={[Math.cos(nodeAngle) * r, Math.sin(nodeAngle) * r, 0]}
+                >
+                  <octahedronGeometry args={[0.08, 0]} />
+                  <meshBasicMaterial
+                    color={ringColor}
+                    transparent
+                    opacity={0.8}
+                    blending={THREE.AdditiveBlending}
+                  />
+                </mesh>
+              );
+            })}
+          </group>
         );
       })}
 
-      <Sparkles count={220} scale={[5, 5, 40]} size={2} speed={1.2} color="#cdd6ff" />
+      {/* 6. Volumetric Relativistic Tachyon Particle Field */}
+      <TachyonStream count={420} />
+
+      {/* 7. Destination Galaxy Horizon Portal (Crucial Visual Anchor) */}
+      <group position={[0, 0, -25.5]}>
+        <mesh ref={portalDiscRef}>
+          <circleGeometry args={[3.8, 64]} />
+          <meshBasicMaterial
+            map={destinationGalaxyTex}
+            transparent
+            opacity={0.95}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh>
+          <ringGeometry args={[3.75, 4.0, 96]} />
+          <meshBasicMaterial
+            color="#ffd27a"
+            transparent
+            opacity={0.85}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      </group>
+
+      {/* 8. Exit Gravitational Lensing Solar Corona (z = -25.5) */}
+      <group position={[0, 0, -25.5]} ref={exitDiscRef}>
+        <mesh>
+          <ringGeometry args={[6.8, 9.6, 96]} />
+          <meshBasicMaterial
+            color="#ffd27a"
+            transparent
+            opacity={0.48}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <mesh rotation={[Math.PI / 2.2, -0.15, 0]}>
+          <ringGeometry args={[7.2, 8.4, 80]} />
+          <meshBasicMaterial
+            color="#f59e0b"
+            transparent
+            opacity={0.3}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+        <pointLight color="#ffd27a" intensity={1.6} distance={24} />
+      </group>
     </group>
   );
 }
@@ -1427,7 +1852,7 @@ function SkillConstellation({ centerZ }: { centerZ: number }) {
 /* SHIP + ASTRONAUT (always visible — locked to camera)                */
 /* ================================================================== */
 
-function CompanionShip({ onContact }: { onContact: () => void }) {
+function CompanionShip({ onContact, isWormhole = false }: { onContact: () => void; isWormhole?: boolean }) {
   const { camera, scene } = useThree();
   const group = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -1497,6 +1922,32 @@ function CompanionShip({ onContact }: { onContact: () => void }) {
         onContact();
       }}
     >
+      {/* deflector shield bubble during rift transit */}
+      {isWormhole && (
+        <group>
+          <mesh scale={1.15}>
+            <sphereGeometry args={[0.72, 32, 32]} />
+            <meshBasicMaterial
+              color="#38bdf8"
+              transparent
+              opacity={0.3}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+          <mesh scale={1.2} rotation={[Math.PI / 2.4, 0, 0]}>
+            <torusGeometry args={[0.74, 0.02, 12, 48]} />
+            <meshBasicMaterial
+              color="#00f5ff"
+              transparent
+              opacity={0.7}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
+      )}
+
       {/* hull */}
       <mesh>
         <capsuleGeometry args={[0.32, 0.9, 16, 32]} />
@@ -1532,10 +1983,15 @@ function CompanionShip({ onContact }: { onContact: () => void }) {
         <meshStandardMaterial color="#ff7a18" metalness={0.5} emissive="#ff7a18" emissiveIntensity={0.3} />
       </mesh>
       {/* engine glow with trail */}
-      <Trail width={0.4} length={4} color={"#ff8a3c"} attenuation={(t) => t * t}>
+      <Trail
+        width={isWormhole ? 0.75 : 0.4}
+        length={isWormhole ? 6 : 4}
+        color={isWormhole ? "#38bdf8" : "#ff8a3c"}
+        attenuation={(t) => t * t}
+      >
         <mesh position={[0, -0.7, 0]}>
-          <coneGeometry args={[0.2, 0.5, 16]} />
-          <meshBasicMaterial color="#ff5a3c" />
+          <coneGeometry args={[isWormhole ? 0.26 : 0.2, 0.5, 16]} />
+          <meshBasicMaterial color={isWormhole ? "#00f5ff" : "#ff5a3c"} />
         </mesh>
       </Trail>
       {/* antenna + pinging tip */}
@@ -1942,409 +2398,616 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   },
 ];
 
-function Medal({
-  achievement,
-  angle,
-  radius,
-  yOffset,
-  speed,
-  index,
-  hoveredRef,
+function CentralShrine({
+  trophyCount = 6,
+  radius = 8.8,
 }: {
-  achievement: Achievement;
-  angle: number;
-  radius: number;
-  yOffset: number;
-  speed: number;
-  index: number;
-  hoveredRef: React.MutableRefObject<number>;
+  trophyCount?: number;
+  radius?: number;
 }) {
-  const group = useRef<THREE.Group>(null);
-  const ring = useRef<THREE.Mesh>(null);
-  const haloMesh = useRef<THREE.Mesh>(null);
-  const discMat = useRef<THREE.MeshStandardMaterial>(null);
-  const ringMat = useRef<THREE.MeshStandardMaterial>(null);
-  const spotlightRef = useRef<THREE.Mesh>(null);
-  const spotlightMatRef = useRef<THREE.MeshBasicMaterial>(null);
-  const shimmerRef = useRef<THREE.Mesh>(null);
-  const outerRingRef = useRef<THREE.Mesh>(null);
-  const frozenAngle = useRef(angle);
-  const scaleRef = useRef(1);
-  const color = achievement.color ?? "#ffd27a";
-  const accent = achievement.accent ?? "#3a1500";
+  const relicRef = useRef<THREE.Group>(null);
+  const ringRef1 = useRef<THREE.Mesh>(null);
+  const ringRef2 = useRef<THREE.Mesh>(null);
+  const beaconRef = useRef<THREE.Mesh>(null);
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
-    const isHovered = hoveredRef.current === index;
-    const anyHovered = hoveredRef.current !== -1;
-
-    // Freeze angle when anything is hovered; resume from frozen position
-    if (!anyHovered) {
-      frozenAngle.current = angle + t * speed;
+    if (relicRef.current) {
+      relicRef.current.rotation.y = t * 0.35;
+      relicRef.current.position.y = 2.4 + Math.sin(t * 1.4) * 0.12;
     }
-    const a = frozenAngle.current;
-
-    if (group.current) {
-      const x = Math.cos(a) * radius;
-      const z = Math.sin(a) * radius;
-      const y = yOffset + Math.sin(a) * 0.6 + Math.sin(t * 0.6 + angle) * 0.15;
-      group.current.position.set(x, y, z);
-      group.current.rotation.y = -a + Math.PI / 2;
-
-      // Smooth scale transition
-      const targetScale = isHovered ? 1.8 : 1.0;
-      scaleRef.current += (targetScale - scaleRef.current) * 0.1;
-      group.current.scale.setScalar(scaleRef.current);
-    }
-
-    // Ring spin — also freezes when hovered
-    if (ring.current) {
-      if (!anyHovered) ring.current.rotation.z = t * 0.4 + angle;
-    }
-
-    // Boost halo glow on hover
-    if (haloMesh.current) {
-      const mat = haloMesh.current.material as THREE.MeshBasicMaterial;
-      const targetOpacity = isHovered ? 0.7 : 0.18;
-      mat.opacity += (targetOpacity - mat.opacity) * 0.1;
-    }
-
-    // Boost disc emissive on hover
-    if (discMat.current) {
-      const targetEmissive = isHovered ? 2.5 : 0.55;
-      discMat.current.emissiveIntensity += (targetEmissive - discMat.current.emissiveIntensity) * 0.1;
-    }
-
-    // Boost ring emissive on hover
-    if (ringMat.current) {
-      const targetEmissive = isHovered ? 4.0 : 1.2;
-      ringMat.current.emissiveIntensity += (targetEmissive - ringMat.current.emissiveIntensity) * 0.1;
-    }
-
-    // Spotlight beam — visible only when hovered
-    if (spotlightRef.current && spotlightMatRef.current) {
-      const targetOpacity = isHovered ? 0.55 : 0.0;
-      spotlightMatRef.current.opacity += (targetOpacity - spotlightMatRef.current.opacity) * 0.1;
-      spotlightRef.current.visible = spotlightMatRef.current.opacity > 0.005;
-      if (isHovered) {
-        // Gentle pulse on beam
-        spotlightMatRef.current.opacity = targetOpacity + Math.sin(t * 3) * 0.05;
-      }
-    }
-
-    // Shimmer ring — pulsing halo ring on hover
-    if (shimmerRef.current) {
-      const mat = shimmerRef.current.material as THREE.MeshBasicMaterial;
-      const targetOpacity = isHovered ? 0.7 + Math.sin(t * 5) * 0.2 : 0.0;
-      mat.opacity += (targetOpacity - mat.opacity) * 0.12;
-      shimmerRef.current.visible = mat.opacity > 0.005;
-      if (isHovered) {
-        // Pulsing scale on shimmer
-        const pulse = 1 + Math.sin(t * 4) * 0.08;
-        shimmerRef.current.scale.setScalar(pulse);
-      }
-    }
-
-    // Outer decorative ring — appears on hover
-    if (outerRingRef.current) {
-      const mat = outerRingRef.current.material as THREE.MeshBasicMaterial;
-      const targetOpacity = isHovered ? 0.9 : 0.55;
-      mat.opacity += (targetOpacity - mat.opacity) * 0.1;
+    if (ringRef1.current) ringRef1.current.rotation.z += dt * 0.25;
+    if (ringRef2.current) ringRef2.current.rotation.x -= dt * 0.2;
+    if (beaconRef.current) {
+      const mat = beaconRef.current.material as THREE.MeshBasicMaterial;
+      mat.opacity = 0.2 + Math.sin(t * 1.8) * 0.08;
     }
   });
 
   return (
-    <group
-      ref={group}
-      onPointerEnter={(e) => {
-        e.stopPropagation();
-        hoveredRef.current = index;
-      }}
-      onPointerLeave={(e) => {
-        e.stopPropagation();
-        hoveredRef.current = -1;
-      }}
-    >
-      {/* glowing back-halo */}
-      <mesh ref={haloMesh}>
-        <sphereGeometry args={[0.55, 24, 24]} />
-        <meshBasicMaterial
-          color={color}
-          transparent
-          opacity={0.18}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
+    <group position={[0, 0, 0]}>
+      {/* 1. Grand Amphitheater Exhibition Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.8, 0]}>
+        <circleGeometry args={[radius + 3.8, 64]} />
+        <meshStandardMaterial color="#06030e" roughness={0.4} metalness={0.7} />
       </mesh>
 
-      {/* SPOTLIGHT BEAM — cone descending from above, only visible on hover */}
-      <mesh ref={spotlightRef} position={[0, 5.5, 0]} rotation={[Math.PI, 0, 0]} visible={false}>
-        <coneGeometry args={[1.6, 11, 32, 1, true]} />
-        <meshBasicMaterial
-          ref={spotlightMatRef}
-          color={color}
-          transparent
-          opacity={0.0}
-          blending={THREE.AdditiveBlending}
-          side={THREE.DoubleSide}
-          depthWrite={false}
-        />
+      {/* Concentric etched cosmic rings */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
+        <ringGeometry args={[radius + 2.8, radius + 2.92, 96]} />
+        <meshBasicMaterial color="#ffd27a" transparent opacity={0.4} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
+        <ringGeometry args={[radius - 0.2, radius - 0.08, 96]} />
+        <meshBasicMaterial color="#c89bff" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
+        <ringGeometry args={[3.8, 3.9, 96]} />
+        <meshBasicMaterial color="#ffd27a" transparent opacity={0.35} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
       </mesh>
 
-      {/* SHIMMER RING — pulsing ring on hover */}
-      <mesh ref={shimmerRef} rotation={[Math.PI / 2, 0, 0]} visible={false}>
-        <torusGeometry args={[1.1, 0.04, 12, 64]} />
-        <meshBasicMaterial
-          color={color}
-          transparent
-          opacity={0.0}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
+      {/* Radial Runway Lightpaths extending from center to each exhibit */}
+      {Array.from({ length: trophyCount }).map((_, i) => {
+        const a = (i / trophyCount) * Math.PI * 2;
+        return (
+          <group key={i} rotation={[0, -a + Math.PI / 2, 0]}>
+            <mesh position={[0, -1.77, radius * 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.08, radius - 1.2]} />
+              <meshBasicMaterial color="#ffd27a" transparent opacity={0.35} blending={THREE.AdditiveBlending} />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* 2. Starlight Colonnade Pillars surrounding the amphitheater */}
+      {Array.from({ length: trophyCount }).map((_, i) => {
+        const a = ((i + 0.5) / trophyCount) * Math.PI * 2;
+        const px = Math.cos(a) * (radius + 2.2);
+        const pz = Math.sin(a) * (radius + 2.2);
+        return (
+          <group key={`col-${i}`} position={[px, 0, pz]}>
+            {/* Pillar column */}
+            <mesh position={[0, 1.2, 0]}>
+              <cylinderGeometry args={[0.18, 0.24, 6.0, 12]} />
+              <meshStandardMaterial color="#0f0b1e" metalness={0.8} roughness={0.3} />
+            </mesh>
+            {/* Base & capital rings */}
+            <mesh position={[0, -1.6, 0]}>
+              <cylinderGeometry args={[0.35, 0.45, 0.4, 12]} />
+              <meshStandardMaterial color="#211738" metalness={0.9} roughness={0.2} emissive="#ffd27a" emissiveIntensity={0.2} />
+            </mesh>
+            <mesh position={[0, 4.2, 0]}>
+              <cylinderGeometry args={[0.35, 0.22, 0.35, 12]} />
+              <meshStandardMaterial color="#211738" metalness={0.9} roughness={0.2} emissive="#c89bff" emissiveIntensity={0.4} />
+            </mesh>
+            {/* Glowing crystal tip & subtle starlight beam */}
+            <mesh position={[0, 4.45, 0]}>
+              <octahedronGeometry args={[0.16, 0]} />
+              <meshBasicMaterial color="#c89bff" />
+            </mesh>
+            <mesh position={[0, 12, 0]}>
+              <cylinderGeometry args={[0.02, 0.25, 15, 12, 1, true]} />
+              <meshBasicMaterial color="#c89bff" transparent opacity={0.12} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* 3. 3-Tiered Imperial Dais at Center */}
+      <mesh position={[0, -1.5, 0]}>
+        <cylinderGeometry args={[2.8, 3.2, 0.5, 16]} />
+        <meshStandardMaterial color="#0e0a1a" metalness={0.85} roughness={0.3} emissive="#2a1244" emissiveIntensity={0.35} />
+      </mesh>
+      <mesh position={[0, -1.15, 0]}>
+        <cylinderGeometry args={[2.0, 2.3, 0.4, 16]} />
+        <meshStandardMaterial color="#171128" metalness={0.88} roughness={0.25} emissive="#ffd27a" emissiveIntensity={0.25} />
+      </mesh>
+      <mesh position={[0, -0.85, 0]}>
+        <cylinderGeometry args={[1.3, 1.5, 0.35, 16]} />
+        <meshStandardMaterial color="#23183d" metalness={0.92} roughness={0.2} emissive="#c89bff" emissiveIntensity={0.45} />
       </mesh>
 
-      {/* medal disc */}
-      <mesh>
-        <cylinderGeometry args={[0.42, 0.42, 0.08, 32]} />
-        <meshStandardMaterial
-          ref={discMat}
-          color={accent}
-          emissive={color}
-          emissiveIntensity={0.55}
-          metalness={0.85}
-          roughness={0.25}
-        />
+      {/* Central Monument Pedestal Column */}
+      <mesh position={[0, 0.4, 0]}>
+        <cylinderGeometry args={[0.36, 0.58, 2.3, 8]} />
+        <meshStandardMaterial color="#1a1230" metalness={0.95} roughness={0.15} emissive="#7c3aed" emissiveIntensity={0.4} />
       </mesh>
-      {/* rotating laurel ring */}
-      <mesh ref={ring} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.55, 0.04, 12, 64]} />
-        <meshStandardMaterial
-          ref={ringMat}
-          color={color}
-          emissive={color}
-          emissiveIntensity={1.2}
-          metalness={1}
-          roughness={0.2}
-        />
-      </mesh>
-      <mesh ref={outerRingRef} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.72, 0.018, 8, 64]} />
-        <meshBasicMaterial color={color} transparent opacity={0.55} blending={THREE.AdditiveBlending} />
-      </mesh>
-      {/* point light per medal for sparkle */}
-      <pointLight color={color} intensity={0.6} distance={3} />
-      {/* label card */}
-      {/* 3D card backdrop — depth-sorts naturally so back medals stay behind front ones */}
-      <group position={[0, -1.45, 0]}>
-        <Billboard>
-          {/* outer glow halo */}
-          <mesh position={[0, 0, -0.02]}>
-            <planeGeometry args={[3.6, 1.7]} />
-            <meshBasicMaterial
-              color={color}
-              transparent
-              opacity={0.16}
-              blending={THREE.AdditiveBlending}
-              depthWrite={false}
-            />
-          </mesh>
-          {/* card body */}
-          <mesh>
-            <planeGeometry args={[3.1, 1.4]} />
-            <meshBasicMaterial color="#06031a" transparent opacity={0.95} />
-          </mesh>
-          {/* top/bottom accent bars */}
-          <mesh position={[0, 0.68, 0.002]}>
-            <planeGeometry args={[3.1, 0.035]} />
-            <meshBasicMaterial color={color} transparent opacity={0.95} />
-          </mesh>
-          <mesh position={[0, -0.68, 0.002]}>
-            <planeGeometry args={[3.1, 0.035]} />
-            <meshBasicMaterial color={color} transparent opacity={0.6} />
-          </mesh>
-          {/* side accent ticks */}
-          <mesh position={[-1.5, 0, 0.002]}>
-            <planeGeometry args={[0.04, 1.4]} />
-            <meshBasicMaterial color={color} transparent opacity={0.5} />
-          </mesh>
-          <mesh position={[1.5, 0, 0.002]}>
-            <planeGeometry args={[0.04, 1.4]} />
-            <meshBasicMaterial color={color} transparent opacity={0.5} />
-          </mesh>
 
-          <Text font={FUTURA_FONT}
-            position={[0, 0.44, 0.003]}
-            fontSize={0.28}
-            color={color}
-            anchorX="center"
-            anchorY="middle"
-            outlineWidth={0.006}
-            outlineColor="#000"
-          >
-            {achievement.icon ?? "✦"}
-          </Text>
-          <Text font={FUTURA_FONT}
-            position={[0, 0.02, 0.003]}
-            fontSize={0.18}
-            color="#ffffff"
-            anchorX="center"
-            anchorY="middle"
-            maxWidth={2.85}
-            textAlign="center"
-            letterSpacing={0.04}
-            lineHeight={1.15}
-            outlineWidth={0.015}
-            outlineColor="#000"
-          >
-            {achievement.name.toUpperCase()}
-          </Text>
-          {(achievement.issuer || achievement.year) && (
-            <Text font={FUTURA_FONT}
-              position={[0, -0.42, 0.003]}
-              fontSize={0.11}
-              color={color}
-              anchorX="center"
-              anchorY="middle"
-              maxWidth={2.85}
-              textAlign="center"
-              letterSpacing={0.16}
-              lineHeight={1.2}
-              outlineWidth={0.005}
-              outlineColor="#000"
-            >
-              {[achievement.issuer, achievement.year].filter(Boolean).join("  ·  ").toUpperCase()}
-            </Text>
-          )}
-        </Billboard>
+      {/* Levitating Grand Astrolabe / Celestial Sphere Monument */}
+      <group ref={relicRef} position={[0, 2.4, 0]}>
+        {/* Core glowing multifaceted star */}
+        <mesh>
+          <icosahedronGeometry args={[0.42, 0]} />
+          <meshStandardMaterial color="#ffd27a" emissive="#ffb84a" emissiveIntensity={2.8} metalness={1} roughness={0.05} />
+        </mesh>
+        {/* Counter-rotating celestial rings */}
+        <mesh ref={ringRef1} rotation={[Math.PI / 3, 0, 0]}>
+          <torusGeometry args={[0.82, 0.03, 12, 48]} />
+          <meshStandardMaterial color="#ffd27a" metalness={0.9} roughness={0.1} emissive="#ffb84a" emissiveIntensity={0.6} />
+        </mesh>
+        <mesh ref={ringRef2} rotation={[-Math.PI / 4, 0.3, 0]}>
+          <torusGeometry args={[0.98, 0.025, 12, 48]} />
+          <meshStandardMaterial color="#c89bff" metalness={0.9} roughness={0.1} emissive="#9b6bff" emissiveIntensity={0.6} />
+        </mesh>
       </group>
+
+      {/* Ascending Beacon Beam to Infinity */}
+      <mesh ref={beaconRef} position={[0, 14, 0]}>
+        <cylinderGeometry args={[0.08, 0.8, 28, 16, 1, true]} />
+        <meshBasicMaterial color="#ffd27a" transparent opacity={0.22} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <pointLight position={[0, 2.4, 0]} color="#ffd27a" intensity={2.6} distance={16} />
     </group>
   );
 }
 
-function Pantheon({ centerZ }: { centerZ: number }) {
-  const { achievements } = usePortfolio();
-  const list = achievements && achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS;
+function TrophySculpture({
+  type,
+  color,
+  accent,
+  isHovered,
+}: {
+  type: number;
+  color: string;
+  accent: string;
+  isHovered: boolean;
+}) {
+  const trophyRef = useRef<THREE.Group>(null);
+  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
 
-  // Shared ref: -1 = nothing hovered, N = index of hovered medal
-  const hoveredRef = useRef<number>(-1);
-
-  const pedestal = useRef<THREE.Group>(null);
-  const beam = useRef<THREE.Mesh>(null);
-  const orbitRingMat = useRef<THREE.MeshBasicMaterial>(null);
-
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
-    const anyHovered = hoveredRef.current !== -1;
+    if (trophyRef.current) {
+      trophyRef.current.rotation.y += dt * (isHovered ? 1.0 : 0.4);
+      trophyRef.current.position.y = 0.5 + Math.sin(t * 1.6 + type) * 0.07;
+    }
+    if (ring1Ref.current) ring1Ref.current.rotation.z += dt * (isHovered ? 1.4 : 0.6);
+    if (ring2Ref.current) ring2Ref.current.rotation.x -= dt * (isHovered ? 1.2 : 0.5);
+  });
 
-    // Pedestal slow rotation — stops when something is hovered
-    if (pedestal.current && !anyHovered) {
-      pedestal.current.rotation.y = t * 0.1;
+  // Type 0: Sovereign Championship Cup (Autonomous Rover / RoboCup Champion)
+  if (type === 0) {
+    return (
+      <group ref={trophyRef}>
+        {/* Pedestal Foot */}
+        <mesh position={[0, -0.32, 0]}>
+          <cylinderGeometry args={[0.3, 0.42, 0.12, 24]} />
+          <meshStandardMaterial color="#ffd27a" metalness={0.95} roughness={0.15} emissive="#d97706" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Stem */}
+        <mesh position={[0, -0.12, 0]}>
+          <cylinderGeometry args={[0.08, 0.12, 0.28, 20]} />
+          <meshStandardMaterial color="#ffd27a" metalness={1} roughness={0.1} />
+        </mesh>
+        {/* Chalice Body */}
+        <mesh position={[0, 0.24, 0]}>
+          <cylinderGeometry args={[0.48, 0.16, 0.52, 24, 1, false]} />
+          <meshStandardMaterial color="#ffd27a" metalness={0.95} roughness={0.12} emissive="#f59e0b" emissiveIntensity={0.5} />
+        </mesh>
+        {/* Rim Trim */}
+        <mesh position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.48, 0.03, 12, 32]} />
+          <meshStandardMaterial color="#fff" metalness={0.9} roughness={0.1} />
+        </mesh>
+        {/* Handles */}
+        <mesh position={[-0.46, 0.22, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <torusGeometry args={[0.18, 0.03, 12, 24, Math.PI]} />
+          <meshStandardMaterial color="#ffd27a" metalness={1} roughness={0.1} />
+        </mesh>
+        <mesh position={[0.46, 0.22, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <torusGeometry args={[0.18, 0.03, 12, 24, Math.PI]} />
+          <meshStandardMaterial color="#ffd27a" metalness={1} roughness={0.1} />
+        </mesh>
+        {/* Laurel Victory Ring with Star Gems */}
+        <mesh ref={ring1Ref} position={[0, 0.72, 0]} rotation={[Math.PI / 2.2, 0, 0]}>
+          <torusGeometry args={[0.62, 0.02, 8, 36]} />
+          <meshBasicMaterial color="#ffd27a" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+        </mesh>
+        <mesh position={[0, 0.78, 0]}>
+          <octahedronGeometry args={[0.14, 0]} />
+          <meshStandardMaterial color="#ffd27a" emissive="#ffd27a" emissiveIntensity={2.5} metalness={1} roughness={0.05} />
+        </mesh>
+      </group>
+    );
+  }
+
+  // Type 1: Quantum Neural Core (NVIDIA Jetson AI Specialist)
+  if (type === 1) {
+    return (
+      <group ref={trophyRef}>
+        {/* Floating Faceted Dodecahedron Core */}
+        <mesh>
+          <dodecahedronGeometry args={[0.36, 0]} />
+          <meshPhysicalMaterial
+            color={color}
+            emissive={color}
+            emissiveIntensity={isHovered ? 2.5 : 1.2}
+            metalness={0.7}
+            roughness={0.15}
+            clearcoat={1.0}
+            clearcoatRoughness={0.1}
+          />
+        </mesh>
+        {/* Inner Octahedral Synaptic Node */}
+        <mesh>
+          <octahedronGeometry args={[0.2, 0]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+        {/* Dual Rotating Gimbal Rings */}
+        <mesh ref={ring1Ref} rotation={[Math.PI / 3, 0, 0]}>
+          <torusGeometry args={[0.62, 0.028, 12, 48]} />
+          <meshStandardMaterial color={color} metalness={0.9} roughness={0.15} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        <mesh ref={ring2Ref} rotation={[-Math.PI / 4, 0.4, 0]}>
+          <torusGeometry args={[0.76, 0.022, 12, 48]} />
+          <meshStandardMaterial color="#ffffff" metalness={0.95} roughness={0.1} emissive={color} emissiveIntensity={0.4} />
+        </mesh>
+        {/* Orbiting Satellite Nodes */}
+        {[0, 1, 2, 3].map((k) => (
+          <mesh key={k} position={[Math.cos((k * Math.PI) / 2) * 0.9, 0, Math.sin((k * Math.PI) / 2) * 0.9]}>
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshBasicMaterial color={color} />
+          </mesh>
+        ))}
+      </group>
+    );
+  }
+
+  // Type 2: Cybernetic Navigation Armillary (ROS 2 Certified Developer)
+  if (type === 2) {
+    return (
+      <group ref={trophyRef}>
+        {/* Outer Celestial Meridian Ring */}
+        <mesh ref={ring1Ref} rotation={[0, 0, Math.PI / 4]}>
+          <torusGeometry args={[0.74, 0.035, 12, 48]} />
+          <meshStandardMaterial color={color} metalness={0.92} roughness={0.15} emissive={color} emissiveIntensity={0.6} />
+        </mesh>
+        {/* Equatorial Horizon Ring */}
+        <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.6, 0.028, 12, 48]} />
+          <meshStandardMaterial color="#e0f2fe" metalness={0.9} roughness={0.2} emissive="#38bdf8" emissiveIntensity={0.4} />
+        </mesh>
+        {/* Innermost Inclined Ring */}
+        <mesh rotation={[Math.PI / 3, 0.2, 0]}>
+          <torusGeometry args={[0.46, 0.022, 12, 36]} />
+          <meshBasicMaterial color={color} transparent opacity={0.7} />
+        </mesh>
+        {/* Central Robotic Navigation Sensor Beacon */}
+        <mesh>
+          <octahedronGeometry args={[0.24, 0]} />
+          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={2.6} metalness={1} roughness={0.08} />
+        </mesh>
+      </group>
+    );
+  }
+
+  // Type 3: Deep Learning Crystalline Obelisk (DeepLearning.AI)
+  if (type === 3) {
+    return (
+      <group ref={trophyRef}>
+        {/* Crystal Base Spire */}
+        <mesh position={[0, -0.05, 0]}>
+          <cylinderGeometry args={[0.26, 0.38, 0.65, 6]} />
+          <meshPhysicalMaterial
+            color={color}
+            emissive={color}
+            emissiveIntensity={isHovered ? 2.2 : 1.0}
+            metalness={0.8}
+            roughness={0.15}
+            clearcoat={1.0}
+          />
+        </mesh>
+        {/* Levitating Apex Capstone */}
+        <mesh position={[0, 0.52, 0]}>
+          <coneGeometry args={[0.26, 0.45, 6]} />
+          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={2.8} metalness={0.9} roughness={0.1} />
+        </mesh>
+        {/* Concentric Data Halos */}
+        <mesh ref={ring1Ref} position={[0, 0.28, 0]} rotation={[Math.PI / 2.2, 0, 0]}>
+          <torusGeometry args={[0.54, 0.018, 8, 36]} />
+          <meshBasicMaterial color={color} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+        </mesh>
+        <mesh ref={ring2Ref} position={[0, 0.34, 0]} rotation={[Math.PI / 1.9, 0.3, 0]}>
+          <torusGeometry args={[0.68, 0.014, 8, 36]} />
+          <meshBasicMaterial color="#fff" transparent opacity={0.5} blending={THREE.AdditiveBlending} />
+        </mesh>
+      </group>
+    );
+  }
+
+  // Type 4: Celestial Cloud Nexus Spire (AWS IoT Core)
+  if (type === 4) {
+    return (
+      <group ref={trophyRef}>
+        {/* Mast */}
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.07, 0.2, 0.95, 8]} />
+          <meshStandardMaterial color="#1e1828" metalness={0.9} roughness={0.2} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        {/* Dual Parabolic Dishes */}
+        <mesh position={[0, -0.15, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.46, 0.46, 0.025, 24]} />
+          <meshStandardMaterial color={color} metalness={0.95} roughness={0.1} emissive={color} emissiveIntensity={0.6} />
+        </mesh>
+        <mesh position={[0, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.32, 0.32, 0.025, 24]} />
+          <meshStandardMaterial color="#fff" metalness={0.95} roughness={0.1} />
+        </mesh>
+        {/* Glowing Top Beacon Diamond */}
+        <mesh position={[0, 0.62, 0]}>
+          <octahedronGeometry args={[0.15, 0]} />
+          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={3.0} />
+        </mesh>
+        {/* Orbiting Golden Telemetry Cubes */}
+        <group ref={ring1Ref}>
+          {[0, 1, 2].map((k) => (
+            <mesh key={k} position={[Math.cos((k * Math.PI * 2) / 3) * 0.72, 0.05, Math.sin((k * Math.PI * 2) / 3) * 0.72]}>
+              <boxGeometry args={[0.09, 0.09, 0.09]} />
+              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.0} />
+            </mesh>
+          ))}
+        </group>
+      </group>
+    );
+  }
+
+  // Type 5: Micro-Architecture Silicon Keystone (Embedded C++ Mastery)
+  return (
+    <group ref={trophyRef}>
+      {/* Heavy Hexagonal Silicon Microchip Block */}
+      <mesh position={[0, 0, 0]}>
+        <cylinderGeometry args={[0.5, 0.5, 0.28, 6]} />
+        <meshStandardMaterial color="#130d22" metalness={0.92} roughness={0.2} emissive={accent} emissiveIntensity={0.8} />
+      </mesh>
+      {/* Gold Rim Circuit Trim */}
+      <mesh position={[0, 0.15, 0]}>
+        <cylinderGeometry args={[0.42, 0.42, 0.04, 6]} />
+        <meshStandardMaterial color={color} metalness={1.0} roughness={0.1} emissive={color} emissiveIntensity={0.7} />
+      </mesh>
+      {/* Central Pulsing Ruby/Rose Processor Crystal */}
+      <mesh position={[0, 0.26, 0]}>
+        <octahedronGeometry args={[0.2, 0]} />
+        <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={isHovered ? 3.0 : 1.8} metalness={0.8} roughness={0.1} />
+      </mesh>
+      {/* Surrounding Energy Pin Field */}
+      <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.66, 0.016, 8, 36]} />
+        <meshBasicMaterial color={color} transparent opacity={0.75} blending={THREE.AdditiveBlending} />
+      </mesh>
+      <mesh ref={ring2Ref} rotation={[Math.PI / 2.3, 0.2, 0]}>
+        <torusGeometry args={[0.8, 0.012, 8, 36]} />
+        <meshBasicMaterial color="#fff" transparent opacity={0.4} blending={THREE.AdditiveBlending} />
+      </mesh>
+    </group>
+  );
+}
+
+function TrophyExhibit({
+  achievement,
+  angle,
+  radius,
+  index,
+  isHovered,
+  onHover,
+  onLeave,
+  onClick,
+}: {
+  achievement: Achievement;
+  angle: number;
+  radius: number;
+  index: number;
+  isHovered: boolean;
+  onHover: (i: number) => void;
+  onLeave: () => void;
+  onClick: (i: number) => void;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const spotlightRef = useRef<THREE.Mesh>(null);
+  const spotlightMat = useRef<THREE.MeshBasicMaterial>(null);
+  const scaleRef = useRef(1);
+
+  const color = achievement.color ?? "#ffd27a";
+  const accent = achievement.accent ?? "#3a1500";
+
+  useFrame((_, dt) => {
+    if (group.current) {
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      group.current.position.set(x, 0, z);
+      // NOTE: Leave group rotation at 0 so child Billboard faces the camera cleanly without parent coordinate distortion!
+
+      const targetScale = isHovered ? 1.15 : 1.0;
+      scaleRef.current = THREE.MathUtils.lerp(scaleRef.current, targetScale, Math.min(1, dt * 7));
+      group.current.scale.setScalar(scaleRef.current);
     }
-    // Beam pulse — dims slightly on hover to shift focus to medal spotlight
-    if (beam.current) {
-      const m = beam.current.material as THREE.MeshBasicMaterial;
-      const targetOpacity = anyHovered ? 0.07 : 0.18 + Math.sin(t * 1.6) * 0.05;
-      m.opacity += (targetOpacity - m.opacity) * 0.08;
-    }
-    // Orbit ring dims on hover
-    if (orbitRingMat.current) {
-      const targetOpacity = anyHovered ? 0.08 : 0.35;
-      orbitRingMat.current.opacity += (targetOpacity - orbitRingMat.current.opacity) * 0.08;
+
+    if (spotlightRef.current && spotlightMat.current) {
+      const targetOp = isHovered ? 0.65 : 0.12;
+      spotlightMat.current.opacity = THREE.MathUtils.lerp(spotlightMat.current.opacity, targetOp, Math.min(1, dt * 8));
     }
   });
 
-  // Distribute medals along a wider orbit ring so labels don't crowd the obelisk
-  const radius = Math.max(6.5, 3 + list.length * 0.75);
+  const titleText = achievement.name.toUpperCase();
+  const subText = isHovered
+    ? "▶ CLICK TO INSPECT TROPHY"
+    : [achievement.issuer, achievement.year].filter(Boolean).join(" · ").toUpperCase();
+  const exhibitTag = `EXHIBIT 0${index + 1} // HONORS ARTIFACT`;
+
+  // Dynamically calculate font size and card width so the title NEVER wraps or breaks across lines
+  const titleFontSize = Math.min(0.155, Math.max(0.115, 2.7 / (titleText.length * 0.72)));
+  const cardWidth = Math.max(2.6, titleText.length * titleFontSize * 0.78 + 0.65);
+  const cardHeight = 0.58;
+
+  return (
+    <group
+      ref={group}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        onHover(index);
+      }}
+      onPointerOut={() => onLeave()}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(index);
+      }}
+    >
+      {/* 1. Holographic Beaming Light Pillar from Pedestal to Sky */}
+      <mesh ref={spotlightRef} position={[0, 1.6, 0]}>
+        <cylinderGeometry args={[1.05, 0.74, 3.4, 32, 1, true]} />
+        <meshBasicMaterial
+          ref={spotlightMat}
+          color={color}
+          transparent
+          opacity={0.14}
+          blending={THREE.AdditiveBlending}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+      {/* Luminous emitter ring at top of the beaming light */}
+      <mesh position={[0, 3.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.05, 0.02, 12, 48]} />
+        <meshBasicMaterial color={color} transparent opacity={isHovered ? 0.85 : 0.45} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+
+      {/* 2. Grand Architectural Exhibition Plinth */}
+      {/* Octagonal Granite Base Step */}
+      <mesh position={[0, -1.6, 0]}>
+        <cylinderGeometry args={[1.05, 1.25, 0.35, 8]} />
+        <meshStandardMaterial color="#0c0818" metalness={0.8} roughness={0.35} emissive="#1f0e35" emissiveIntensity={0.3} />
+      </mesh>
+      {/* Fluted Titanium Pedestal Column */}
+      <mesh position={[0, -0.85, 0]}>
+        <cylinderGeometry args={[0.62, 0.78, 1.25, 16]} />
+        <meshStandardMaterial color="#150f26" metalness={0.88} roughness={0.25} />
+      </mesh>
+      {/* Inset Glowing Accent Collar */}
+      <mesh position={[0, -0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.76, 0.025, 12, 32]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {/* Polished Exhibit Platform Surface */}
+      <mesh position={[0, -0.12, 0]}>
+        <cylinderGeometry args={[0.72, 0.72, 0.1, 32]} />
+        <meshPhysicalMaterial color="#211738" metalness={0.9} roughness={0.15} clearcoat={1.0} emissive={accent} emissiveIntensity={0.4} />
+      </mesh>
+
+      {/* 3. The 3D Sculpted Trophy Artwork */}
+      <group position={[0, 0.25, 0]}>
+        <TrophySculpture type={index % 6} color={color} accent={accent} isHovered={isHovered} />
+      </group>
+
+      {/* 4. Beamed Out on Top of the Beaming Light */}
+      <group position={[0, 3.48, 0]}>
+        <Billboard follow={true}>
+          {/* Glassmorphic plaque backing */}
+          <mesh position={[0, 0, -0.015]}>
+            <planeGeometry args={[cardWidth, cardHeight]} />
+            <meshBasicMaterial color="#050312" transparent opacity={0.88} depthWrite={false} />
+          </mesh>
+          {/* Top border accent line */}
+          <mesh position={[0, cardHeight / 2 - 0.015, 0.002]}>
+            <planeGeometry args={[cardWidth, 0.025]} />
+            <meshBasicMaterial color={color} />
+          </mesh>
+          {/* Exhibit Number */}
+          <Text
+            font={FUTURA_FONT}
+            position={[0, 0.16, 0.02]}
+            fontSize={0.09}
+            color={color}
+            anchorX="center"
+            anchorY="middle"
+            letterSpacing={0.16}
+            renderOrder={100}
+          >
+            {exhibitTag}
+          </Text>
+          {/* Achievement Title - dynamically sized to ALWAYS fit on a single line */}
+          <Text
+            font={FUTURA_FONT}
+            position={[0, 0.01, 0.02]}
+            fontSize={titleFontSize}
+            color="#ffffff"
+            anchorX="center"
+            anchorY="middle"
+            textAlign="center"
+            outlineWidth={0.012}
+            outlineColor="#000"
+            renderOrder={101}
+          >
+            {titleText}
+          </Text>
+          {/* Issuer & Year or Prompt */}
+          <Text
+            font={FUTURA_FONT}
+            position={[0, -0.15, 0.02]}
+            fontSize={0.095}
+            color={isHovered ? "#00f5ff" : color}
+            anchorX="center"
+            anchorY="middle"
+            textAlign="center"
+            letterSpacing={0.08}
+            outlineWidth={0.008}
+            outlineColor="#000"
+            renderOrder={102}
+          >
+            {subText}
+          </Text>
+        </Billboard>
+      </group>
+
+      {/* Exhibit Light Source */}
+      <pointLight position={[0, 1.2, 0]} color={color} intensity={isHovered ? 2.2 : 0.8} distance={6} />
+    </group>
+  );
+}
+
+function Pantheon({
+  centerZ,
+  onSelectAchievement,
+}: {
+  centerZ: number;
+  onSelectAchievement: (i: number) => void;
+}) {
+  const { achievements } = usePortfolio();
+  const list = achievements && achievements.length > 0 ? achievements : DEFAULT_ACHIEVEMENTS;
+  const [hoveredIdx, setHoveredIdx] = useState<number>(-1);
+  const orbitGroup = useRef<THREE.Group>(null);
+  const orbitAngle = useRef<number>(0);
+
+  useEffect(() => {
+    document.body.style.cursor = hoveredIdx !== -1 ? "pointer" : "";
+  }, [hoveredIdx]);
+
+  useFrame((_, dt) => {
+    if (hoveredIdx === -1 && orbitGroup.current) {
+      orbitAngle.current += dt * 0.04;
+      orbitGroup.current.rotation.y = orbitAngle.current;
+    }
+  });
+
+  const radius = Math.max(8.5, 5.5 + list.length * 0.55);
 
   return (
     <group position={[0, 1.2, centerZ]}>
-      {/* central altar / pedestal */}
-      <group ref={pedestal}>
-        <mesh position={[0, -1.4, 0]}>
-          <cylinderGeometry args={[1.6, 2.0, 0.4, 8]} />
-          <meshStandardMaterial
-            color="#1a1428"
-            emissive="#3a1f5a"
-            emissiveIntensity={0.4}
-            metalness={0.6}
-            roughness={0.5}
+      <CentralShrine trophyCount={list.length} radius={radius} />
+      <group ref={orbitGroup}>
+        {list.map((a, i) => (
+          <TrophyExhibit
+            key={`${a.name}-${i}`}
+            achievement={a}
+            angle={(i / list.length) * Math.PI * 2}
+            radius={radius}
+            index={i}
+            isHovered={hoveredIdx === i}
+            onHover={(idx) => setHoveredIdx(idx)}
+            onLeave={() => setHoveredIdx(-1)}
+            onClick={(idx) => onSelectAchievement(idx)}
           />
-        </mesh>
-        <mesh position={[0, -1.0, 0]}>
-          <cylinderGeometry args={[1.2, 1.4, 0.3, 8]} />
-          <meshStandardMaterial
-            color="#2a1a3f"
-            emissive="#9b6bff"
-            emissiveIntensity={0.5}
-            metalness={0.7}
-            roughness={0.4}
-          />
-        </mesh>
-        {/* obelisk */}
-        <mesh position={[0, 0.4, 0]}>
-          <coneGeometry args={[0.45, 2.4, 4]} />
-          <meshStandardMaterial
-            color="#3a1a5f"
-            emissive="#c89bff"
-            emissiveIntensity={0.7}
-            metalness={0.85}
-            roughness={0.2}
-          />
-        </mesh>
-        {/* glowing crown */}
-        <mesh position={[0, 1.85, 0]}>
-          <icosahedronGeometry args={[0.28, 0]} />
-          <meshStandardMaterial
-            color="#ffd27a"
-            emissive="#ffb24a"
-            emissiveIntensity={2.2}
-            metalness={1}
-            roughness={0.1}
-          />
-        </mesh>
-        <pointLight position={[0, 1.85, 0]} color="#ffd27a" intensity={2.5} distance={10} />
+        ))}
       </group>
-
-      {/* upward light beam */}
-      <mesh ref={beam} position={[0, 6, 0]}>
-        <cylinderGeometry args={[0.06, 0.5, 14, 16, 1, true]} />
-        <meshBasicMaterial
-          color="#ffd27a"
-          transparent
-          opacity={0.22}
-          blending={THREE.AdditiveBlending}
-          side={THREE.DoubleSide}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* faint orbit ring on the floor */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -1.15, 0]}>
-        <ringGeometry args={[radius - 0.04, radius + 0.04, 96]} />
-        <meshBasicMaterial
-          ref={orbitRingMat}
-          color="#c89bff"
-          transparent
-          opacity={0.35}
-          side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
-          depthWrite={false}
-        />
-      </mesh>
-
-      {/* the medals */}
-      {list.map((a, i) => (
-        <Medal
-          key={`${a.name}-${i}`}
-          achievement={a}
-          angle={(i / list.length) * Math.PI * 2}
-          radius={radius}
-          yOffset={0.2}
-          speed={0.14}
-          index={i}
-          hoveredRef={hoveredRef}
-        />
-      ))}
     </group>
   );
 }
@@ -2355,12 +3018,16 @@ function Pantheon({ centerZ }: { centerZ: number }) {
 
 function World({
   onSelectProject,
+  onSelectAchievement,
   luminosity,
   layout,
+  isWormhole = false,
 }: {
   onSelectProject: (i: number) => void;
+  onSelectAchievement: (i: number) => void;
   luminosity: number;
   layout: SceneLayout;
+  isWormhole?: boolean;
 }) {
   const { experiences: EXPERIENCES } = usePortfolio();
   return (
@@ -2387,19 +3054,21 @@ function World({
         />
       ))}
 
-      <Wormhole position={[0, 0, layout.wormholeZ]} />
+      <Wormhole position={[0, 0, layout.wormholeZ]} isWormhole={isWormhole} />
       <Galaxy onSelectProject={onSelectProject} centerZ={layout.galaxyZ} />
       <SkillConstellation centerZ={layout.skillsZ} />
-      <Pantheon centerZ={layout.pantheonZ} />
+      <Pantheon centerZ={layout.pantheonZ} onSelectAchievement={onSelectAchievement} />
       <BlackHole position={[0, 0, layout.blackholeZ]} scale={3} />
 
       {/* ====== CENTRAL SECTION TITLES ====== */}
       <SectionTitle
-        position={[0, 2.2, layout.wormholeZ - 6]}
+        position={[0, 6.2, layout.wormholeZ + 25.5]}
         primary="THE RIFT"
-        secondary="// FOLDING SPACETIME"
+        secondary="// EINSTEIN-ROSEN BRIDGE"
         color="#c89bff"
-        glow="rgba(200,155,255,0.9)"
+        glow="rgba(200,155,255,0.95)"
+        distance={15}
+        maxDist={70}
       />
       <SunTitle centerZ={layout.galaxyZ} />
       <SectionTitle
@@ -2410,12 +3079,13 @@ function World({
         glow="rgba(155,240,255,0.9)"
       />
       <SectionTitle
-        position={[0, 5.8, layout.pantheonZ + 1]}
+        position={[0, 6.2, layout.pantheonZ + 2]}
         primary="THE PANTHEON"
         secondary="// HALL OF HONORS"
         color="#ffd27a"
         glow="rgba(255,210,122,0.95)"
         distance={12}
+        maxDist={36}
       />
       <SectionTitle
         position={[0, 4.5, layout.blackholeZ + 3]}
@@ -2424,12 +3094,13 @@ function World({
         color="#ff7a8a"
         glow="rgba(255,122,138,0.9)"
         distance={10}
+        maxDist={30}
       />
     </>
   );
 }
 
-/* Reusable billboarded section title rendered as a 3D-positioned HTML sprite */
+/* Reusable billboarded section title rendered as a 3D-positioned HTML sprite with distance culling */
 function SectionTitle({
   position,
   primary,
@@ -2437,6 +3108,7 @@ function SectionTitle({
   color,
   glow,
   distance = 14,
+  maxDist = 48,
 }: {
   position: [number, number, number];
   primary: string;
@@ -2444,13 +3116,26 @@ function SectionTitle({
   color: string;
   glow: string;
   distance?: number;
+  maxDist?: number;
 }) {
   const ref = useRef<THREE.Group>(null);
+  const [inRange, setInRange] = useState(false);
+  const targetPos = useMemo(() => new THREE.Vector3(...position), [position]);
+
   useFrame((state) => {
-    if (!ref.current) return;
-    const t = state.clock.elapsedTime;
-    ref.current.scale.setScalar(1 + Math.sin(t * 1.6) * 0.03);
+    const dist = state.camera.position.distanceTo(targetPos);
+    const visible = dist < maxDist;
+    if (inRange !== visible) {
+      setInRange(visible);
+    }
+    if (visible && ref.current) {
+      const t = state.clock.elapsedTime;
+      ref.current.scale.setScalar(1 + Math.sin(t * 1.6) * 0.03);
+    }
   });
+
+  if (!inRange) return null;
+
   return (
     <group ref={ref} position={position}>
       <Html center distanceFactor={distance} transform sprite zIndexRange={[5, 0]}>
@@ -2501,11 +3186,18 @@ function SectionTitle({
 function SunTitle({ centerZ }: { centerZ: number }) {
   const ringRef = useRef<THREE.Group>(null);
   const labelRef = useRef<THREE.Group>(null);
+  const [inRange, setInRange] = useState(false);
+  const targetPos = useMemo(() => new THREE.Vector3(0, 0, centerZ), [centerZ]);
+
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (ringRef.current) ringRef.current.rotation.z = t * 0.25;
-    if (labelRef.current) labelRef.current.scale.setScalar(1 + Math.sin(t * 1.4) * 0.04);
+    const dist = state.camera.position.distanceTo(targetPos);
+    const visible = dist < 50;
+    if (inRange !== visible) setInRange(visible);
+    if (visible && labelRef.current) labelRef.current.scale.setScalar(1 + Math.sin(t * 1.4) * 0.04);
   });
+
   return (
     <group position={[0, 0, centerZ]}>
       {/* glowing ring around the sun */}
@@ -2535,47 +3227,49 @@ function SunTitle({ centerZ }: { centerZ: number }) {
       </group>
 
       {/* floating label above the sun */}
-      <group ref={labelRef} position={[0, 4.5, 2]}>
-        <Html center distanceFactor={14} transform sprite zIndexRange={[5, 0]}>
-          <div
-            className="pointer-events-none select-none flex flex-col items-center"
-            style={{ fontFamily: "'Orbitron','Rajdhani',monospace" }}
-          >
+      {inRange && (
+        <group ref={labelRef} position={[0, 4.5, 2]}>
+          <Html center distanceFactor={14} transform sprite zIndexRange={[5, 0]}>
             <div
-              className="whitespace-nowrap font-black"
-              style={{
-                fontSize: 26,
-                letterSpacing: "0.4em",
-                color: "#ffd27a",
-                textShadow: "0 0 10px rgba(255,180,80,0.95), 0 0 28px rgba(255,120,40,0.8), 0 0 2px #2a0a00",
-                WebkitTextStroke: "1px rgba(40,10,0,0.7)",
-              }}
+              className="pointer-events-none select-none flex flex-col items-center"
+              style={{ fontFamily: "'Orbitron','Rajdhani',monospace" }}
             >
-              THE FORGE
+              <div
+                className="whitespace-nowrap font-black"
+                style={{
+                  fontSize: 26,
+                  letterSpacing: "0.4em",
+                  color: "#ffd27a",
+                  textShadow: "0 0 10px rgba(255,180,80,0.95), 0 0 28px rgba(255,120,40,0.8), 0 0 2px #2a0a00",
+                  WebkitTextStroke: "1px rgba(40,10,0,0.7)",
+                }}
+              >
+                THE FORGE
+              </div>
+              <div
+                className="whitespace-nowrap mt-1"
+                style={{
+                  fontSize: 9,
+                  letterSpacing: "0.65em",
+                  color: "#ffb04a",
+                  textShadow: "0 0 8px rgba(255,140,60,0.9)",
+                }}
+              >
+                // WHERE IDEAS IGNITE INTO WORLDS
+              </div>
+              <div
+                style={{
+                  marginTop: 5,
+                  width: 140,
+                  height: 1,
+                  background: "linear-gradient(90deg, transparent, #ffb04a, transparent)",
+                  boxShadow: "0 0 8px rgba(255,140,60,0.9)",
+                }}
+              />
             </div>
-            <div
-              className="whitespace-nowrap mt-1"
-              style={{
-                fontSize: 9,
-                letterSpacing: "0.65em",
-                color: "#ffb04a",
-                textShadow: "0 0 8px rgba(255,140,60,0.9)",
-              }}
-            >
-              // WHERE IDEAS IGNITE INTO WORLDS
-            </div>
-            <div
-              style={{
-                marginTop: 5,
-                width: 140,
-                height: 1,
-                background: "linear-gradient(90deg, transparent, #ffb04a, transparent)",
-                boxShadow: "0 0 8px rgba(255,140,60,0.9)",
-              }}
-            />
-          </div>
-        </Html>
-      </group>
+          </Html>
+        </group>
+      )}
     </group>
   );
 }
@@ -2700,6 +3394,7 @@ function CrtTerminalContact({
               LINK {ready ? "●" : "○"} {new Date().toISOString().slice(11, 19)}
             </span>
             <button
+              id="close-contact-btn"
               onClick={onClose}
               className="text-[#00ff8c] hover:text-white"
               style={{ textShadow: "0 0 6px #00ff8c" }}
@@ -2767,6 +3462,7 @@ function CrtTerminalContact({
                 <div className="flex items-center justify-between pt-1">
                   <div className="text-[11px] opacity-70">PRESS [TRANSMIT] TO RELAY VIA MAIL CARRIER {cursor}</div>
                   <button
+                    id="contact-transmit-btn"
                     type="submit"
                     disabled={!title.trim() || !content.trim()}
                     className="border border-[#00ff8c] bg-[#00ff8c]/10 px-4 py-1.5 text-[11px] uppercase tracking-[0.3em] text-[#00ff8c] hover:bg-[#00ff8c]/25 disabled:cursor-not-allowed disabled:opacity-40"
@@ -2787,6 +3483,7 @@ function CrtTerminalContact({
                   ✦ TRANSMISSION SENT. CHECK YOUR MAIL CLIENT. {cursor}
                 </div>
                 <button
+                  id="contact-disconnect-btn"
                   onClick={onClose}
                   className="mt-3 border border-[#00ff8c] px-3 py-1 text-[11px] uppercase tracking-widest hover:bg-[#00ff8c]/20"
                 >
@@ -2833,6 +3530,120 @@ function CrtTerminalContact({
 /* ================================================================== */
 
 /* ================================================================== */
+/* RIFT FLIGHT HUD — Cinematic Sci-Fi Pilot Avionics & Horizon Reticle */
+/* ================================================================== */
+
+function RiftFlightHUD() {
+  return (
+    <div
+      className="pointer-events-none fixed inset-0 z-30 select-none overflow-hidden"
+      style={{ animation: "fadein .5s ease-out" }}
+    >
+      {/* 1. Center Horizon Lock Reticle (Physiological Anchor against Motion Sickness) */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative flex h-52 w-52 items-center justify-center">
+          {/* Outer Concentric Precision Reticle Ring */}
+          <div className="absolute inset-0 rounded-full border border-cyan-400/35 shadow-[0_0_20px_rgba(56,189,248,0.2)]" />
+          <div className="absolute inset-3 rounded-full border border-dashed border-cyan-300/20" />
+          <div className="absolute inset-10 rounded-full border border-cyan-400/20" />
+
+          {/* Cardinal Precision Crosshairs */}
+          <div className="absolute top-0 h-3.5 w-0.5 bg-cyan-400 shadow-[0_0_6px_#38bdf8]" />
+          <div className="absolute bottom-0 h-3.5 w-0.5 bg-cyan-400 shadow-[0_0_6px_#38bdf8]" />
+          <div className="absolute left-0 h-0.5 w-3.5 bg-cyan-400 shadow-[0_0_6px_#38bdf8]" />
+          <div className="absolute right-0 h-0.5 w-3.5 bg-cyan-400 shadow-[0_0_6px_#38bdf8]" />
+
+          {/* Central Laser Point Focal Anchor */}
+          <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_10px_#38bdf8,0_0_20px_#38bdf8]" />
+
+          {/* Reticle Telemetry Label */}
+          <span className="absolute -bottom-7 font-mono text-[9px] uppercase tracking-[0.3em] text-cyan-300/80 drop-shadow-[0_0_6px_rgba(56,189,248,0.6)]">
+            HORIZON LOCK // 0.00°
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Top Header Telemetry Pill */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
+        <div className="flex items-center gap-3 rounded-full border border-cyan-400/40 bg-slate-950/80 px-5 py-1.5 backdrop-blur-xl shadow-[0_0_25px_rgba(56,189,248,0.3)]">
+          <span className="inline-block h-2 w-2 rounded-full bg-cyan-300 animate-pulse shadow-[0_0_8px_#38bdf8]" />
+          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-cyan-200">
+            EINSTEIN-ROSEN TRANSIT // METRIC FLUX: 0.038 G
+          </span>
+          <span className="h-3 w-px bg-cyan-400/30" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-400">
+            STABLE 99.8%
+          </span>
+        </div>
+      </div>
+
+      {/* 3. Left Avionics Bracket (Spacetime Metric Gauge) */}
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 rounded-2xl border border-cyan-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-cyan-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+        <div className="border-b border-cyan-400/20 pb-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-cyan-400">
+          SPACETIME METRIC // FLIGHT READOUT
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">CURVATURE κ:</span>
+          <span className="text-cyan-300 font-semibold">-0.984 G</span>
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">TENSOR DILATION:</span>
+          <span className="text-cyan-300 font-semibold">1.042 τ</span>
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">INERTIAL DAMPENERS:</span>
+          <span className="text-emerald-400 font-semibold">ACTIVE [100%]</span>
+        </div>
+        <div className="flex justify-between gap-6 pt-1 border-t border-cyan-400/15">
+          <span className="text-white/60">SLIPSTREAM COHERENCE:</span>
+          <span className="text-cyan-400 font-bold">OPTIMAL</span>
+        </div>
+      </div>
+
+      {/* 4. Right Avionics Bracket (Vector & Shields) */}
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 rounded-2xl border border-purple-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-purple-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+        <div className="border-b border-purple-400/20 pb-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-purple-400">
+          QUANTUM DEFLECTOR // AVIONICS
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">TRAVEL VECTOR:</span>
+          <span className="text-purple-300 font-semibold">[0.00, 0.00, -1.00]</span>
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">RELATIVISTIC γ:</span>
+          <span className="text-purple-300 font-semibold">14.8 C</span>
+        </div>
+        <div className="flex justify-between gap-6">
+          <span className="text-white/60">DEFLECTOR SHIELD:</span>
+          <span className="text-cyan-300 font-semibold">ENGAGED [MAX]</span>
+        </div>
+        <div className="flex justify-between gap-6 pt-1 border-t border-purple-400/15">
+          <span className="text-white/60">DESTINATION:</span>
+          <span className="text-amber-300 font-bold">THE FORGE GALAXY</span>
+        </div>
+      </div>
+
+      {/* 5. Bottom Corridor Transit Progress Tracker */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex w-[380px] max-w-[85vw] flex-col items-center gap-1.5">
+        <div className="flex w-full justify-between font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-300/80">
+          <span>ENTRANCE LENS</span>
+          <span className="font-bold text-white drop-shadow-[0_0_8px_#38bdf8] animate-pulse">
+            TRAVERSING SLIPSTREAM
+          </span>
+          <span>THE FORGE</span>
+        </div>
+        <div className="h-1.5 w-full rounded-full border border-cyan-400/40 bg-slate-950/90 p-0.5 backdrop-blur shadow-[0_0_12px_rgba(56,189,248,0.25)]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-purple-400 to-amber-300 shadow-[0_0_8px_#38bdf8] animate-pulse"
+            style={{ width: "68%" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ================================================================== */
 /* CONTROLS HINT — collapsible cheatsheet                              */
 /* ================================================================== */
 function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
@@ -2845,6 +3656,8 @@ function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
   return (
     <div className="pointer-events-auto absolute bottom-6 right-6 z-10 w-[260px] max-w-[80vw]">
       <button
+        id="tips-toggle-btn"
+        aria-label={open ? "Hide controls tips" : "Show controls tips"}
         onClick={() => setOpen((v) => !v)}
         className="ml-auto mb-2 flex items-center gap-2 rounded-full border border-white/20 bg-black/55 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-white/80 backdrop-blur hover:border-white/60"
       >
@@ -2966,9 +3779,10 @@ function Portfolio() {
   const [visited, setVisited] = useState<Set<ChapterId>>(new Set(["intro"]));
   const [contactOpen, setContactOpen] = useState(false);
   const [projectIndex, setProjectIndex] = useState<number | null>(null);
+  const [selectedAchievementIndex, setSelectedAchievementIndex] = useState<number | null>(null);
   const [luminosity, setLuminosity] = useState(1);
   const [freeRoam, setFreeRoam] = useState(false);
-  const { enabled: musicOn, toggle: toggleMusic, volume, setVolume } = useSpaceMusic();
+  const { enabled: musicOn, toggle: toggleMusic, volume, setVolume, setRiftActive } = useSpaceMusic();
   const prevIndexRef = useRef(0);
 
   // Derive scene layout + chapters from the loaded markdown. Empty fallback
@@ -3003,6 +3817,10 @@ function Portfolio() {
     if (chapter) setVisited((v) => new Set(v).add(chapter.id));
   }, [chapter?.id]);
 
+  useEffect(() => {
+    setRiftActive(chapter?.id === "wormhole");
+  }, [chapter?.id, setRiftActive]);
+
   const go = (i: number) => {
     if (!CHAPTERS.length) return;
     const next = Math.max(0, Math.min(CHAPTERS.length - 1, i));
@@ -3010,11 +3828,16 @@ function Portfolio() {
     setIndex(next);
   };
 
-  // keyboard nav
+  // keyboard nav & modal escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") go(index + 1);
       if (e.key === "ArrowLeft") go(index - 1);
+      if (e.key === "Escape") {
+        setProjectIndex(null);
+        setSelectedAchievementIndex(null);
+        setContactOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -3058,7 +3881,7 @@ function Portfolio() {
 
   return (
     <PortfolioContext.Provider value={data}>
-      <div className="fixed inset-0 bg-[#03020a] text-white overflow-hidden">
+      <main id="main-content" role="main" className="fixed inset-0 bg-[#03020a] text-white overflow-hidden">
         <Canvas camera={{ position: [4, 2, 8], fov: 55 }} dpr={[1, 2]}>
           <color attach="background" args={["#03020a"]} />
           <fog attach="fog" args={["#03020a", 40, 220]} />
@@ -3069,17 +3892,29 @@ function Portfolio() {
               </Html>
             }
           >
-            <World onSelectProject={(i) => setProjectIndex(i)} luminosity={luminosity} layout={layout} />
+            <World
+              onSelectProject={(i) => setProjectIndex(i)}
+              onSelectAchievement={(i) => setSelectedAchievementIndex(i)}
+              luminosity={luminosity}
+              layout={layout}
+              isWormhole={chapter?.id === "wormhole"}
+            />
           </Suspense>
           {/* Ship lives OUTSIDE Suspense so it never disappears while assets load */}
-          <CompanionShip onContact={() => setContactOpen(true)} />
+          <CompanionShip
+            onContact={() => setContactOpen(true)}
+            isWormhole={chapter?.id === "wormhole"}
+          />
           {!freeRoam && <CameraRig chapter={chapter!} />}
           <ZoomControls baseFov={55} />
           <FreeRoam enabled={freeRoam} />
         </Canvas>
 
+        {/* Dynamic Sci-Fi Flight HUD overlay during Rift traversal (Horizon lock anchor against motion sickness) */}
+        {chapter?.id === "wormhole" && <RiftFlightHUD />}
+
         {/* TOP BAR: brand · controls · chapter progress, all on one line */}
-        <div className="absolute top-4 left-0 right-0 z-10 flex items-center justify-between gap-4 px-6">
+        <header id="site-header" role="banner" className="absolute top-4 left-0 right-0 z-10 flex items-center justify-between gap-4 px-6">
           {/* brand */}
           <div className="pointer-events-none">
             <h1 className="text-xs tracking-[0.4em] text-white/70">
@@ -3091,6 +3926,7 @@ function Portfolio() {
           {/* center controls */}
           <div className="flex items-center gap-4 rounded-full border border-white/15 bg-black/55 px-4 py-2 backdrop-blur-xl">
             <button
+              id="music-toggle-btn"
               onClick={toggleMusic}
               className="flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/80 hover:text-white transition whitespace-nowrap"
               title={musicOn ? "Mute soundtrack" : "Play Interstellar-inspired pad"}
@@ -3148,6 +3984,7 @@ function Portfolio() {
             <span className="h-4 w-px bg-white/15" />
 
             <button
+              id="roam-toggle-btn"
               onClick={() => setFreeRoam((v) => !v)}
               className={`text-[11px] uppercase tracking-[0.2em] transition whitespace-nowrap ${freeRoam ? "text-emerald-300" : "text-white/80 hover:text-white"}`}
               title="Free roam (WASD + mouse, Shift to boost, Space/Ctrl up/down, Esc to release mouse)"
@@ -3160,14 +3997,17 @@ function Portfolio() {
           </div>
 
           {/* chapter progress */}
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex gap-1.5">
+          <nav id="chapter-nav" aria-label="Cosmic Journey Chapters" className="flex flex-col items-end gap-2">
+            <div className="flex gap-1.5" role="tablist" aria-label="Chapter Indicators">
               {CHAPTERS.map((c, i) => (
                 <button
                   key={c.id}
+                  id={`chapter-dot-${c.id}`}
                   onClick={() => go(i)}
-                  aria-label={c.title}
+                  aria-label={`Jump to chapter ${i + 1}: ${c.title}`}
                   title={c.title}
+                  role="tab"
+                  aria-selected={i === index}
                   className={`h-1.5 rounded-full transition-all ${
                     i === index ? "w-8 bg-white" : visited.has(c.id) ? "w-3 bg-white/70" : "w-3 bg-white/20"
                   }`}
@@ -3177,18 +4017,51 @@ function Portfolio() {
             <p className="text-[10px] uppercase tracking-widest text-white/40">
               chapter {index + 1} / {CHAPTERS.length}
             </p>
-          </div>
-        </div>
+          </nav>
+        </header>
 
         {/* CAPTION PANEL — bottom-left */}
-        <div className="absolute bottom-24 left-6 z-20 w-[400px] max-w-[88vw]">
+        <section id="chapter-caption-panel" aria-labelledby="chapter-caption-title" className="absolute bottom-24 left-6 z-20 w-[400px] max-w-[88vw]">
           <div
             key={chapter!.id}
             className="rounded-2xl border-2 border-cyan-300/40 bg-slate-950/85 p-5 backdrop-blur-2xl shadow-[0_0_40px_rgba(34,211,238,0.25)] ring-1 ring-cyan-200/10"
             style={{ animation: "fadein .5s ease-out" }}
           >
-            <p className="font-display text-xs font-bold uppercase tracking-[0.35em] text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]">{chapter!.title}</p>
+            <h2 id="chapter-caption-title" className="font-display text-xs font-bold uppercase tracking-[0.35em] text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]">
+              {chapter!.title}
+            </h2>
             <p className="mt-3 text-white leading-relaxed text-[16px] font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">{chapter!.caption}</p>
+
+            {/* pantheon: quick trophy exhibition drawer */}
+            {chapter!.id === "pantheon" && (
+              <div className="mt-4 pt-3 border-t border-amber-400/20">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-amber-300 font-mono">
+                    🏆 Curated Trophy Exhibition
+                  </p>
+                  <span className="text-[10px] font-mono text-white/50">
+                    {(data.achievements?.length ?? DEFAULT_ACHIEVEMENTS.length)} Artifacts
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                  {(data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS).map(
+                    (a, i) => (
+                      <button
+                        key={i}
+                        id={`pantheon-artifact-btn-${i}`}
+                        onClick={() => setSelectedAchievementIndex(i)}
+                        className="group flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-2.5 py-1.5 text-left text-xs text-white/85 transition hover:border-amber-300 hover:bg-amber-400/20"
+                      >
+                        <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
+                        <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
+                          {a.name}
+                        </span>
+                      </button>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* finale: list visited */}
             {chapter!.id === "finale" && (
@@ -3198,6 +4071,7 @@ function Portfolio() {
                   {CHAPTERS.map((c, i) => (
                     <li key={c.id}>
                       <button
+                        id={`visited-section-btn-${c.id}`}
                         onClick={() => go(i)}
                         className={`w-full text-left rounded-md border px-2 py-1.5 transition ${
                           visited.has(c.id)
@@ -3213,28 +4087,67 @@ function Portfolio() {
               </div>
             )}
           </div>
-        </div>
+        </section>
 
         {/* CONTROLS TIPS — bottom-right */}
         <ControlsHint freeRoam={freeRoam} />
 
         {/* PREV / NEXT */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+        <nav id="chapter-step-controls" aria-label="Chapter step controls" className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
           <button
+            id="prev-chapter-btn"
             onClick={() => go(index - 1)}
             disabled={index === 0}
+            aria-label="Previous chapter"
             className="rounded-full border border-white/25 bg-white/5 px-4 py-2 text-sm backdrop-blur-md disabled:opacity-30 hover:border-white transition"
           >
             ← Previous
           </button>
           <button
+            id="next-chapter-btn"
             onClick={() => go(index + 1)}
             disabled={index === CHAPTERS.length - 1}
+            aria-label={index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"}
             className="rounded-full border border-white bg-white text-black px-5 py-2 text-sm font-medium backdrop-blur-md disabled:opacity-30 hover:bg-white/90 transition"
           >
             {index === CHAPTERS.length - 1 ? "Journey complete" : "Continue →"}
           </button>
-        </div>
+        </nav>
+
+        {/* ACCESSIBLE CRAWLER & SCREEN-READER MANIFEST FOR PERFECT SEO INDEXATION */}
+        <section id="accessible-portfolio-manifest" className="sr-only" aria-label="Portfolio Dossier and Experience Manifest">
+          <h2>About Bacem Zarai</h2>
+          <p>{BRAND.description}</p>
+          <h2>Engineering Waypoints & Experiences</h2>
+          <ul>
+            {(data.experiences ?? []).map((e: Experience, i: number) => (
+              <li key={i}>
+                <h3>{e.name} — {e.place ?? "Engineering Milestone"} ({e.year})</h3>
+                <p>{e.description}</p>
+              </li>
+            ))}
+          </ul>
+          <h2>Featured Systems & Projects</h2>
+          <ul>
+            {PROJECTS.map((p, i) => (
+              <li key={i}>
+                <h3>{p.name}</h3>
+                <p>{p.desc}</p>
+                <p>{p.details}</p>
+                <p>Tech Stack: {p.stack.join(", ")}</p>
+              </li>
+            ))}
+          </ul>
+          <h2>Curated Honors & Certifications</h2>
+          <ul>
+            {(data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS).map((a: Achievement, i: number) => (
+              <li key={i}>
+                <h3>{a.name} — {a.issuer} ({a.year})</h3>
+                <p>{a.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* CONTACT MODAL - CRT TERMINAL */}
         {contactOpen && (
@@ -3264,7 +4177,12 @@ function Portfolio() {
                     <p className="text-xs uppercase tracking-[0.3em]" style={{ color: p.color }}>
                       ◉ Project
                     </p>
-                    <button onClick={() => setProjectIndex(null)} className="text-white/50 hover:text-white">
+                    <button
+                      id="close-project-modal-btn"
+                      onClick={() => setProjectIndex(null)}
+                      className="text-white/50 hover:text-white"
+                      aria-label="Close project modal"
+                    >
                       ✕
                     </button>
                   </div>
@@ -3281,6 +4199,129 @@ function Portfolio() {
                         {s}
                       </span>
                     ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+        {/* PANTHEON ACHIEVEMENT DOSSIER MODAL */}
+        {selectedAchievementIndex !== null &&
+          (() => {
+            const list = data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS;
+            const a = list[selectedAchievementIndex];
+            if (!a) return null;
+            const color = a.color ?? "#ffd27a";
+            return (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+                onClick={() => setSelectedAchievementIndex(null)}
+              >
+                <div
+                  className="relative w-[520px] max-w-[94vw] rounded-2xl border bg-[#0b081c] p-7 shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden"
+                  style={{
+                    borderColor: `${color}66`,
+                    boxShadow: `0 0 40px ${color}22, 0 20px 40px rgba(0,0,0,0.8)`,
+                    animation: "fadein .3s ease-out",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Glowing header badge */}
+                  <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded-lg border text-sm font-bold shadow-inner"
+                        style={{ borderColor: `${color}88`, color, background: `${color}15` }}
+                      >
+                        {a.icon ?? "✦"}
+                      </span>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.3em] font-mono" style={{ color }}>
+                          ◈ PANTHEON // VERIFIED HONORS
+                        </p>
+                        <p className="text-[11px] text-white/50 tracking-wider font-mono">
+                          STATUS: CONFIRMED CREDENTIAL
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      id="close-achievement-modal-btn"
+                      aria-label="Close honors dossier modal"
+                      onClick={() => setSelectedAchievementIndex(null)}
+                      className="rounded-full p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Title & Issuer */}
+                  <div className="mt-5">
+                    <h2 className="font-display text-2xl font-bold tracking-wide text-white leading-tight">
+                      {a.name}
+                    </h2>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                      {a.issuer && (
+                        <span className="rounded border border-white/15 bg-white/5 px-2.5 py-1 text-white/80 font-mono">
+                          ISSUER: <strong className="text-white">{a.issuer}</strong>
+                        </span>
+                      )}
+                      {a.year && (
+                        <span className="rounded border border-white/15 bg-white/5 px-2.5 py-1 text-white/80 font-mono">
+                          YEAR: <strong style={{ color }}>{a.year}</strong>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="mt-5 rounded-xl border border-white/10 bg-black/40 p-4">
+                    <p className="text-xs uppercase tracking-[0.25em] text-white/40 mb-2 font-mono">
+                      // MILESTONE SUMMARY
+                    </p>
+                    <p className="text-[14px] leading-relaxed text-white/85">
+                      {a.description ??
+                        `Official credential recognized in ${a.year ?? "the archives"} by ${a.issuer ?? "accrediting body"}. Demonstrates advanced applied engineering mastery and autonomous systems execution.`}
+                    </p>
+                  </div>
+
+                  {/* Navigation footer */}
+                  <div className="mt-6 flex items-center justify-between pt-2 border-t border-white/10 text-xs">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() =>
+                          setSelectedAchievementIndex(
+                            (selectedAchievementIndex - 1 + list.length) % list.length,
+                          )
+                        }
+                        className="rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-white/70 hover:border-white/50 hover:text-white transition"
+                      >
+                        ← Prev Honor
+                      </button>
+                      <button
+                        onClick={() =>
+                          setSelectedAchievementIndex(
+                            (selectedAchievementIndex + 1) % list.length,
+                          )
+                        }
+                        className="rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-white/70 hover:border-white/50 hover:text-white transition"
+                      >
+                        Next Honor →
+                      </button>
+                    </div>
+
+                    <button
+                      id="achievement-done-btn"
+                      aria-label="Done inspecting honor"
+                      onClick={() => setSelectedAchievementIndex(null)}
+                      className="rounded-lg border px-4 py-1.5 font-medium transition"
+                      style={{
+                        borderColor: color,
+                        color: "#000",
+                        background: color,
+                      }}
+                    >
+                      Done
+                    </button>
                   </div>
                 </div>
               </div>
@@ -3321,7 +4362,7 @@ function Portfolio() {
           100% { transform: translate(0, 0); }
         }
       `}</style>
-      </div>
+      </main>
     </PortfolioContext.Provider>
   );
 }

@@ -111,13 +111,25 @@ function parseFrontmatter(raw: string): PortfolioContent {
   };
 }
 
+import rawFallback from "./portfolio.md?raw";
+
 export async function fetchPortfolio(): Promise<PortfolioContent> {
-  const res = await fetch(PORTFOLIO_MD_URL, { cache: "no-store" });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch portfolio markdown: HTTP ${res.status}`);
+  try {
+    const res = await fetch(PORTFOLIO_MD_URL, { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const text = await res.text();
+    return parseFrontmatter(text);
+  } catch (err) {
+    console.warn("[portfolio] Remote fetch failed, falling back to local portfolio.md:", err);
+    try {
+      return parseFrontmatter(rawFallback);
+    } catch (fallbackErr) {
+      console.error("[portfolio] Fallback parsing also failed:", fallbackErr);
+      throw err;
+    }
   }
-  const text = await res.text();
-  return parseFrontmatter(text);
 }
 
 /* ============ React context for sharing the loaded data ============ */
