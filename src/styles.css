@@ -1,0 +1,327 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: "Rajdhani", "Segoe UI", system-ui, sans-serif;
+    letter-spacing: 0.01em;
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  .font-display {
+    font-family: "Orbitron", "Rajdhani", sans-serif;
+    letter-spacing: 0.06em;
+  }
+
+  .font-mono, code, pre, kbd {
+    font-family: "Share Tech Mono", ui-monospace, monospace !important;
+  }
+}
+
+/* Minimal markdown styling for the POC portfolio. */
+.prose h1 { font-size: 1.875rem; font-weight: 700; margin: 1.5rem 0 1rem; }
+.prose h2 { font-size: 1.5rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
+.prose h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+.prose p { margin: 0.75rem 0; line-height: 1.65; }
+.prose ul { list-style: disc; padding-left: 1.5rem; margin: 0.75rem 0; }
+.prose ol { list-style: decimal; padding-left: 1.5rem; margin: 0.75rem 0; }
+.prose li { margin: 0.25rem 0; }
+.prose a { color: var(--color-primary); text-decoration: underline; }
+.prose img { display: inline-block; max-width: 100%; height: auto; vertical-align: middle; }
+.prose code { background: var(--color-muted); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.9em; }
+.prose pre { background: var(--color-muted); padding: 1rem; border-radius: 8px; overflow-x: auto; }
+.prose blockquote { border-left: 3px solid var(--color-border); padding-left: 1rem; color: var(--color-muted-foreground); margin: 1rem 0; }
+.prose hr { border: 0; border-top: 1px solid var(--color-border); margin: 2rem 0; }
+
+/* ============================================================
+   RETRO CRT TV OVERLAY
+   A fixed, pointer-events:none stack of layers that lives above
+   the app to simulate an old television: scanlines, RGB shadow
+   mask, vignette + screen curvature, soft phosphor glow,
+   chromatic aberration, flicker, rolling bar, and power-on flash.
+   ============================================================ */
+
+.crt-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+  mix-blend-mode: normal;
+  /* Subtle warm phosphor tint over everything */
+  background:
+    radial-gradient(ellipse at center,
+      transparent 70%,
+      rgba(20, 12, 4, 0.15) 92%,
+      rgba(0, 0, 0, 0.35) 100%);
+  animation: crt-flicker 5.2s infinite steps(1);
+}
+
+/* Horizontal scanlines */
+.crt-scanlines {
+  position: absolute;
+  inset: -2px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.32) 0px,
+    rgba(0, 0, 0, 0.32) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* RGB shadow mask (aperture grille) */
+.crt-mask {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(255, 0, 60, 0.06) 0px,
+    rgba(255, 0, 60, 0.06) 1px,
+    rgba(0, 255, 120, 0.06) 1px,
+    rgba(0, 255, 120, 0.06) 2px,
+    rgba(0, 120, 255, 0.06) 2px,
+    rgba(0, 120, 255, 0.06) 3px
+  );
+  mix-blend-mode: screen;
+  opacity: 0.45;
+}
+
+/* Slow rolling horizontal bar */
+.crt-roll {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 18%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.045) 45%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.045) 55%,
+    transparent
+  );
+  mix-blend-mode: screen;
+  animation: crt-roll 9s linear infinite;
+}
+
+/* Curvature + dark corners vignette */
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 130% 105% at center,
+      transparent 75%,
+      rgba(0, 0, 0, 0.25) 95%,
+      rgba(0, 0, 0, 0.5) 100%);
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.35),
+    inset 0 0 20px rgba(255, 180, 90, 0.05);
+}
+
+/* Faint chromatic edge fringe */
+.crt-chroma {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 50%, rgba(255, 40, 80, 0.05), transparent 30%),
+    radial-gradient(circle at 88% 50%, rgba(40, 140, 255, 0.05), transparent 30%);
+  mix-blend-mode: screen;
+}
+
+/* Subtle TV noise */
+.crt-noise {
+  position: absolute;
+  inset: -50%;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  animation: crt-noise 1.2s steps(6) infinite;
+}
+
+/* One-shot power-on white flash */
+.crt-power {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  animation: crt-power 1.2s ease-out 0s 1 both;
+  pointer-events: none;
+}
+
+
+@keyframes crt-flicker {
+  0%, 96%, 100% { opacity: 1; }
+  97% { opacity: 0.94; }
+  98% { opacity: 1; }
+  98.5% { opacity: 0.88; }
+  99% { opacity: 1; }
+}
+@keyframes crt-roll {
+  0%   { top: -20%; }
+  100% { top: 120%; }
+}
+@keyframes crt-noise {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-3%, 2%); }
+  40%  { transform: translate(2%, -4%); }
+  60%  { transform: translate(-4%, -2%); }
+  80%  { transform: translate(3%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes crt-power {
+  0%   { opacity: 0.9; transform: scaleY(0.004); filter: brightness(2.4); }
+  10%  { opacity: 0.9; transform: scaleY(0.02); }
+  25%  { opacity: 0.6; transform: scaleY(1); }
+  60%  { opacity: 0.15; }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+
+
+/* Tiny chromatic aberration on text only — no body filter
+   because filter on <body> reparents position:fixed children
+   and breaks full-viewport canvases. */
+body.crt-screen {
+  text-shadow: 0.4px 0 0 rgba(255, 0, 80, 0.18), -0.4px 0 0 rgba(0, 180, 255, 0.18);
+}
+
+
