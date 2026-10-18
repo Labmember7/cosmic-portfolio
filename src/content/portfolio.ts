@@ -14,7 +14,18 @@ export const PORTFOLIO_MD_URL =
   (import.meta.env.VITE_PORTFOLIO_MD_URL as string | undefined) ||
   "https://raw.githubusercontent.com/Labmember7/Labmember7/main/README.md";
 
-export type ProjectPattern = "stripes" | "lava" | "ice" | "gas" | "grid";
+export type ProjectPattern =
+  | "stripes"
+  | "lava"
+  | "ice"
+  | "gas"
+  | "grid"
+  | "oceanic"
+  | "continental"
+  | "desert"
+  | "toxic"
+  | "crystal"
+  | "cyber";
 
 export interface Brand {
   name: string;
@@ -112,6 +123,18 @@ function parseFrontmatter(raw: string): PortfolioContent {
 }
 
 import rawFallback from "./portfolio.md?raw";
+
+let cachedInitialContent: PortfolioContent | null = null;
+export function getInitialPortfolioContent(): PortfolioContent {
+  if (!cachedInitialContent) {
+    try {
+      cachedInitialContent = parseFrontmatter(rawFallback);
+    } catch (err) {
+      console.error("[portfolio] Failed to parse initial rawFallback:", err);
+    }
+  }
+  return cachedInitialContent!;
+}
 
 export async function fetchPortfolio(): Promise<PortfolioContent> {
   try {

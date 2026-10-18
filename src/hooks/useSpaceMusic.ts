@@ -256,6 +256,90 @@ export function useSpaceMusic() {
     }
   }, [ensureContext]);
 
+  const playLaunchSound = useCallback(() => {
+    const ctx = ensureContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+    const now = ctx.currentTime;
+
+    // Sub-bass engine ignition rumble (38Hz -> 75Hz sweep)
+    const sub = ctx.createOscillator();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(38, now);
+    sub.frequency.exponentialRampToValueAtTime(75, now + 1.2);
+    sub.frequency.exponentialRampToValueAtTime(45, now + 2.8);
+
+    const subGain = ctx.createGain();
+    subGain.gain.setValueAtTime(0, now);
+    subGain.gain.linearRampToValueAtTime(0.45 * (volumeRef.current || 0.4), now + 0.3);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+
+    sub.connect(subGain);
+    subGain.connect(ctx.destination);
+    sub.start(now);
+    sub.stop(now + 3.2);
+
+    // Thruster roar: filtered noise approximation with multiple detuned saws
+    [110, 165, 220].forEach((baseFreq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(baseFreq, now);
+      osc.detune.setValueAtTime((i - 1) * 15, now);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(300, now);
+      filter.frequency.exponentialRampToValueAtTime(1200, now + 0.6);
+      filter.frequency.exponentialRampToValueAtTime(200, now + 2.5);
+
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.08 * (volumeRef.current || 0.4), now + 0.4);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
+
+      osc.connect(filter).connect(g).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 3.0);
+    });
+
+    // High shimmer / celestial warp flash
+    [N(67), N(71), N(74), N(79)].forEach((f, idx) => {
+      const chime = ctx.createOscillator();
+      chime.type = "sine";
+      chime.frequency.setValueAtTime(f, now + 0.2 + idx * 0.08);
+      const cg = ctx.createGain();
+      cg.gain.setValueAtTime(0, now + 0.2 + idx * 0.08);
+      cg.gain.linearRampToValueAtTime(0.06, now + 0.35 + idx * 0.08);
+      cg.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+      chime.connect(cg).connect(ctx.destination);
+      chime.start(now + 0.2 + idx * 0.08);
+      chime.stop(now + 2.5);
+    });
+  }, [ensureContext]);
+
+  const playBootChime = useCallback(() => {
+    const ctx = ensureContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+    const now = ctx.currentTime;
+    [N(60), N(64), N(67), N(72)].forEach((f, i) => {
+      const o = ctx.createOscillator();
+      o.type = "sine";
+      o.frequency.setValueAtTime(f, now + i * 0.06);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, now + i * 0.06);
+      g.gain.linearRampToValueAtTime(0.05, now + i * 0.06 + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.06 + 0.8);
+      o.connect(g).connect(ctx.destination);
+      o.start(now + i * 0.06);
+      o.stop(now + i * 0.06 + 0.9);
+    });
+  }, [ensureContext]);
+
   const setVolume = useCallback((v: number) => {
     setVolumeState(v);
     if (masterRef.current && ctxRef.current) {
@@ -283,5 +367,13 @@ export function useSpaceMusic() {
     };
   }, [stopScheduler]);
 
-  return { enabled, toggle, volume, setVolume, setRiftActive };
+  return {
+    enabled,
+    toggle,
+    volume,
+    setVolume,
+    setRiftActive,
+    playLaunchSound,
+    playBootChime,
+  };
 }

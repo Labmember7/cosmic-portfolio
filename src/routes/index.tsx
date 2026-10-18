@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense, useRef, useState, useMemo, useEffect } from "react";
+import { Suspense, useRef, useState, useMemo, useEffect, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   Stars,
@@ -23,12 +23,21 @@ import {
   PortfolioContext,
   usePortfolio,
   fetchPortfolio,
+  getInitialPortfolioContent,
   PORTFOLIO_MD_URL,
   type ProjectPattern,
   type PortfolioContent,
   type Experience,
   type Achievement,
 } from "@/content/portfolio";
+import {
+  generateAtmosphereTelemetry,
+  getBiomeTexture,
+  getPlanetCloudTexture,
+  getPlanetRingTexture,
+  type AtmosphereTelemetry,
+  type BiomeType,
+} from "@/lib/planetGenerator";
 
 export const Route = createFileRoute("/")({
   component: Portfolio,
@@ -253,6 +262,42 @@ function AstronautModel(props: any) {
 }
 useGLTF.preload(ASTRONAUT_URL);
 
+/* ---------------- Realistically Animated 3D Astronaut Persona ---------------- */
+
+function AnimatedAstronaut() {
+  const groupRef = useRef<THREE.Group>(null);
+  const { scene } = useGLTF(ASTRONAUT_URL);
+  const cloned = useMemo(() => scene.clone(), [scene]);
+
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.elapsedTime;
+
+    // Slow, clean, dignified low-gravity astronaut kinematics:
+    // 1. Subtle respiratory & buoyancy micro-bobbing:
+    const bob = Math.sin(t * 0.85) * 0.022 + Math.sin(t * 1.7) * 0.008;
+    groupRef.current.position.y = -0.48 + bob;
+
+    // 2. Slow majestic horizon surveying yaw:
+    // Astronaut smoothly turns upper body / helmet to inspect the celestial exoplanet (+yaw),
+    // pauses peacefully, then turns back to gaze down the runway (-Z):
+    const surveyYaw = Math.sin(t * 0.28) * 0.14 + Math.sin(t * 0.12) * 0.06;
+    groupRef.current.rotation.y = Math.PI + surveyYaw;
+
+    // 3. Subtle spacesuit weight-shift pitch & roll:
+    groupRef.current.rotation.x = Math.sin(t * 0.6) * 0.02; // breathing chest pitch
+    groupRef.current.rotation.z = Math.sin(t * 0.4) * 0.015; // low-gravity boot weight shift
+  });
+
+  return (
+    <group ref={groupRef} scale={1.35} position={[0, -0.48, 0]} rotation={[0, Math.PI, 0]}>
+      <primitive object={cloned} />
+      {/* Subtle telemetry status beacon on suit chest */}
+      <pointLight position={[0, 1.15, 0.35]} color="#38bdf8" intensity={0.65} distance={1.8} />
+    </group>
+  );
+}
+
 /* ================================================================== */
 /* CAMERA RIG                                                          */
 /* ================================================================== */
@@ -264,23 +309,118 @@ function CameraRig({ chapter }: { chapter: Chapter }) {
   const viaPos = useMemo(() => (chapter.via ? new THREE.Vector3(...chapter.via.camera) : null), [chapter]);
   const viaLook = useMemo(() => (chapter.via ? new THREE.Vector3(...chapter.via.lookAt) : null), [chapter]);
   const lookHelper = useMemo(() => new THREE.Object3D(), []);
-  const currentLook = useRef(new THREE.Vector3(...chapter.lookAt));
+
+  // Relative look offset from camera position to target point (avoids flipping on reverse travel)
+  const currentLookOffset = useRef(
+    new THREE.Vector3(
+      chapter.lookAt[0] - chapter.camera[0],
+      chapter.lookAt[1] - chapter.camera[1],
+      chapter.lookAt[2] - chapter.camera[2],
+    ),
+  );
+
+  // Persistent right-click drag angle (yaw, pitch) with fluid target damping
+  const targetDragAngle = useRef({ yaw: 0, pitch: 0 });
+  const dragAngle = useRef({ yaw: 0, pitch: 0 });
+  const isDraggingRight = useRef(false);
+  const lastMousePos = useRef({ x: 0, y: 0 });
   const phase = useRef<"via" | "final">("final");
 
-  // When chapter changes, reset phase
+  // Prevent right-click context menu and track right-drag rotation
+  useEffect(() => {
+    const onContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button === 2) {
+        e.preventDefault();
+        isDraggingRight.current = true;
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+        document.body.style.cursor = "grabbing";
+      }
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDraggingRight.current) {
+        const dx = e.clientX - lastMousePos.current.x;
+        const dy = e.clientY - lastMousePos.current.y;
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+
+        // Snappy, fluid, inverted scene-grab drag with refined sensitivity
+        const sensitivity = 0.0032;
+        const nextYaw = targetDragAngle.current.yaw + dx * sensitivity;
+        targetDragAngle.current.yaw = Math.atan2(Math.sin(nextYaw), Math.cos(nextYaw));
+        targetDragAngle.current.pitch = THREE.MathUtils.clamp(
+          targetDragAngle.current.pitch + dy * sensitivity,
+          -0.85,
+          0.85,
+        );
+      }
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      if (e.button === 2) {
+        isDraggingRight.current = false;
+        document.body.style.cursor = "";
+      }
+    };
+
+    window.addEventListener("contextmenu", onContextMenu);
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("contextmenu", onContextMenu);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  // When chapter changes, reset via phase and cleanly initialize wormhole return target
   useEffect(() => {
     phase.current = chapter.via ? "via" : "final";
+    if (chapter.id === "wormhole") {
+      targetDragAngle.current.yaw = 0;
+      targetDragAngle.current.pitch = 0;
+      dragAngle.current.yaw = Math.atan2(
+        Math.sin(dragAngle.current.yaw),
+        Math.cos(dragAngle.current.yaw),
+      );
+    }
   }, [chapter]);
 
   useFrame((_, dt) => {
     const isWormhole = chapter.id === "wormhole";
-    const cam = camera as THREE.PerspectiveCamera;
 
-    // Gentle cinematic FOV expansion during wormhole traversal (no disorienting distortion)
-    const targetFov = isWormhole ? 60 : 55;
-    if (Math.abs(cam.fov - targetFov) > 0.05) {
-      cam.fov = THREE.MathUtils.lerp(cam.fov, targetFov, Math.min(1, dt * 1.3));
-      cam.updateProjectionMatrix();
+    // At the wormhole rift, snap target angle to default 0
+    if (isWormhole && !isDraggingRight.current) {
+      targetDragAngle.current.yaw = 0;
+      targetDragAngle.current.pitch = 0;
+    }
+
+    // Snappy, ultra-fluid cinematic damping (reaches target instantaneously without stepping)
+    const dampSpeed = isWormhole ? 5.5 : 24.0;
+    const dampFactor = Math.min(1, dt * dampSpeed);
+    const diffYaw = Math.atan2(
+      Math.sin(targetDragAngle.current.yaw - dragAngle.current.yaw),
+      Math.cos(targetDragAngle.current.yaw - dragAngle.current.yaw),
+    );
+    dragAngle.current.yaw += diffYaw * dampFactor;
+    dragAngle.current.yaw = Math.atan2(
+      Math.sin(dragAngle.current.yaw),
+      Math.cos(dragAngle.current.yaw),
+    );
+    dragAngle.current.pitch = THREE.MathUtils.lerp(
+      dragAngle.current.pitch,
+      targetDragAngle.current.pitch,
+      dampFactor,
+    );
+    if (isWormhole) {
+      if (Math.abs(dragAngle.current.yaw) < 0.0008) dragAngle.current.yaw = 0;
+      if (Math.abs(dragAngle.current.pitch) < 0.0008) dragAngle.current.pitch = 0;
     }
 
     // Smooth, consistent cinematic easing
@@ -294,43 +434,80 @@ function CameraRig({ chapter }: { chapter: Chapter }) {
         phase.current = "final";
       }
     }
+
+    // Interpolate camera position
     camera.position.lerp(tgtPos, k);
-    currentLook.current.lerp(tgtLook, k);
-    lookHelper.position.copy(currentLook.current);
+
+    // Compute relative look offset: destination lookAt relative to destination camera position
+    const tgtLookOffset = tgtLook.clone().sub(tgtPos);
+    currentLookOffset.current.lerp(tgtLookOffset, k);
+
+    // Apply right-click drag rotation (yaw around Y, pitch around local X)
+    const euler = new THREE.Euler(dragAngle.current.pitch, dragAngle.current.yaw, 0, "YXZ");
+    const rotatedLookOffset = currentLookOffset.current.clone().applyEuler(euler);
+
+    // Look at point is ALWAYS in front of the camera, preventing any 180° flips when translating backward
+    lookHelper.position.copy(camera.position).add(rotatedLookOffset);
     camera.lookAt(lookHelper.position);
   });
+
   return null;
 }
 
-/* Wheel/pinch zoom by adjusting camera FOV — keeps camera position fixed,
-   no quality loss (true optical zoom, not a CSS scale). Double-click resets. */
+/* Cosmic starfield that follows the camera position everywhere across the universe,
+   ensuring stars never disappear when traveling to distant sectors like the Arsenal or on zoom. */
+function UniversalCosmicStars() {
+  const { camera } = useThree();
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.position.copy(camera.position);
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Stars radius={140} depth={70} count={9500} factor={4.8} fade speed={0.8} />
+    </group>
+  );
+}
+
+/* Wheel/pinch zoom by adjusting camera FOV — unlocked without auto-reset snaps.
+   Supports smooth dampening, full FOV range, and double-click to reset. */
 function ZoomControls({
+  chapterId,
   baseFov = 55,
-  minFov = 18,
-  maxFov = 70,
+  minFov = 15,
+  maxFov = 85,
 }: {
+  chapterId?: string;
   baseFov?: number;
   minFov?: number;
   maxFov?: number;
 }) {
   const { camera, gl } = useThree();
+  const targetFov = useRef(chapterId === "wormhole" ? 60 : baseFov);
+
+  // When chapter changes, smoothly ease to the chapter's base FOV
   useEffect(() => {
-    const cam = camera as THREE.PerspectiveCamera;
+    targetFov.current = chapterId === "wormhole" ? 60 : baseFov;
+  }, [chapterId, baseFov]);
+
+  useEffect(() => {
     const el = gl.domElement;
 
     const handler = (e: WheelEvent) => {
       e.preventDefault();
-      const next = THREE.MathUtils.clamp(cam.fov + e.deltaY * 0.05, minFov, maxFov);
-      if (next !== cam.fov) {
-        cam.fov = next;
-        cam.updateProjectionMatrix();
-      }
+      // Smooth incremental zoom target without snapping
+      const delta = e.deltaY * 0.045;
+      targetFov.current = THREE.MathUtils.clamp(targetFov.current + delta, minFov, maxFov);
     };
     const reset = () => {
-      cam.fov = baseFov;
-      cam.updateProjectionMatrix();
+      targetFov.current = chapterId === "wormhole" ? 60 : baseFov;
     };
-    // pinch
+
+    // pinch gesture for touchscreens / trackpads
     let pinchStart = 0;
     let pinchFov = baseFov;
     const dist = (t: TouchList) => {
@@ -341,17 +518,17 @@ function ZoomControls({
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 2) {
         pinchStart = dist(e.touches);
-        pinchFov = cam.fov;
+        pinchFov = targetFov.current;
       }
     };
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 2 && pinchStart > 0) {
         e.preventDefault();
         const ratio = dist(e.touches) / pinchStart;
-        cam.fov = THREE.MathUtils.clamp(pinchFov / ratio, minFov, maxFov);
-        cam.updateProjectionMatrix();
+        targetFov.current = THREE.MathUtils.clamp(pinchFov / ratio, minFov, maxFov);
       }
     };
+
     el.addEventListener("wheel", handler, { passive: false });
     el.addEventListener("dblclick", reset);
     el.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -362,7 +539,16 @@ function ZoomControls({
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
     };
-  }, [camera, gl, baseFov, minFov, maxFov]);
+  }, [gl, chapterId, baseFov, minFov, maxFov]);
+
+  useFrame((_, dt) => {
+    const cam = camera as THREE.PerspectiveCamera;
+    if (Math.abs(cam.fov - targetFov.current) > 0.01) {
+      cam.fov = THREE.MathUtils.lerp(cam.fov, targetFov.current, Math.min(1, dt * 6.5));
+      cam.updateProjectionMatrix();
+    }
+  });
+
   return null;
 }
 
@@ -1008,59 +1194,99 @@ function Wormhole({
 /* EXPERIENCE PLANETS                                                  */
 /* ================================================================== */
 
+/* ================================================================== */
+/* REALISTIC ATMOSPHERIC SHELL & ADVANCED EXOPLANET BIOMES             */
+/* ================================================================== */
+
 /**
- * FresnelRim — additive back-side shell that fakes a soft atmospheric rim
- * glow using a view-dependent fresnel term. Cheap, no lights required.
+ * RealisticAtmosphereShell — dual-wavelength Rayleigh & Mie scattering simulation.
+ * Recreates the luminous atmospheric limb glow seen in real orbital photography,
+ * with subtle sunset fringe color transitions at glancing view angles.
  */
-function FresnelRim({
+function RealisticAtmosphereShell({
   radius,
-  color,
-  power = 2.6,
-  intensity = 1.0,
-  scale = 1.06,
+  atmosphereColor,
+  sunsetLimbColor,
+  power = 3.2,
+  intensity = 1.35,
+  scale = 1.12,
 }: {
   radius: number;
-  color: string;
+  atmosphereColor: string;
+  sunsetLimbColor?: string;
   power?: number;
   intensity?: number;
   scale?: number;
 }) {
   const material = useMemo(() => {
-    const c = new THREE.Color(color);
+    const cAtm = new THREE.Color(atmosphereColor);
+    const cSunset = new THREE.Color(sunsetLimbColor || atmosphereColor);
+    const outerRadius = radius * scale;
+    const planetRatio = 1.0 / scale;
     return new THREE.ShaderMaterial({
       uniforms: {
-        uColor: { value: c },
+        uColor: { value: cAtm },
+        uSunsetColor: { value: cSunset },
         uPower: { value: power },
         uIntensity: { value: intensity },
+        uOuterRadius: { value: outerRadius },
+        uPlanetRatio: { value: planetRatio },
       },
       vertexShader: `
+        varying vec3 vViewPosition;
+        varying vec3 vCenter;
         varying vec3 vNormal;
-        varying vec3 vViewDir;
         void main() {
           vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vViewPosition = mv.xyz;
+          vCenter = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
           vNormal = normalize(normalMatrix * normal);
-          vViewDir = normalize(-mv.xyz);
           gl_Position = projectionMatrix * mv;
         }
       `,
       fragmentShader: `
         uniform vec3 uColor;
+        uniform vec3 uSunsetColor;
         uniform float uPower;
         uniform float uIntensity;
+        uniform float uOuterRadius;
+        uniform float uPlanetRatio;
+        varying vec3 vViewPosition;
+        varying vec3 vCenter;
         varying vec3 vNormal;
-        varying vec3 vViewDir;
         void main() {
-          float f = 1.0 - max(dot(normalize(vNormal), normalize(vViewDir)), 0.0);
-          f = pow(f, uPower) * uIntensity;
-          gl_FragColor = vec4(uColor * f, f);
+          vec3 viewToCenter = normalize(vCenter);
+          vec3 viewToPix = normalize(vViewPosition);
+          float cosAngle = clamp(dot(viewToCenter, viewToPix), -1.0, 1.0);
+          float sinAngle = sqrt(max(0.0, 1.0 - cosAngle * cosAngle));
+          float centerDist = length(vCenter);
+          float impact = centerDist * sinAngle;
+          float b = clamp(impact / uOuterRadius, 0.0, 1.0);
+
+          float glow = 0.0;
+          if (b < uPlanetRatio) {
+            glow = pow(b / uPlanetRatio, uPower);
+          } else {
+            float t = (b - uPlanetRatio) / max(0.001, 1.0 - uPlanetRatio);
+            glow = pow(max(0.0, 1.0 - t), 2.2);
+          }
+
+          // Subtle sun lighting on the atmosphere
+          vec3 sunDir = normalize(vec3(-0.8, 0.6, 0.7));
+          float sunFactor = smoothstep(-0.3, 0.4, dot(vNormal, sunDir));
+          glow *= (0.35 + 0.65 * sunFactor);
+
+          vec3 finalColor = mix(uColor, uSunsetColor, pow(b, 2.0));
+          float alpha = glow * uIntensity;
+          gl_FragColor = vec4(finalColor * alpha, alpha);
         }
       `,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      side: THREE.BackSide,
+      side: THREE.FrontSide,
     });
-  }, [color, power, intensity]);
+  }, [atmosphereColor, sunsetLimbColor, power, intensity, radius, scale]);
 
   return (
     <mesh scale={scale}>
@@ -1079,6 +1305,8 @@ function ExperiencePlanet({
   place,
   side,
   pattern,
+  isIntroActive = false,
+  isActiveWaypoint = false,
 }: {
   z: number;
   color: string;
@@ -1088,66 +1316,328 @@ function ExperiencePlanet({
   place?: string;
   side: number;
   pattern: ProjectPattern;
+  isIntroActive?: boolean;
+  isActiveWaypoint?: boolean;
 }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const tex = useMemo(() => makePlanetTexture(pattern, color, accent), [pattern, color, accent]);
-  useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.y += dt * 0.2;
-  });
-  const x = side * 5;
+  const planetRef = useRef<THREE.Mesh>(null);
+  const cloudRef = useRef<THREE.Mesh>(null);
+  const scanRingRef = useRef<THREE.Group>(null);
+  const [hovered, setHovered] = useState(false);
+
+  // Experience planet hover is strictly restricted to its active waypoint scene: not before, not after
+  useEffect(() => {
+    if (!isActiveWaypoint) {
+      setHovered(false);
+    }
+  }, [isActiveWaypoint]);
+
+  // Dynamic cursor pointer feedback when hovering the active waypoint planet
+  useEffect(() => {
+    if (isActiveWaypoint && hovered) {
+      document.body.style.cursor = "pointer";
+      return () => {
+        document.body.style.cursor = "";
+      };
+    }
+  }, [isActiveWaypoint, hovered]);
+
   const displayPlace = place ?? name;
+
+  // Procedural biome & scientific atmosphere telemetry
+  const telemetry = useMemo(
+    () => generateAtmosphereTelemetry(displayPlace, pattern, color, accent),
+    [displayPlace, pattern, color, accent],
+  );
+
+  // High-fidelity procedural textures (cached)
+  const tex = useMemo(
+    () => getBiomeTexture(telemetry.biomeType, color, accent, displayPlace),
+    [telemetry.biomeType, color, accent, displayPlace],
+  );
+
+  const cloudTex = useMemo(
+    () => (telemetry.hasClouds ? getPlanetCloudTexture(telemetry.biomeType) : null),
+    [telemetry.hasClouds, telemetry.biomeType],
+  );
+
+  const ringTex = useMemo(
+    () => (telemetry.hasRings ? getPlanetRingTexture(telemetry.ringColor || color, accent) : null),
+    [telemetry.hasRings, telemetry.ringColor, color, accent],
+  );
+
+  // Smooth rotation with differential cloud speed for realistic parallax
+  useFrame((_, dt) => {
+    if (planetRef.current) planetRef.current.rotation.y += dt * 0.16;
+    if (cloudRef.current) cloudRef.current.rotation.y += dt * (0.16 + telemetry.cloudSpeed);
+    if (scanRingRef.current) {
+      scanRingRef.current.rotation.z += dt * 0.4;
+      scanRingRef.current.rotation.x = Math.sin(Date.now() * 0.001) * 0.15;
+    }
+  });
+
+  const x = side * 5;
+  const isLeft = side === -1;
+
   return (
     <group position={[x, 0, z]}>
-      <mesh ref={ref}>
+      {/* Invisible Hover Hit Sphere (2.5 radius) — mounted EXCLUSIVELY when on this planet's scene */}
+      {isActiveWaypoint && (
+        <mesh
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHovered(true);
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            setHovered(false);
+          }}
+        >
+          <sphereGeometry args={[2.5, 24, 24]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      )}
+
+      {/* Main planetary sphere with physical biome material */}
+      <mesh
+        ref={planetRef}
+        onPointerOver={
+          isActiveWaypoint
+            ? (e) => {
+                e.stopPropagation();
+                setHovered(true);
+              }
+            : undefined
+        }
+        onPointerOut={
+          isActiveWaypoint
+            ? (e) => {
+                e.stopPropagation();
+                setHovered(false);
+              }
+            : undefined
+        }
+      >
         <sphereGeometry args={[2, 64, 64]} />
         <meshPhysicalMaterial
-          map={tex.map}
-          roughness={0.55}
-          metalness={0.08}
-          clearcoat={0.65}
-          clearcoatRoughness={0.25}
+          map={tex}
+          roughness={telemetry.biomeType === "oceanic" ? 0.28 : telemetry.biomeType === "ice" ? 0.35 : 0.58}
+          metalness={telemetry.biomeType === "cyber" ? 0.35 : 0.08}
+          clearcoat={telemetry.biomeType === "oceanic" || telemetry.biomeType === "ice" ? 0.8 : 0.4}
+          clearcoatRoughness={0.2}
           sheen={0.4}
-          sheenColor={new THREE.Color(accent)}
-          sheenRoughness={0.6}
-          envMapIntensity={1.1}
+          sheenColor={new THREE.Color(telemetry.sunsetLimbColor)}
+          sheenRoughness={0.5}
+          envMapIntensity={1.2}
           emissive={color}
-          emissiveIntensity={0.06}
+          emissiveIntensity={isActiveWaypoint && hovered ? 0.18 : 0.06}
         />
       </mesh>
-      <FresnelRim radius={2} color={accent} power={2.4} intensity={1.15} scale={1.045} />
 
-      <mesh rotation={[Math.PI / 2.4, 0, 0]}>
-        <ringGeometry args={[2.6, 3.3, 96]} />
-        <meshBasicMaterial color={color} transparent opacity={0.55} side={THREE.DoubleSide} />
-      </mesh>
-      <pointLight position={[0, 0, 2]} intensity={0.6} color={color} distance={10} />
-      {/* Big stylized PLACE — the cool headline above the planet */}
-      <Text font={FUTURA_FONT}
-        position={[0, 4.1, 0]}
-        fontSize={0.95}
-        color={color}
-        outlineWidth={0.03}
-        outlineColor="#000"
-        letterSpacing={0.18}
-        anchorY="bottom"
-      >
-        {displayPlace.toUpperCase()}
-      </Text>
-      {place && (
-        <Text font={FUTURA_FONT}
-          position={[0, 3.35, 0]}
-          fontSize={0.32}
-          color="#fff"
-          outlineWidth={0.01}
-          outlineColor="#000"
-          letterSpacing={0.05}
-        >
-          {name}
-        </Text>
+      {/* Rotating spherical cloud deck with real parallax depth */}
+      {telemetry.hasClouds && cloudTex && (
+        <mesh ref={cloudRef} scale={1.018} raycast={() => null}>
+          <sphereGeometry args={[2, 48, 48]} />
+          <meshStandardMaterial
+            map={cloudTex}
+            transparent
+            opacity={telemetry.cloudOpacity}
+            depthWrite={false}
+            roughness={0.9}
+            color="#ffffff"
+          />
+        </mesh>
       )}
-      <Text font={FUTURA_FONT} position={[0, 2.9, 0]} fontSize={0.22} color="#ffffffaa">
-        {year}
-      </Text>
+
+      {/* Luminous Rayleigh atmospheric scattering limb shell */}
+      <RealisticAtmosphereShell
+        radius={2}
+        atmosphereColor={telemetry.atmosphereColor}
+        sunsetLimbColor={telemetry.sunsetLimbColor}
+        power={3.2}
+        intensity={isActiveWaypoint && hovered ? 1.7 : 1.3}
+        scale={1.12}
+      />
+
+      {/* Realistic planetary rings with dust gaps */}
+      {telemetry.hasRings && ringTex && (
+        <mesh rotation={[Math.PI / 2.3, 0.18, 0]} raycast={() => null}>
+          <ringGeometry args={[telemetry.ringInner ?? 2.5, telemetry.ringOuter ?? 3.5, 96]} />
+          <meshBasicMaterial
+            map={ringTex}
+            transparent
+            opacity={telemetry.ringOpacity ?? 0.55}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* Subtle planetary local illumination */}
+      <pointLight position={[0, 0, 2.5]} intensity={0.7} color={telemetry.atmosphereColor} distance={12} />
+
+      {/* Orbiting holographic telemetry scan rings when hovered */}
+      {isActiveWaypoint && hovered && (
+        <group ref={scanRingRef} raycast={() => null}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
+            <ringGeometry args={[2.3, 2.34, 64]} />
+            <meshBasicMaterial color={telemetry.atmosphereColor} transparent opacity={0.65} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[0, Math.PI / 2, 0]} raycast={() => null}>
+            <ringGeometry args={[2.35, 2.38, 48]} />
+            <meshBasicMaterial color={telemetry.sunsetLimbColor} transparent opacity={0.45} side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Sci-Fi Target Reticle & 3D Glowing Leader Line extending towards Left / Right */}
+      {isActiveWaypoint && hovered && (
+        <group>
+          {/* Target Reticle on Planet Limb */}
+          <group position={[isLeft ? -2.15 : 2.15, 0.15, 0]}>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
+              <ringGeometry args={[0.07, 0.12, 24]} />
+              <meshBasicMaterial color={telemetry.atmosphereColor} side={THREE.DoubleSide} transparent opacity={0.9} />
+            </mesh>
+            <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
+              <circleGeometry args={[0.035, 16]} />
+              <meshBasicMaterial color="#ffffff" side={THREE.DoubleSide} />
+            </mesh>
+          </group>
+
+          {/* 3D Glowing Neon Vector Leader Line connecting limb to HUD card */}
+          {(() => {
+            const start = new THREE.Vector3(isLeft ? -2.15 : 2.15, 0.15, 0);
+            const elbow = new THREE.Vector3(isLeft ? -2.8 : 2.8, 0.45, 0);
+            const end = new THREE.Vector3(isLeft ? -3.3 : 3.3, 0.45, 0);
+            const geom = new THREE.BufferGeometry().setFromPoints([start, elbow, end]);
+            return (
+              <primitive
+                object={
+                  new THREE.Line(
+                    geom,
+                    new THREE.LineBasicMaterial({
+                      color: telemetry.atmosphereColor,
+                      transparent: true,
+                      opacity: 0.85,
+                    })
+                  )
+                }
+              />
+            );
+          })()}
+        </group>
+      )}
+
+      {/* Floating Exoplanet Telemetry HUD Card on left side (for left planets) or right side (for right planets) */}
+      {isActiveWaypoint && hovered && (
+        <Html
+          distanceFactor={13}
+          position={[isLeft ? -4.5 : 4.5, 0.45, 0]}
+          center
+          pointerEvents="none"
+        >
+          <div
+            className={`w-[340px] rounded-xl border border-cyan-400/40 bg-slate-950/95 p-4 backdrop-blur-2xl shadow-[0_0_35px_rgba(34,211,238,0.3)] text-left select-none font-sans relative ${
+              isLeft ? "mr-2" : "ml-2"
+            }`}
+          >
+            {/* Callout Arrow Tick linking to leader line */}
+            <div
+              className={`absolute top-4 w-2 h-2 rotate-45 bg-slate-950 ${
+                isLeft
+                  ? "-right-1 border-t border-r border-cyan-400/50"
+                  : "-left-1 border-b border-l border-cyan-400/50"
+              }`}
+            />
+
+            <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="h-2 w-2 rounded-full animate-ping"
+                  style={{ backgroundColor: telemetry.atmosphereColor }}
+                />
+                <span className="text-[10px] font-mono tracking-widest text-cyan-300 uppercase">
+                  ◈ TELEMETRY LOCK // {telemetry.classification.toUpperCase()}
+                </span>
+              </div>
+              <span
+                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border"
+                style={{
+                  borderColor: telemetry.atmosphereColor,
+                  color: telemetry.atmosphereColor,
+                  background: `${telemetry.atmosphereColor}15`,
+                }}
+              >
+                {telemetry.biomeType.toUpperCase()}
+              </span>
+            </div>
+            <div className="space-y-1.5 text-[11px] font-mono text-white/80">
+              <div>
+                <span className="text-white/40">ATMOSPHERE: </span>
+                <span className="text-cyan-200 font-semibold">{telemetry.composition}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>
+                  <span className="text-white/40">PRESSURE: </span>
+                  <span className="text-white/90">{telemetry.pressure}</span>
+                </span>
+                <span>
+                  <span className="text-white/40">TEMP: </span>
+                  <span className="text-white/90">{telemetry.surfaceTemp}</span>
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>
+                  <span className="text-white/40">HYDROSPHERE: </span>
+                  <span className="text-white/90">{telemetry.hydrosphere}</span>
+                </span>
+                <span>
+                  <span className="text-white/40">GRAVITY: </span>
+                  <span className="text-white/90">{telemetry.gravity}</span>
+                </span>
+              </div>
+              <div className="pt-1.5 border-t border-white/5 text-[10px] text-amber-300/85">
+                <span className="text-white/40">HAZARDS: </span>
+                {telemetry.hazards.join(" · ")}
+              </div>
+            </div>
+          </div>
+        </Html>
+      )}
+
+      {/* Floating Milestone Titles (Only displayed for the active waypoint to prevent background clutter) */}
+      {!isIntroActive && isActiveWaypoint && (
+        <Billboard follow lockX={false} lockY={false} lockZ={false}>
+          <Text
+            font={FUTURA_FONT}
+            position={[0, 4.1, 0]}
+            fontSize={0.95}
+            color={color}
+            outlineWidth={0.03}
+            outlineColor="#000"
+            letterSpacing={0.18}
+            anchorY="bottom"
+          >
+            {displayPlace.toUpperCase()}
+          </Text>
+          {place && (
+            <Text
+              font={FUTURA_FONT}
+              position={[0, 3.35, 0]}
+              fontSize={0.32}
+              color="#fff"
+              outlineWidth={0.01}
+              outlineColor="#000"
+              letterSpacing={0.05}
+            >
+              {name}
+            </Text>
+          )}
+          <Text font={FUTURA_FONT} position={[0, 2.9, 0]} fontSize={0.22} color="#ffffffaa">
+            {year}
+          </Text>
+        </Billboard>
+      )}
     </group>
   );
 }
@@ -1439,7 +1929,22 @@ function ProjectPlanet({
 }) {
   const ref = useRef<THREE.Group>(null);
   const planetRef = useRef<THREE.Mesh>(null);
-  const tex = useMemo(() => makePlanetTexture(pattern, color, accent), [pattern, color, accent]);
+  const cloudRef = useRef<THREE.Mesh>(null);
+
+  const telemetry = useMemo(
+    () => generateAtmosphereTelemetry(name, pattern, color, accent),
+    [name, pattern, color, accent],
+  );
+
+  const tex = useMemo(
+    () => getBiomeTexture(telemetry.biomeType, color, accent, name),
+    [telemetry.biomeType, color, accent, name],
+  );
+
+  const cloudTex = useMemo(
+    () => (telemetry.hasClouds ? getPlanetCloudTexture(telemetry.biomeType) : null),
+    [telemetry.hasClouds, telemetry.biomeType],
+  );
 
   useFrame((state, dt) => {
     if (ref.current) {
@@ -1450,7 +1955,8 @@ function ProjectPlanet({
       ref.current.position.z = centerZ - Math.sin(a) * orbitRadius;
       ref.current.position.y = Math.sin(a * 1.3) * 0.6;
     }
-    if (planetRef.current) planetRef.current.rotation.y += dt * 0.25;
+    if (planetRef.current) planetRef.current.rotation.y += dt * 0.22;
+    if (cloudRef.current) cloudRef.current.rotation.y += dt * (0.22 + telemetry.cloudSpeed);
   });
 
   const [hovered, setHovered] = useState(false);
@@ -1474,27 +1980,51 @@ function ProjectPlanet({
       <mesh ref={planetRef} scale={hovered ? size * 1.15 : size}>
         <sphereGeometry args={[0.9, 48, 48]} />
         <meshPhysicalMaterial
-          map={tex.map}
+          map={tex}
           emissive={color}
-          emissiveIntensity={hovered ? 0.3 : 0.08}
-          roughness={0.5}
+          emissiveIntensity={hovered ? 0.35 : 0.08}
+          roughness={telemetry.biomeType === "oceanic" ? 0.25 : 0.52}
           metalness={0.1}
           clearcoat={0.7}
-          clearcoatRoughness={0.22}
+          clearcoatRoughness={0.2}
           sheen={0.45}
-          sheenColor={new THREE.Color(accent)}
-          sheenRoughness={0.55}
-          envMapIntensity={1.15}
+          sheenColor={new THREE.Color(telemetry.sunsetLimbColor)}
+          sheenRoughness={0.5}
+          envMapIntensity={1.2}
         />
       </mesh>
+
+      {/* Rotating clouds for project planets */}
+      {telemetry.hasClouds && cloudTex && (
+        <mesh ref={cloudRef} scale={hovered ? size * 1.15 * 1.02 : size * 1.02}>
+          <sphereGeometry args={[0.9, 36, 36]} />
+          <meshStandardMaterial
+            map={cloudTex}
+            transparent
+            opacity={telemetry.cloudOpacity * 0.9}
+            depthWrite={false}
+            roughness={0.9}
+            color="#ffffff"
+          />
+        </mesh>
+      )}
+
       <group scale={hovered ? size * 1.15 : size}>
-        <FresnelRim radius={0.9} color={accent} power={2.2} intensity={hovered ? 1.6 : 1.1} scale={1.05} />
+        <RealisticAtmosphereShell
+          radius={0.9}
+          atmosphereColor={telemetry.atmosphereColor}
+          sunsetLimbColor={telemetry.sunsetLimbColor}
+          power={3.2}
+          intensity={hovered ? 1.7 : 1.15}
+          scale={1.12}
+        />
       </group>
 
       {/* Always-visible small name label so planets are identifiable from afar */}
-      <Text font={FUTURA_FONT}
+      <Text
+        font={FUTURA_FONT}
         position={[0, 1.1 * size + 0.35, 0]}
-        fontSize={hovered ? 0.55 : 0.32}
+        fontSize={0.32}
         color={color}
         outlineWidth={0.012}
         outlineColor="#000"
@@ -1502,14 +2032,6 @@ function ProjectPlanet({
       >
         {name}
       </Text>
-      {hovered && (
-        <Html distanceFactor={8} position={[0, 1.4 * size + 0.9, 0]} center>
-          <div className="pointer-events-none rounded-lg border border-white/25 bg-black/90 px-4 py-2 text-base font-semibold shadow-2xl whitespace-nowrap">
-            <span style={{ color }}>{name}</span>
-            <div className="text-white/60 text-xs font-normal mt-0.5">click to open</div>
-          </div>
-        </Html>
-      )}
     </group>
   );
 }
@@ -2358,24 +2880,27 @@ function GroundControlLabel({
 /* INTRO SCENE: astronaut + docked ship                                */
 /* ================================================================== */
 
-/* ---------------- Moon surface ---------------- */
+/* ================================================================== */
+/* INTRO SCENE: STARPORT ALPHA // DEEP SPACE LAUNCH GANTRY            */
+/* ================================================================== */
+
+/* ---------------- Subtle Ambient Lunar Dust ---------------- */
 
 function MoonDust() {
   const ref = useRef<THREE.Points>(null);
   const { positions, velocities } = useMemo(() => {
-    const N = 220;
+    const N = 60;
     const positions = new Float32Array(N * 3);
     const velocities = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) {
-      const r = Math.random() * 5.5;
+      const r = Math.random() * 6.5;
       const a = Math.random() * Math.PI * 2;
       positions[i * 3 + 0] = Math.cos(a) * r;
-      positions[i * 3 + 1] = -0.3 + Math.random() * 1.6;
+      positions[i * 3 + 1] = -0.3 + Math.random() * 1.5;
       positions[i * 3 + 2] = Math.sin(a) * r;
-      // wind blowing in the direction of travel (-Z) with a soft swirl
-      velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.15;
-      velocities[i * 3 + 1] = (Math.random() - 0.3) * 0.05;
-      velocities[i * 3 + 2] = -0.25 - Math.random() * 0.35;
+      velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.08;
+      velocities[i * 3 + 1] = (Math.random() - 0.3) * 0.04;
+      velocities[i * 3 + 2] = -0.1 - Math.random() * 0.15;
     }
     return { positions, velocities };
   }, []);
@@ -2389,13 +2914,12 @@ function MoonDust() {
       arr[i + 0] += velocities[i + 0] * dt;
       arr[i + 1] += velocities[i + 1] * dt;
       arr[i + 2] += velocities[i + 2] * dt;
-      // recycle particles that drift away
-      if (arr[i + 2] < -6 || arr[i + 1] > 1.6 || Math.abs(arr[i]) > 6) {
-        const r = Math.random() * 2 + 1.5;
-        const a = Math.random() * Math.PI * 0.6 + Math.PI * 0.2; // behind astronaut
+      if (arr[i + 2] < -6 || arr[i + 1] > 1.4 || Math.abs(arr[i]) > 6) {
+        const r = Math.random() * 2.5 + 1.2;
+        const a = Math.random() * Math.PI * 2;
         arr[i + 0] = Math.cos(a) * r;
-        arr[i + 1] = -0.2 + Math.random() * 0.4;
-        arr[i + 2] = Math.sin(a) * r + 2;
+        arr[i + 1] = -0.3 + Math.random() * 0.3;
+        arr[i + 2] = Math.sin(a) * r + 1.5;
       }
     }
     attr.needsUpdate = true;
@@ -2412,98 +2936,287 @@ function MoonDust() {
           args={[positions, 3]}
         />
       </bufferGeometry>
-      <pointsMaterial size={0.06} color="#d8c8b0" transparent opacity={0.55} depthWrite={false} sizeAttenuation />
+      <pointsMaterial size={0.045} color="#d8c8b0" transparent opacity={0.3} depthWrite={false} sizeAttenuation />
     </points>
   );
 }
 
-function MoonGround() {
-  // A circular patch of moon ground with scattered rocks.
+/* ---------------- Starport Gantry & Runway Pad on Full Spherical Moon ---------------- */
+
+function StarportGantryPad() {
+  const runwayChevronsRef = useRef<THREE.Group>(null);
+  const radarLeftRef = useRef<THREE.Mesh>(null);
+  const radarRightRef = useRef<THREE.Mesh>(null);
+  const beaconLightRef = useRef<THREE.PointLight>(null);
+
+  // Full Moon Sphere Constants:
+  // Radius = 34, Apex summit at y = -0.48, center at [0, -34.48, 0]
+  const MOON_R = 34;
+  const MOON_CY = -MOON_R - 0.48; // -34.48
+
+  // 190 scattered lunar boulders covering the full spherical Moon while preserving the plateau
   const rocks = useMemo(() => {
-    const items: { p: [number, number, number]; s: number; r: number }[] = [];
+    const items: {
+      p: [number, number, number];
+      s: number;
+      r: [number, number, number];
+      type: "dodec" | "ico";
+      color: string;
+    }[] = [];
+
     const rand = (seed: number) => {
       const x = Math.sin(seed * 9301 + 49297) * 233280;
       return x - Math.floor(x);
     };
-    for (let i = 0; i < 22; i++) {
-      const a = rand(i + 1) * Math.PI * 2;
-      const r = 1.6 + rand(i + 7) * 4.2;
-      const s = 0.08 + rand(i + 13) * 0.35;
+
+    // Clean neutral lunar gray rock palette matching the original disk aesthetic
+    const colors = ["#8a8275", "#7a7468", "#948d80", "#736d63", "#827b70"];
+
+    for (let i = 0; i < 190; i++) {
+      // Polar distribution: phi from ~0.17 (outside hexagonal deck at r ≈ 5.5) to 1.32 (covering visible horizon)
+      const phi = 0.17 + Math.pow(rand(i * 4 + 1), 1.25) * 1.15;
+      const theta = rand(i * 4 + 2) * Math.PI * 2;
+
+      const px = MOON_R * Math.sin(phi) * Math.cos(theta);
+      const pz = MOON_R * Math.sin(phi) * Math.sin(theta);
+      const py = MOON_CY + MOON_R * Math.cos(phi);
+
+      // Varied boulder sizes
+      const s = 0.12 + Math.pow(rand(i * 4 + 3), 1.6) * 0.95;
+
       items.push({
-        p: [Math.cos(a) * r, -0.42 + s * 0.5, Math.sin(a) * r],
+        p: [px, py + s * 0.38, pz],
         s,
-        r: rand(i + 21) * Math.PI * 2,
+        r: [rand(i + 11) * Math.PI, rand(i + 23) * Math.PI * 2, rand(i + 37) * Math.PI],
+        type: i % 3 === 0 ? "ico" : "dodec",
+        color: colors[i % colors.length],
       });
     }
     return items;
   }, []);
 
+  // Animated sequential runway pulse
+  useFrame((state, dt) => {
+    if (radarLeftRef.current) radarLeftRef.current.rotation.y += dt * 0.85;
+    if (radarRightRef.current) radarRightRef.current.rotation.y -= dt * 0.75;
+    if (beaconLightRef.current) {
+      beaconLightRef.current.intensity = Math.sin(state.clock.elapsedTime * 6) > 0.4 ? 1.8 : 0.2;
+    }
+    if (runwayChevronsRef.current) {
+      runwayChevronsRef.current.children.forEach((child, idx) => {
+        const mesh = child as THREE.Mesh;
+        if (mesh.material) {
+          const mat = mesh.material as THREE.MeshBasicMaterial;
+          mat.opacity = 0.35 + Math.sin(state.clock.elapsedTime * 5 - idx * 0.6) * 0.45;
+        }
+      });
+    }
+  });
+
   return (
     <group>
-      {/* main disc */}
-      <mesh position={[0, -0.5, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <circleGeometry args={[6.5, 64]} />
-        <meshStandardMaterial color="#7a7468" roughness={1} metalness={0} emissive="#1a1814" emissiveIntensity={0.2} />
+      {/* 1. Full 3D Spherical Moon Body - clean simple lunar gray matching previous disk */}
+      <mesh position={[0, MOON_CY, 0]} receiveShadow>
+        <sphereGeometry args={[MOON_R, 64, 64]} />
+        <meshStandardMaterial
+          color="#7a7468"
+          roughness={0.92}
+          metalness={0.0}
+          emissive="#1a1814"
+          emissiveIntensity={0.2}
+        />
       </mesh>
-      {/* subtle rim glow disc beneath */}
-      <mesh position={[0, -0.55, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[6.2, 7.2, 64]} />
-        <meshBasicMaterial color="#7fd1ff" transparent opacity={0.12} />
+
+      {/* 2. Starport Plateau Foundation Pedestal anchoring into the summit of the moon */}
+      <mesh position={[0, -0.68, 0]} receiveShadow>
+        <cylinderGeometry args={[5.25, 5.45, 0.42, 6]} />
+        <meshStandardMaterial color="#1a1e27" metalness={0.85} roughness={0.35} />
       </mesh>
-      {/* craters as flat darker discs */}
-      {[
-        [1.2, 0.6, -0.4],
-        [-2.1, -0.49, 1.3],
-        [2.4, -0.49, 1.8],
-        [-1.6, -0.49, -2.2],
-        [3.4, -0.49, -1.1],
-      ].map((c, i) => (
-        <mesh key={i} position={[c[0], -0.48, c[2]]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.45 + (i % 3) * 0.2, 24]} />
-          <meshStandardMaterial color="#56524a" roughness={1} />
+
+      {/* 3. Hexagonal Starport Launch Deck */}
+      <mesh position={[0, -0.48, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 6]} receiveShadow>
+        <circleGeometry args={[5.2, 6]} />
+        <meshStandardMaterial
+          color="#1e222d"
+          roughness={0.45}
+          metalness={0.8}
+          emissive="#0a0f1d"
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+
+      {/* Glowing Cyber Perimeter Rings */}
+      <mesh position={[0, -0.46, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 6]}>
+        <ringGeometry args={[5.1, 5.25, 6]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.85} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, -0.47, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[5.3, 5.42, 64]} />
+        <meshBasicMaterial color="#0284c7" transparent opacity={0.4} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Concentric Landing Pad Target Circles */}
+      <mesh position={[0, -0.46, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1.8, 1.9, 48]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.65} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, -0.46, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[3.2, 3.3, 64]} />
+        <meshBasicMaterial color="#fbbf24" transparent opacity={0.45} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Directional Illuminated Runway Chevrons (Heading into -Z) */}
+      <group ref={runwayChevronsRef} position={[0, -0.45, 0]}>
+        {[-0.5, -1.8, -3.1, -4.4].map((zPos, idx) => (
+          <group key={idx} position={[0, 0, zPos]}>
+            {/* Left wing chevron */}
+            <mesh position={[-0.45, 0, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 4]}>
+              <planeGeometry args={[0.65, 0.12]} />
+              <meshBasicMaterial color="#22d3ee" transparent opacity={0.7} side={THREE.DoubleSide} />
+            </mesh>
+            {/* Right wing chevron */}
+            <mesh position={[0.45, 0, 0]} rotation={[-Math.PI / 2, 0, -Math.PI / 4]}>
+              <planeGeometry args={[0.65, 0.12]} />
+              <meshBasicMaterial color="#22d3ee" transparent opacity={0.7} side={THREE.DoubleSide} />
+            </mesh>
+          </group>
+        ))}
+      </group>
+
+      {/* Left Gantry Communications Tower */}
+      <group position={[-4.5, 0, -1]}>
+        <mesh position={[0, 1.2, 0]}>
+          <cylinderGeometry args={[0.12, 0.22, 3.4, 8]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
         </mesh>
-      ))}
-      {/* scattered rocks */}
+        <mesh ref={radarLeftRef} position={[0, 3.0, 0]}>
+          <cylinderGeometry args={[0.65, 0.1, 0.15, 16]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+        </mesh>
+        <mesh position={[0, 3.3, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshBasicMaterial color="#f43f5e" />
+        </mesh>
+        <pointLight position={[0, 3.3, 0]} color="#f43f5e" intensity={1.2} distance={8} />
+      </group>
+
+      {/* Right Gantry Communications Tower */}
+      <group position={[4.5, 0, -1]}>
+        <mesh position={[0, 1.2, 0]}>
+          <cylinderGeometry args={[0.12, 0.22, 3.4, 8]} />
+          <meshStandardMaterial color="#475569" metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh ref={radarRightRef} position={[0, 3.0, 0]}>
+          <cylinderGeometry args={[0.65, 0.1, 0.15, 16]} />
+          <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.2} />
+        </mesh>
+        <mesh position={[0, 3.3, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshBasicMaterial color="#22d3ee" />
+        </mesh>
+        <pointLight ref={beaconLightRef} position={[0, 3.3, 0]} color="#22d3ee" intensity={1.2} distance={8} />
+      </group>
+
+      {/* 4. Realistic Lunar Boulders scattered all over the curved spherical surface */}
       {rocks.map((rk, i) => (
-        <mesh key={i} position={rk.p} rotation={[0, rk.r, 0]} castShadow>
-          <dodecahedronGeometry args={[rk.s, 0]} />
-          <meshStandardMaterial color="#8a8275" roughness={0.95} flatShading />
+        <mesh key={i} position={rk.p} rotation={rk.r} castShadow receiveShadow>
+          {rk.type === "ico" ? (
+            <icosahedronGeometry args={[rk.s, 0]} />
+          ) : (
+            <dodecahedronGeometry args={[rk.s, 0]} />
+          )}
+          <meshStandardMaterial color={rk.color} roughness={0.94} flatShading />
         </mesh>
       ))}
     </group>
   );
 }
 
+/* ---------------- Celestial Horizon Giant (Rising Earth/Exoplanet) ---------------- */
+
+function CelestialHorizonGiant() {
+  const planetRef = useRef<THREE.Mesh>(null);
+  const cloudRef = useRef<THREE.Mesh>(null);
+
+  // Gaia/Earth-like exoplanet texture
+  const tex = useMemo(() => getBiomeTexture("oceanic", "#38bdf8", "#0369a1", "HorizonGiant"), []);
+  const cloudTex = useMemo(() => getPlanetCloudTexture("oceanic", "#ffffff"), []);
+
+  useFrame((_, dt) => {
+    if (planetRef.current) planetRef.current.rotation.y += dt * 0.04;
+    if (cloudRef.current) cloudRef.current.rotation.y += dt * 0.06;
+  });
+
+  return (
+    <group position={[15, 12, -50]}>
+      {/* Massive celestial body */}
+      <mesh ref={planetRef}>
+        <sphereGeometry args={[8.5, 64, 64]} />
+        <meshPhysicalMaterial
+          map={tex}
+          roughness={0.3}
+          metalness={0.08}
+          clearcoat={0.7}
+          clearcoatRoughness={0.2}
+          sheen={0.5}
+          sheenColor={new THREE.Color("#67e8f9")}
+          emissive="#0284c7"
+          emissiveIntensity={0.08}
+        />
+      </mesh>
+
+      {/* Swirling celestial cloud layer */}
+      <mesh ref={cloudRef} scale={1.018}>
+        <sphereGeometry args={[8.5, 48, 48]} />
+        <meshStandardMaterial
+          map={cloudTex}
+          transparent
+          opacity={0.65}
+          depthWrite={false}
+          roughness={0.9}
+          color="#ffffff"
+        />
+      </mesh>
+
+      {/* Ethereal Rayleigh limb scattering glow */}
+      <RealisticAtmosphereShell
+        radius={8.5}
+        atmosphereColor="#38bdf8"
+        sunsetLimbColor="#f59e0b"
+        power={3.2}
+        intensity={1.7}
+        scale={1.12}
+      />
+
+      {/* Celestial light casting onto the lunar outpost */}
+      <directionalLight position={[-1, 1, 1]} intensity={0.9} color="#bae6fd" />
+    </group>
+  );
+}
+
+/* ---------------- Main IntroAstronaut & Starport Scene ---------------- */
+
 function IntroAstronaut() {
-  const { brand: BRAND } = usePortfolio();
-  // Journey heads in -Z. Astronaut faces -Z (forward).
-  // Camera starts behind him at +Z, then sweeps away into the scripted flow.
   return (
     <group position={[0, 0, 0]}>
-      {/* Cool moonlight key from above-front, warm rim from behind */}
-      <directionalLight position={[-2, 6, -4]} intensity={1.4} color="#cfe6ff" />
-      <pointLight position={[0, 2, 4]} intensity={0.8} color="#ffd9a0" distance={8} decay={2} />
-      <pointLight position={[0, 1.2, -3]} intensity={0.6} color="#7fd1ff" distance={6} decay={2} />
+      {/* Key atmospheric lights */}
+      <directionalLight position={[-3, 8, 4]} intensity={1.6} color="#dbeafe" />
+      <pointLight position={[0, 2.5, 4]} intensity={1.2} color="#fef08a" distance={10} decay={2} />
+      <pointLight position={[0, 1.2, -3]} intensity={1.4} color="#38bdf8" distance={8} decay={2} />
 
-      <MoonGround />
+      {/* Full 3D Spherical Moon & Starport Launch Deck */}
+      <StarportGantryPad />
+
+      {/* Subtle Ambient Lunar Dust */}
       <MoonDust />
 
-      {/* Astronaut standing on the moon, facing the journey (-Z) */}
-      <Float speed={0.8} rotationIntensity={0.05} floatIntensity={0.12}>
-        <Suspense fallback={null}>
-          <AstronautModel scale={1.3} position={[0, -0.5, 0]} rotation={[0, Math.PI, 0]} />
-        </Suspense>
-      </Float>
+      {/* Rising Celestial Giant on the Horizon */}
+      <CelestialHorizonGiant />
 
-      {/* Title floats above the astronaut, always facing the camera */}
-      <Billboard position={[0, 2.6, 2.2]} follow lockX={false} lockY={false} lockZ={false}>
-        <Text font={FUTURA_FONT} position={[0, 0.4, 0]} fontSize={0.5} color="#fff" outlineWidth={0.012} outlineColor="#000">
-          {BRAND.name}
-        </Text>
-        <Text font={FUTURA_FONT} position={[0, -0.2, 0]} fontSize={0.25} color="#7fd1ff">
-          {BRAND.tagline}
-        </Text>
-      </Billboard>
+      {/* Realistically Animated 3D Astronaut Persona poised on the gantry */}
+      <Suspense fallback={null}>
+        <AnimatedAstronaut />
+      </Suspense>
     </group>
   );
 }
@@ -3297,12 +4010,20 @@ function World({
   luminosity,
   layout,
   isWormhole = false,
+  isIntroActive = false,
+  activeExperienceIndex = null,
+  bootReady = false,
+  onLaunchMission,
 }: {
   onSelectProject: (i: number) => void;
   onSelectAchievement: (i: number) => void;
   luminosity: number;
   layout: SceneLayout;
   isWormhole?: boolean;
+  isIntroActive?: boolean;
+  activeExperienceIndex?: number | null;
+  bootReady?: boolean;
+  onLaunchMission?: () => void;
 }) {
   const { experiences: EXPERIENCES } = usePortfolio();
   return (
@@ -3310,7 +4031,7 @@ function World({
       <ambientLight intensity={0.35 * luminosity} />
       <pointLight position={[20, 10, 20]} intensity={1.1 * luminosity} color="#ffffff" />
       <pointLight position={[-15, -5, layout.wormholeZ + 10]} intensity={0.9 * luminosity} color="#7a3cff" />
-      <Stars radius={250} depth={120} count={9000} factor={5} fade speed={1} />
+      <UniversalCosmicStars />
       <ShootingStars layout={layout} />
 
       <IntroAstronaut />
@@ -3326,6 +4047,8 @@ function World({
           place={e.place}
           pattern={e.pattern}
           side={i % 2 === 0 ? -1 : 1}
+          isIntroActive={isIntroActive}
+          isActiveWaypoint={activeExperienceIndex === i}
         />
       ))}
 
@@ -3838,9 +4561,9 @@ function RiftFlightHUD() {
         </div>
       </div>
 
-      {/* 2. Top Header Telemetry Pill */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
-        <div className="flex items-center gap-3 rounded-full border border-cyan-400/40 bg-slate-950/80 px-5 py-1.5 backdrop-blur-xl shadow-[0_0_25px_rgba(56,189,248,0.3)]">
+      {/* 2. Top Header Telemetry & Transit Corridor Progress Cluster */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <div className="flex items-center gap-3 rounded-full border border-cyan-400/40 bg-slate-950/85 px-5 py-1.5 backdrop-blur-xl shadow-[0_0_25px_rgba(56,189,248,0.3)]">
           <span className="inline-block h-2 w-2 rounded-full bg-cyan-300 animate-pulse shadow-[0_0_8px_#38bdf8]" />
           <span className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-cyan-200">
             EINSTEIN-ROSEN TRANSIT // METRIC FLUX: 0.038 G
@@ -3850,10 +4573,27 @@ function RiftFlightHUD() {
             STABLE 99.8%
           </span>
         </div>
+
+        {/* Transit Corridor Progress Meter (Streamlined at top, completely clearing bottom) */}
+        <div className="flex w-[340px] max-w-[85vw] flex-col items-center gap-1 rounded-full border border-cyan-400/25 bg-slate-950/70 px-4 py-1.5 backdrop-blur-md">
+          <div className="flex w-full justify-between font-mono text-[8px] uppercase tracking-[0.22em] text-cyan-300/80">
+            <span>ENTRANCE LENS</span>
+            <span className="font-bold text-white drop-shadow-[0_0_8px_#38bdf8] animate-pulse">
+              SLIPSTREAM TRANSIT
+            </span>
+            <span>THE FORGE</span>
+          </div>
+          <div className="h-1.5 w-full rounded-full border border-cyan-400/40 bg-slate-950/90 p-0.5">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-purple-400 to-amber-300 shadow-[0_0_8px_#38bdf8] animate-pulse"
+              style={{ width: "68%" }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* 3. Left Avionics Bracket (Spacetime Metric Gauge) */}
-      <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 rounded-2xl border border-cyan-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-cyan-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+      <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 rounded-2xl border border-cyan-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-cyan-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
         <div className="border-b border-cyan-400/20 pb-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-cyan-400">
           SPACETIME METRIC // FLIGHT READOUT
         </div>
@@ -3876,7 +4616,7 @@ function RiftFlightHUD() {
       </div>
 
       {/* 4. Right Avionics Bracket (Vector & Shields) */}
-      <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2 rounded-2xl border border-purple-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-purple-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+      <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 rounded-2xl border border-purple-400/25 bg-slate-950/70 p-4 font-mono text-[10px] text-purple-200/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.8)]">
         <div className="border-b border-purple-400/20 pb-1.5 text-[9px] font-bold uppercase tracking-[0.25em] text-purple-400">
           QUANTUM DEFLECTOR // AVIONICS
         </div>
@@ -3897,23 +4637,6 @@ function RiftFlightHUD() {
           <span className="text-amber-300 font-bold">THE FORGE GALAXY</span>
         </div>
       </div>
-
-      {/* 5. Bottom Corridor Transit Progress Tracker */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex w-[380px] max-w-[85vw] flex-col items-center gap-1.5">
-        <div className="flex w-full justify-between font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-300/80">
-          <span>ENTRANCE LENS</span>
-          <span className="font-bold text-white drop-shadow-[0_0_8px_#38bdf8] animate-pulse">
-            TRAVERSING SLIPSTREAM
-          </span>
-          <span>THE FORGE</span>
-        </div>
-        <div className="h-1.5 w-full rounded-full border border-cyan-400/40 bg-slate-950/90 p-0.5 backdrop-blur shadow-[0_0_12px_rgba(56,189,248,0.25)]">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-purple-400 to-amber-300 shadow-[0_0_8px_#38bdf8] animate-pulse"
-            style={{ width: "68%" }}
-          />
-        </div>
-      </div>
     </div>
   );
 }
@@ -3922,7 +4645,7 @@ function RiftFlightHUD() {
 /* CONTROLS HINT — collapsible cheatsheet                              */
 /* ================================================================== */
 function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const Key = ({ children }: { children: React.ReactNode }) => (
     <kbd className="inline-flex min-w-[22px] items-center justify-center rounded border border-white/25 bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-inner">
       {children}
@@ -3951,6 +4674,25 @@ function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
           {!freeRoam ? (
             <ul className="space-y-1.5 text-[12px] leading-snug">
               <li className="flex items-center justify-between gap-2">
+                <span className="text-white/70">Grab & rotate</span>
+                <span className="flex gap-1">
+                  <Key>Right-Drag</Key>
+                </span>
+              </li>
+              <li className="flex items-center justify-between gap-2">
+                <span className="text-white/70">Advance orbit</span>
+                <span className="flex gap-1">
+                  <Key>Space</Key>
+                  <Key>→</Key>
+                </span>
+              </li>
+              <li className="flex items-center justify-between gap-2">
+                <span className="text-white/70">Reverse travel</span>
+                <span className="flex gap-1">
+                  <Key>←</Key>
+                </span>
+              </li>
+              <li className="flex items-center justify-between gap-2">
                 <span className="text-white/70">Zoom in / out</span>
                 <span className="flex gap-1">
                   <Key>scroll</Key>
@@ -3962,21 +4704,8 @@ function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
                   <Key>dbl-click</Key>
                 </span>
               </li>
-              <li className="flex items-center justify-between gap-2">
-                <span className="text-white/70">Pinch zoom</span>
-                <span className="flex gap-1">
-                  <Key>2-finger</Key>
-                </span>
-              </li>
-              <li className="flex items-center justify-between gap-2">
-                <span className="text-white/70">Next / prev chapter</span>
-                <span className="flex gap-1">
-                  <Key>←</Key>
-                  <Key>→</Key>
-                </span>
-              </li>
               <li className="mt-2 border-t border-white/10 pt-2 text-[11px] text-cyan-200/80">
-                Tip: enable <span className="font-bold">Roam</span> in the top bar to fly anywhere with WASD + mouse.
+                Tip: right-click and drag anywhere to grab and rotate the cosmic scene; the angle is held on release and maintained until the rift.
               </li>
             </ul>
           ) : (
@@ -4032,18 +4761,562 @@ function ControlsHint({ freeRoam }: { freeRoam: boolean }) {
   );
 }
 
+/* ================================================================== */
+/* QUANTUM BOOT SCREEN // SEAMLESS WORLD ENGINE INITIALIZATION         */
+/* ================================================================== */
+
+function QuantumBootScreen({
+  onDismiss,
+  playBootChime,
+}: {
+  onDismiss: () => void;
+  playBootChime?: () => void;
+}) {
+  const [progress, setProgress] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [logs, setLogs] = useState<string[]>([
+    "[SYS_BOOT 0.1] INITIALIZING QUANTUM AVIONICS // WEBGL2 PIPELINE ONLINE",
+  ]);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
+  useEffect(() => {
+    let current = 0;
+    const interval = window.setInterval(() => {
+      // Smooth non-linear boot curve
+      const step = current < 30 ? 4 : current < 70 ? 3 : current < 92 ? 2 : 1;
+      current = Math.min(100, current + step);
+      setProgress(current);
+
+      if (current >= 24 && current < 46) {
+        setLogs((prev) =>
+          prev.length === 1
+            ? [...prev, "[SYS_BOOT 0.2] PRE-WARMING GPU BUFFER MATRICES & SHADERS..."]
+            : prev,
+        );
+      } else if (current >= 48 && current < 68) {
+        setLogs((prev) =>
+          prev.length === 2
+            ? [...prev, "[SYS_BOOT 0.3] SYNTHESIZING EXOPLANETARY BIOMES (8 CLASSIFICATIONS)..."]
+            : prev,
+        );
+      } else if (current >= 70 && current < 88) {
+        setLogs((prev) =>
+          prev.length === 3
+            ? [...prev, "[SYS_BOOT 0.4] COMPUTING RAYLEIGH LIMB SCATTERING & CLOUD PARALLAX..."]
+            : prev,
+        );
+      } else if (current >= 90 && current < 99) {
+        setLogs((prev) =>
+          prev.length === 4
+            ? [...prev, "[SYS_BOOT 0.5] DEEP-SPACE RELAY LOCKED // CALLSIGN: BACEM ZARAI..."]
+            : prev,
+        );
+      } else if (current >= 100) {
+        setLogs((prev) =>
+          prev.length === 5
+            ? [...prev, "[SYS_BOOT 0.6] WARP CONDUIT STABILIZED (100%) // ODYSSEY ENGAGED"]
+            : prev,
+        );
+        window.clearInterval(interval);
+        try {
+          playBootChime?.();
+        } catch {}
+        window.setTimeout(() => {
+          setReady(true);
+          window.setTimeout(() => {
+            setDismissed(true);
+            onDismiss();
+          }, 650);
+        }, 320);
+      }
+    }, 32);
+
+    return () => window.clearInterval(interval);
+  }, [onDismiss, playBootChime]);
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#020108] text-white overflow-hidden transition-all duration-700 ${
+        ready
+          ? "opacity-0 scale-105 pointer-events-none filter blur-md"
+          : "opacity-100 scale-100"
+      }`}
+    >
+      {/* Background Star Matrix & Cybernetic Grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(34,211,238,0.15) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(34,211,238,0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-50"
+        style={{
+          background: "radial-gradient(circle at center, rgba(34,211,238,0.12) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* Central Counter-Rotating Quantum Singularity Rings */}
+      <div className="relative flex items-center justify-center mb-8">
+        {/* Outer Ring: Degree Markings & Ticks */}
+        <svg className="w-56 h-56 sm:w-64 sm:h-64 animate-[spin_20s_linear_infinite]" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(34,211,238,0.25)" strokeWidth="1.5" />
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="#22d3ee"
+            strokeWidth="3"
+            strokeDasharray="40 180"
+            strokeLinecap="round"
+          />
+          <circle
+            cx="100"
+            cy="100"
+            r="90"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="3"
+            strokeDasharray="60 160"
+            strokeDashoffset="120"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Middle Ring: Counter-Rotating Reticle */}
+        <svg className="absolute w-44 h-44 sm:w-52 sm:h-52 animate-[spin_12s_linear_infinite_reverse]" viewBox="0 0 160 160">
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="1"
+            strokeDasharray="6 8"
+          />
+          <circle
+            cx="80"
+            cy="80"
+            r="70"
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth="2"
+            strokeDasharray="25 90"
+          />
+        </svg>
+
+        {/* Inner Ring: Concentric Tech Core */}
+        <svg className="absolute w-32 h-32 sm:w-36 sm:h-36 animate-[spin_6s_linear_infinite]" viewBox="0 0 120 120">
+          <circle
+            cx="60"
+            cy="60"
+            r="48"
+            fill="none"
+            stroke="rgba(168,85,247,0.4)"
+            strokeWidth="2"
+            strokeDasharray="12 16"
+          />
+        </svg>
+
+        {/* Center Glowing Plasma Core with Live Percentage */}
+        <div className="absolute flex flex-col items-center justify-center">
+          <span className="font-display text-4xl sm:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-emerald-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]">
+            {progress}%
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-cyan-400/80 mt-0.5">
+            WARP CORE
+          </span>
+        </div>
+      </div>
+
+      {/* Main Title Header */}
+      <div className="text-center mb-6 px-4">
+        <div className="flex items-center justify-center gap-2 font-mono text-[10px] tracking-[0.4em] text-cyan-300 uppercase">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+          QUANTUM AVIONICS // HYPERSPACE BOOT SEQUENCE
+        </div>
+        <h2 className="font-display mt-1 text-lg sm:text-xl font-bold uppercase tracking-[0.3em] text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+          BACEM ZARAI · A COSMIC JOURNEY
+        </h2>
+      </div>
+
+      {/* Segmented Glowing Progress Bar */}
+      <div className="w-[360px] max-w-[85vw] mb-6">
+        <div className="relative h-2.5 w-full rounded-full border border-cyan-400/50 bg-slate-950/90 overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.35)] p-0.5">
+          {/* Calibration marks at 25%, 50%, 75% */}
+          <div className="absolute inset-0 flex justify-between px-3 pointer-events-none z-10 opacity-30">
+            <span className="w-px h-full bg-cyan-200" />
+            <span className="w-px h-full bg-cyan-200" />
+            <span className="w-px h-full bg-cyan-200" />
+          </div>
+          <div
+            className="relative h-full rounded-full bg-gradient-to-r from-cyan-500 via-sky-300 to-emerald-400 transition-all duration-150 shadow-[0_0_14px_#22d3ee]"
+            style={{ width: `${progress}%` }}
+          >
+            {/* Leading photon beacon */}
+            <span className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff,0_0_12px_#22d3ee]" />
+          </div>
+        </div>
+        {/* Status badges */}
+        <div className="flex items-center justify-between mt-2 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50">
+          <span>CORE: <strong className="text-cyan-300">ONLINE</strong></span>
+          <span>BIOMES: <strong className="text-emerald-300">STABILIZED</strong></span>
+          <span>AVIONICS: <strong className="text-sky-300">READY</strong></span>
+        </div>
+      </div>
+
+      {/* Dynamic Telemetry Terminal Output */}
+      <div className="w-[480px] max-w-[90vw] rounded-xl border border-cyan-400/30 bg-slate-950/85 p-4 font-mono text-[11px] shadow-2xl backdrop-blur-xl">
+        <div className="flex items-center justify-between border-b border-cyan-400/20 pb-2 mb-2 text-[9px] uppercase tracking-widest text-cyan-400">
+          <span>◈ SYSTEM DIAGNOSTIC LOG</span>
+          <span className="animate-pulse text-emerald-400">● REAL-TIME COMPILATION</span>
+        </div>
+        <div className="space-y-1.5 max-h-24 overflow-y-auto terminal-scrollbar pr-2 text-white/80">
+          {logs.map((line, idx) => (
+            <div key={idx} className="leading-tight">
+              <span className="text-cyan-300">{line}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-1 text-emerald-300">
+            <span>&gt;</span>
+            <span className="animate-pulse">█</span>
+          </div>
+          <div ref={logsEndRef} />
+        </div>
+      </div>
+
+      {/* Anamorphic Warp Flash on 100% Complete */}
+      {ready && (
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-100 to-transparent pointer-events-none animate-pulse"
+          style={{ transform: "scaleY(0.06)", filter: "blur(4px)" }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* 2D INITIAL MISSION BRIEFING CARD (OUTSIDE 3D WORLD, BEHIND 2D UI)  */
+/* ================================================================== */
+
+function InitialMissionBriefingCard({
+  brand,
+  caption,
+  bootReady,
+}: {
+  brand: PortfolioContent["brand"];
+  caption?: string;
+  bootReady: boolean;
+  onLaunchMission?: () => void;
+}) {
+  return (
+    <aside
+      id="initial-mission-briefing"
+      aria-label="Starport Flight Log & Mission Briefing"
+      className={`fixed left-6 bottom-10 sm:left-10 sm:bottom-12 z-20 w-[360px] max-w-[min(360px,calc(50vw-160px))] transition-all duration-700 pointer-events-auto ${
+        bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
+    >
+      <div className="rounded-2xl border-2 border-cyan-400/40 bg-slate-950/85 px-6 py-5 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.32)] ring-1 ring-cyan-300/25">
+        <div className="flex items-center justify-between gap-2 font-mono text-[9px] tracking-[0.28em] text-cyan-300 uppercase">
+          <div className="flex items-center gap-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+            <span>01 · LUNAR STARPORT ALPHA</span>
+          </div>
+          <span className="text-white/40">// MISSION BRIEFING</span>
+        </div>
+
+        <h1 className="font-display mt-3 text-2xl font-black uppercase tracking-[0.18em] text-white drop-shadow-[0_0_14px_rgba(255,255,255,0.6)]">
+          {brand.name}
+        </h1>
+
+        <p className="mt-1.5 font-mono text-[11px] leading-relaxed tracking-[0.12em] text-cyan-200/90">
+          {brand.tagline.toUpperCase().split(" · ").join(" // ")}
+        </p>
+
+        {caption && (
+          <p className="mt-3 text-xs leading-relaxed text-white/80 border-t border-cyan-400/15 pt-2.5">
+            {caption}
+          </p>
+        )}
+
+        <div className="mt-3 flex items-center justify-between border-t border-cyan-400/20 pt-2.5 text-[9px] font-mono text-white/60">
+          <span>AVIONICS: <strong className="text-emerald-300">NOMINAL</strong></span>
+          <span>·</span>
+          <span>SECTORS: <strong className="text-cyan-300">6 WAYPOINTS</strong></span>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ================================================================== */
+/* COSMIC SCI-FI MOUSE RETICLE & HUD FOLLOWER                         */
+/* ================================================================== */
+
+interface SpacetimeRipple {
+  id: number;
+  x: number;
+  y: number;
+}
+
+function CosmicMouseReticle() {
+  const followerRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [ripples, setRipples] = useState<SpacetimeRipple[]>([]);
+  const [visible, setVisible] = useState(false);
+
+  const pos = useRef({ x: -100, y: -100 });
+  const target = useRef({ x: -100, y: -100 });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.matchMedia("(pointer: coarse)").matches) return;
+
+    let animId: number;
+
+    const onMouseMove = (e: MouseEvent) => {
+      target.current = { x: e.clientX, y: e.clientY };
+      if (!visible) setVisible(true);
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
+      }
+
+      const targetEl = e.target as HTMLElement | null;
+      const isInteractive =
+        document.body.style.cursor === "pointer" ||
+        targetEl?.closest("button, a, [role='button'], input, select, textarea, .cursor-pointer") !== null;
+      setHovered(isInteractive);
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      if (e.button === 2) {
+        setDragging(true);
+      } else if (e.button === 0) {
+        // Trigger a small, subtle water droplet ripple on space-time
+        const id = Date.now() + Math.random();
+        setRipples((prev) => [...prev.slice(-3), { id, x: e.clientX, y: e.clientY }]);
+        window.setTimeout(() => {
+          setRipples((prev) => prev.filter((r) => r.id !== id));
+        }, 550);
+      }
+    };
+
+    const onMouseUp = (e: MouseEvent) => {
+      if (e.button === 2) {
+        setDragging(false);
+      }
+    };
+
+    const onMouseLeave = () => setVisible(false);
+    const onMouseEnter = () => setVisible(true);
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("mouseleave", onMouseLeave);
+    document.addEventListener("mouseenter", onMouseEnter);
+
+    const loop = () => {
+      pos.current.x += (target.current.x - pos.current.x) * 0.24;
+      pos.current.y += (target.current.y - pos.current.y) * 0.24;
+
+      if (followerRef.current) {
+        followerRef.current.style.transform = `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)`;
+      }
+      animId = requestAnimationFrame(loop);
+    };
+    animId = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("mouseleave", onMouseLeave);
+      document.removeEventListener("mouseenter", onMouseEnter);
+      cancelAnimationFrame(animId);
+    };
+  }, [visible]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[99999] overflow-hidden select-none hidden md:block">
+      {/* 1. Precision Center Tracking Dot */}
+      <div
+        ref={dotRef}
+        className="absolute -left-1 -top-1 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_8px_#22d3ee,0_0_14px_#38bdf8]"
+        style={{ willChange: "transform" }}
+      />
+
+      {/* 2. Fluid Lagging Concentric Tactical HUD Reticle */}
+      <div
+        ref={followerRef}
+        className="absolute -left-5 -top-5 flex h-10 w-10 items-center justify-center"
+        style={{ willChange: "transform" }}
+      >
+        <div
+          className={`relative flex items-center justify-center rounded-full transition-all duration-200 ${
+            dragging
+              ? "h-12 w-12 border-2 border-purple-400 bg-purple-950/25 shadow-[0_0_20px_rgba(192,132,252,0.65)] rotate-45"
+              : hovered
+                ? "h-12 w-12 border border-cyan-300 bg-cyan-400/10 shadow-[0_0_20px_rgba(34,211,238,0.55)] scale-110"
+                : "h-8 w-8 border border-cyan-400/40 bg-transparent shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+          }`}
+        >
+          {/* Tactical Corner Brackets */}
+          <span
+            className={`absolute -top-1 -left-1 h-2 w-2 border-t-2 border-l-2 transition-colors duration-200 ${
+              dragging ? "border-purple-300" : hovered ? "border-cyan-200" : "border-cyan-400/60"
+            }`}
+          />
+          <span
+            className={`absolute -top-1 -right-1 h-2 w-2 border-t-2 border-r-2 transition-colors duration-200 ${
+              dragging ? "border-purple-300" : hovered ? "border-cyan-200" : "border-cyan-400/60"
+            }`}
+          />
+          <span
+            className={`absolute -bottom-1 -left-1 h-2 w-2 border-b-2 border-l-2 transition-colors duration-200 ${
+              dragging ? "border-purple-300" : hovered ? "border-cyan-200" : "border-cyan-400/60"
+            }`}
+          />
+          <span
+            className={`absolute -bottom-1 -right-1 h-2 w-2 border-b-2 border-r-2 transition-colors duration-200 ${
+              dragging ? "border-purple-300" : hovered ? "border-cyan-200" : "border-cyan-400/60"
+            }`}
+          />
+
+          {/* Compass Axis Crosshair when dragging */}
+          {dragging && (
+            <>
+              <div className="absolute h-full w-px bg-purple-400/60 shadow-[0_0_6px_#c084fc]" />
+              <div className="absolute w-full h-px bg-purple-400/60 shadow-[0_0_6px_#c084fc]" />
+            </>
+          )}
+
+          {/* Locked-on rotating reticle when hovered */}
+          {hovered && !dragging && (
+            <div className="absolute inset-1 rounded-full border border-dashed border-cyan-300/40 animate-[spin_6s_linear_infinite]" />
+          )}
+        </div>
+      </div>
+
+      {/* 3. Small Subtle Water Droplet Space-Time Ripple */}
+      {ripples.map((r) => (
+        <div
+          key={r.id}
+          className="pointer-events-none absolute"
+          style={{ left: r.x, top: r.y }}
+        >
+          {/* Main capillary droplet meniscus ripple */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300 pointer-events-none"
+            style={{
+              animation: "water-droplet-ripple 0.5s cubic-bezier(0.12, 0.65, 0.35, 1) forwards",
+            }}
+          />
+          {/* Subtle concentric water echo */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/40 pointer-events-none"
+            style={{
+              animation: "water-droplet-echo 0.42s ease-out 0.08s forwards",
+            }}
+          />
+          {/* Tiny center droplet contact flash */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-200 pointer-events-none"
+            style={{
+              animation: "water-droplet-core 0.22s ease-out forwards",
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ================================================================== */
+/* SUBTLE AMBIENT KEY SUGGESTIONS (CYCLES GENTLY, FADES IN & OUT)     */
+/* ================================================================== */
+
+function AmbientKeySuggestions({
+  isIdle,
+  isIntro = false,
+}: {
+  isIdle: boolean;
+  isIntro?: boolean;
+}) {
+  const hints = useMemo(
+    () => [
+      { key: "🖱️ Right-Drag", desc: "Grab & rotate the cosmic scene · holds on release" },
+      { key: "⚲ Scroll", desc: "Zoom in/out · double-click to reset" },
+      { key: "⌨️ Space / →", desc: "Advance to next cosmic waypoint" },
+      { key: "⌨️ ←", desc: "Reverse camera travel without turning" },
+    ],
+    [],
+  );
+
+  const [hintIndex, setHintIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setHintIndex((prev) => (prev + 1) % hints.length);
+        setVisible(true);
+      }, 500);
+    }, 4500);
+
+    return () => clearInterval(interval);
+  }, [hints.length]);
+
+  const current = hints[hintIndex];
+
+  return (
+    <div
+      className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-25 transition-all duration-500 ${
+        visible && !isIdle ? "opacity-80 translate-y-0" : "opacity-0 translate-y-1"
+      } ${isIntro ? "bottom-26" : "bottom-18"} hidden md:block`}
+    >
+      <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-4 py-1.5 backdrop-blur-xl text-[11px] font-mono tracking-wider text-white/80 shadow-2xl ring-1 ring-white/10">
+        <span className="font-bold text-cyan-300">{current.key}:</span>
+        <span className="text-white/70">{current.desc}</span>
+      </div>
+    </div>
+  );
+}
+
 function Portfolio() {
-  // ───── Fetch the portfolio markdown from GitHub ─────
-  const [data, setData] = useState<PortfolioContent | null>(null);
+  // Synchronous initial fallback ensures ZERO-LAG canvas mounting
+  const [data, setData] = useState<PortfolioContent>(() => getInitialPortfolioContent());
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [bootReady, setBootReady] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
     fetchPortfolio()
       .then((d) => {
-        if (!cancelled) setData(d);
+        if (!cancelled && d) setData(d);
       })
       .catch((e) => {
-        if (!cancelled) setLoadError(e instanceof Error ? e.message : String(e));
+        // Fallback is already active, so only log warn
+        console.warn("[Portfolio] Remote fetch failed, fallback active:", e);
       });
     return () => {
       cancelled = true;
@@ -4057,11 +5330,18 @@ function Portfolio() {
   const [selectedAchievementIndex, setSelectedAchievementIndex] = useState<number | null>(null);
   const [luminosity, setLuminosity] = useState(1);
   const [freeRoam, setFreeRoam] = useState(false);
-  const { enabled: musicOn, toggle: toggleMusic, volume, setVolume, setRiftActive } = useSpaceMusic();
+  const {
+    enabled: musicOn,
+    toggle: toggleMusic,
+    volume,
+    setVolume,
+    setRiftActive,
+    playLaunchSound,
+    playBootChime,
+  } = useSpaceMusic();
   const prevIndexRef = useRef(0);
 
-  // Derive scene layout + chapters from the loaded markdown. Empty fallback
-  // until data arrives keeps hook order stable.
+  // Derive scene layout + chapters from the loaded markdown.
   const layout = useMemo<SceneLayout>(() => computeLayout(data?.experiences ?? []), [data]);
   const CHAPTERS = useMemo<Chapter[]>(
     () => (data ? buildChapters(data.experiences, layout, data.brand.description) : []),
@@ -4070,23 +5350,54 @@ function Portfolio() {
 
   const baseChapter = CHAPTERS[index] ?? CHAPTERS[0];
 
-  // Direction-aware override: when the user RETURNS to the wormhole from a later
-  // chapter, fly the camera into the FAR end of the tunnel and traverse back
-  // through it (mirror of the forward pass).
   const chapter = useMemo<Chapter | undefined>(() => {
     if (!baseChapter) return undefined;
     const goingBackward = index < prevIndexRef.current;
-    if (baseChapter.id === "wormhole" && goingBackward) {
-      const wz = layout.wormholeZ;
+    if (goingBackward) {
+      // Reversing camera travel without flipping orientation or forward via detour
       return {
         ...baseChapter,
-        via: { camera: [0, 0, wz - 20], lookAt: [0, 0, wz + 20] },
-        camera: [0, 0, wz + 15],
-        lookAt: [0, 0, wz + 40],
+        via: undefined,
       };
     }
     return baseChapter;
-  }, [index, baseChapter, layout]);
+  }, [index, baseChapter]);
+
+  // Activity tracking for subtle key suggestions and space advance prompt after being idle
+  const [isIdle, setIsIdle] = useState(false);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    setIsIdle(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, 4500);
+  }, []);
+
+  useEffect(() => {
+    const handleActivity = () => resetIdleTimer();
+    window.addEventListener("mousemove", handleActivity, { passive: true });
+    window.addEventListener("mousedown", handleActivity, { passive: true });
+    window.addEventListener("keydown", handleActivity, { passive: true });
+    window.addEventListener("wheel", handleActivity, { passive: true });
+    window.addEventListener("touchstart", handleActivity, { passive: true });
+
+    resetIdleTimer();
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("mousedown", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("wheel", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+    };
+  }, [resetIdleTimer]);
+
+  useEffect(() => {
+    resetIdleTimer();
+  }, [index, resetIdleTimer]);
 
   useEffect(() => {
     if (chapter) setVisited((v) => new Set(v).add(chapter.id));
@@ -4103,11 +5414,26 @@ function Portfolio() {
     setIndex(next);
   };
 
+  const handleLaunchMission = () => {
+    playLaunchSound();
+    go(1);
+  };
+
   // keyboard nav & modal escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") go(index + 1);
-      if (e.key === "ArrowLeft") go(index - 1);
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+
+      if (e.key === "ArrowRight" || e.code === "Space") {
+        if (e.code === "Space") e.preventDefault();
+        if (contactOpen || projectIndex !== null || selectedAchievementIndex !== null) return;
+        if (index === 0) playLaunchSound();
+        go(index + 1);
+      }
+      if (e.key === "ArrowLeft") {
+        go(index - 1);
+      }
       if (e.key === "Escape") {
         setProjectIndex(null);
         setSelectedAchievementIndex(null);
@@ -4116,63 +5442,42 @@ function Portfolio() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index]);
-
-  // ───── 404: empty space view if the GitHub markdown failed to load ─────
-  if (loadError) {
-    return (
-      <div className="fixed inset-0 bg-black text-white/70 overflow-hidden">
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center">
-          <div className="text-[12rem] leading-none font-extralight text-white/15 select-none">404</div>
-          <p className="text-sm uppercase tracking-[0.4em] text-white/40">empty space</p>
-          <p className="max-w-md text-white/40 text-sm">
-            The portfolio manifest could not be reached. The signal is lost in the void.
-          </p>
-          <p className="text-[10px] text-white/20 font-mono break-all max-w-md">{PORTFOLIO_MD_URL}</p>
-        </div>
-        {/* faint drifting stars so it isn't fully blank */}
-        <div
-          className="pointer-events-none fixed inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "radial-gradient(1px 1px at 12% 22%, #fff 50%, transparent), radial-gradient(1px 1px at 78% 64%, #fff 50%, transparent), radial-gradient(1px 1px at 41% 88%, #fff 50%, transparent), radial-gradient(1px 1px at 88% 14%, #fff 50%, transparent), radial-gradient(1px 1px at 26% 56%, #fff 50%, transparent)",
-            backgroundSize: "100% 100%",
-          }}
-        />
-      </div>
-    );
-  }
-
-  // ───── Loading view while we fetch the markdown ─────
-  if (!data) {
-    return (
-      <div className="fixed inset-0 bg-[#03020a] text-white/60 flex items-center justify-center">
-        <span className="text-xs uppercase tracking-[0.4em] animate-pulse">entering orbit…</span>
-      </div>
-    );
-  }
+  }, [index, playLaunchSound, contactOpen, projectIndex, selectedAchievementIndex]);
 
   const { brand: BRAND, projects: PROJECTS } = data;
 
   return (
     <PortfolioContext.Provider value={data}>
       <main id="main-content" role="main" className="fixed inset-0 bg-[#03020a] text-white overflow-hidden">
+        {/* Futuristic Cyber Reticle Mouse HUD */}
+        <CosmicMouseReticle />
+
+        {/* Cool Seamless Quantum Boot Screen */}
+        {!bootReady && (
+          <QuantumBootScreen
+            onDismiss={() => setBootReady(true)}
+            playBootChime={playBootChime}
+          />
+        )}
+
         <Canvas camera={{ position: [4, 2, 8], fov: 55 }} dpr={[1, 2]}>
           <color attach="background" args={["#03020a"]} />
           <fog attach="fog" args={["#03020a", 40, 220]} />
-          <Suspense
-            fallback={
-              <Html center>
-                <span className="text-sm text-white/60">entering orbit…</span>
-              </Html>
-            }
-          >
+          <Suspense fallback={null}>
             <World
               onSelectProject={(i) => setProjectIndex(i)}
               onSelectAchievement={(i) => setSelectedAchievementIndex(i)}
               luminosity={luminosity}
               layout={layout}
               isWormhole={chapter?.id === "wormhole"}
+              isIntroActive={chapter?.id === "intro"}
+              activeExperienceIndex={
+                chapter?.id.startsWith("experience-")
+                  ? parseInt(chapter.id.replace("experience-", ""), 10) - 1
+                  : null
+              }
+              bootReady={bootReady}
+              onLaunchMission={handleLaunchMission}
             />
           </Suspense>
           {/* Ship lives OUTSIDE Suspense so it never disappears while assets load */}
@@ -4181,15 +5486,55 @@ function Portfolio() {
             isWormhole={chapter?.id === "wormhole"}
           />
           {!freeRoam && <CameraRig chapter={chapter!} />}
-          <ZoomControls baseFov={55} />
+          <ZoomControls chapterId={chapter?.id} baseFov={55} />
           <FreeRoam enabled={freeRoam} />
         </Canvas>
+
+        {/* Initial mission briefing text panel rendered in 2D DOM outside Canvas at bottom-left */}
+        {chapter?.id === "intro" && (
+          <InitialMissionBriefingCard
+            brand={BRAND}
+            caption={chapter?.caption}
+            bootReady={bootReady}
+          />
+        )}
+
+        {/* Cinematic Anamorphic Widescreen Letterbox for Chapter 1 (Entrance Scene) */}
+        {chapter?.id === "intro" && (
+          <div
+            className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${
+              bootReady ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {/* Top anamorphic telemetry bar */}
+            <div className="h-10 w-full bg-black/90 border-b border-cyan-400/25 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-cyan-300 backdrop-blur-md">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+                <span>STARPORT ALPHA // SECTOR 07-B</span>
+              </div>
+              <span className="text-white/40 hidden sm:inline">TELEMETRY: ALL 12 CHANNELS NOMINAL</span>
+              <span className="text-cyan-200">ORBITAL LAUNCH PAD READY</span>
+            </div>
+            {/* Bottom anamorphic telemetry bar */}
+            <div className="h-10 w-full bg-black/90 border-t border-cyan-400/25 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-white/50 backdrop-blur-md">
+              <span>MISSION CLOCK: T-00:00:00</span>
+              <span className="text-cyan-300 hidden sm:inline">COORDINATES: 28.5721° N, 80.6480° W</span>
+              <span className="text-emerald-400">HYPERDRIVE: ARMED</span>
+            </div>
+          </div>
+        )}
 
         {/* Dynamic Sci-Fi Flight HUD overlay during Rift traversal (Horizon lock anchor against motion sickness) */}
         {chapter?.id === "wormhole" && <RiftFlightHUD />}
 
         {/* TOP BAR: brand · controls · chapter progress, all on one line */}
-        <header id="site-header" role="banner" className="absolute top-4 left-0 right-0 z-10 flex items-center justify-between gap-4 px-6">
+        <header
+          id="site-header"
+          role="banner"
+          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-4 px-6 transition-all duration-700 ${
+            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          } ${chapter?.id === "intro" ? "top-12" : "top-4"}`}
+        >
           {/* brand */}
           <div className="pointer-events-none">
             <h1 className="text-xs tracking-[0.4em] text-white/70">
@@ -4295,80 +5640,131 @@ function Portfolio() {
           </nav>
         </header>
 
-        {/* CAPTION PANEL — bottom-left */}
-        <section id="chapter-caption-panel" aria-labelledby="chapter-caption-title" className="absolute bottom-24 left-6 z-20 w-[400px] max-w-[88vw]">
-          <div
-            key={chapter!.id}
-            className="rounded-2xl border-2 border-cyan-300/40 bg-slate-950/85 p-5 backdrop-blur-2xl shadow-[0_0_40px_rgba(34,211,238,0.25)] ring-1 ring-cyan-200/10"
-            style={{ animation: "fadein .5s ease-out" }}
+        {/* CAPTION PANEL — bottom-left (hidden on intro to avoid duplicating InitialMissionBriefingCard) */}
+        {chapter?.id !== "intro" && (
+          <section
+            id="chapter-caption-panel"
+            aria-labelledby="chapter-caption-title"
+            className={`absolute left-6 z-20 w-[360px] max-w-[min(360px,calc(50vw-180px))] transition-all duration-700 ${
+              bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+            } bottom-24`}
           >
-            <h2 id="chapter-caption-title" className="font-display text-xs font-bold uppercase tracking-[0.35em] text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]">
-              {chapter!.title}
-            </h2>
-            <p className="mt-3 text-white leading-relaxed text-[16px] font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">{chapter!.caption}</p>
+            <div
+              key={chapter!.id}
+              className="rounded-2xl border-2 border-cyan-300/40 bg-slate-950/85 p-5 backdrop-blur-2xl shadow-[0_0_40px_rgba(34,211,238,0.25)] ring-1 ring-cyan-200/10"
+              style={{ animation: "fadein .5s ease-out" }}
+            >
+              <h2 id="chapter-caption-title" className="font-display text-xs font-bold uppercase tracking-[0.35em] text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]">
+                {chapter!.title}
+              </h2>
+              <p className="mt-3 text-white leading-relaxed text-[16px] font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">{chapter!.caption}</p>
 
-            {/* pantheon: quick trophy exhibition drawer */}
-            {chapter!.id === "pantheon" && (
-              <div className="mt-4 pt-3 border-t border-amber-400/20">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-amber-300 font-mono">
-                    🏆 Curated Trophy Exhibition
-                  </p>
-                  <span className="text-[10px] font-mono text-white/50">
-                    {(data.achievements?.length ?? DEFAULT_ACHIEVEMENTS.length)} Artifacts
-                  </span>
+              {/* pantheon: quick trophy exhibition drawer */}
+              {chapter!.id === "pantheon" && (
+                <div className="mt-4 pt-3 border-t border-amber-400/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-amber-300 font-mono">
+                      🏆 Curated Trophy Exhibition
+                    </p>
+                    <span className="text-[10px] font-mono text-white/50">
+                      {(data.achievements?.length ?? DEFAULT_ACHIEVEMENTS.length)} Artifacts
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                    {(data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS).map(
+                      (a, i) => (
+                        <button
+                          key={i}
+                          id={`pantheon-artifact-btn-${i}`}
+                          onClick={() => setSelectedAchievementIndex(i)}
+                          className="group flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-2.5 py-1.5 text-left text-xs text-white/85 transition hover:border-amber-300 hover:bg-amber-400/20"
+                        >
+                          <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
+                          <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
+                            {a.name}
+                          </span>
+                        </button>
+                      ),
+                    )}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
-                  {(data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS).map(
-                    (a, i) => (
-                      <button
-                        key={i}
-                        id={`pantheon-artifact-btn-${i}`}
-                        onClick={() => setSelectedAchievementIndex(i)}
-                        className="group flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-2.5 py-1.5 text-left text-xs text-white/85 transition hover:border-amber-300 hover:bg-amber-400/20"
-                      >
-                        <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
-                        <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
-                          {a.name}
-                        </span>
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
+              )}
 
-            {/* finale: list visited */}
-            {chapter!.id === "finale" && (
-              <div className="mt-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-orange-300 mb-2">Sections you've visited</p>
-                <ul className="grid grid-cols-2 gap-1.5 text-xs">
-                  {CHAPTERS.map((c, i) => (
-                    <li key={c.id}>
-                      <button
-                        id={`visited-section-btn-${c.id}`}
-                        onClick={() => go(i)}
-                        className={`w-full text-left rounded-md border px-2 py-1.5 transition ${
-                          visited.has(c.id)
-                            ? "border-orange-400/50 bg-orange-400/10 text-white"
-                            : "border-white/10 bg-white/[0.03] text-white/40"
-                        }`}
-                      >
-                        {visited.has(c.id) ? "✓" : "○"} {c.title}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </section>
+              {/* finale: list visited */}
+              {chapter!.id === "finale" && (
+                <div className="mt-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-orange-300 mb-2">Sections you've visited</p>
+                  <ul className="grid grid-cols-2 gap-1.5 text-xs">
+                    {CHAPTERS.map((c, i) => (
+                      <li key={c.id}>
+                        <button
+                          id={`visited-section-btn-${c.id}`}
+                          onClick={() => go(i)}
+                          className={`w-full text-left rounded-md border px-2 py-1.5 transition ${
+                            visited.has(c.id)
+                              ? "border-orange-400/50 bg-orange-400/10 text-white"
+                              : "border-white/10 bg-white/[0.03] text-white/40"
+                          }`}
+                        >
+                          {visited.has(c.id) ? "✓" : "○"} {c.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* CONTROLS TIPS — bottom-right */}
-        <ControlsHint freeRoam={freeRoam} />
+        <div
+          className={`transition-opacity duration-700 ${
+            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <ControlsHint freeRoam={freeRoam} />
+        </div>
+
+        {/* Subtle Ambient Key Suggestions that gently cycle and fade in/out (omitted in intro and wormhole to avoid overcrowding) */}
+        {bootReady && !freeRoam && chapter?.id !== "intro" && chapter?.id !== "wormhole" && (
+          <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
+        )}
+
+        {/* Elegant Idle Space Prompt: Suggest Space to advance after being idle on a view */}
+        <div
+          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-3 transition-all duration-700 ${
+            bootReady &&
+            isIdle &&
+            !contactOpen &&
+            projectIndex === null &&
+            selectedAchievementIndex === null &&
+            index < CHAPTERS.length - 1 &&
+            chapter?.id !== "intro" &&
+            chapter?.id !== "wormhole"
+              ? "opacity-100 translate-y-0 scale-100"
+              : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+          } bottom-18`}
+        >
+          <div className="flex items-center gap-2.5 rounded-full border border-cyan-400/50 bg-slate-950/90 px-5 py-2 backdrop-blur-2xl shadow-[0_0_35px_rgba(34,211,238,0.45)] ring-1 ring-cyan-300/30 animate-pulse">
+            <kbd className="rounded border border-cyan-300/70 bg-cyan-400/30 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-widest text-cyan-200 shadow-[0_0_12px_rgba(34,211,238,0.5)]">
+              SPACE
+            </kbd>
+            <span className="text-[11px] font-mono tracking-[0.22em] uppercase text-cyan-100 font-semibold">
+              Press to advance orbit
+            </span>
+            <span className="text-cyan-400 text-sm font-bold">➔</span>
+          </div>
+        </div>
 
         {/* PREV / NEXT */}
-        <nav id="chapter-step-controls" aria-label="Chapter step controls" className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3">
+        <nav
+          id="chapter-step-controls"
+          aria-label="Chapter step controls"
+          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 transition-all duration-700 ${
+            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          } ${chapter?.id === "intro" ? "bottom-14" : "bottom-6"}`}
+        >
           <button
             id="prev-chapter-btn"
             onClick={() => go(index - 1)}
@@ -4380,12 +5776,15 @@ function Portfolio() {
           </button>
           <button
             id="next-chapter-btn"
-            onClick={() => go(index + 1)}
+            onClick={() => {
+              if (index === 0) playLaunchSound();
+              go(index + 1);
+            }}
             disabled={index === CHAPTERS.length - 1}
             aria-label={index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"}
             className="rounded-full border border-white bg-white text-black px-5 py-2 text-sm font-medium backdrop-blur-md disabled:opacity-30 hover:bg-white/90 transition"
           >
-            {index === CHAPTERS.length - 1 ? "Journey complete" : "Continue →"}
+            {index === 0 ? "Initiate Odyssey →" : index === CHAPTERS.length - 1 ? "Journey complete" : "Continue →"}
           </button>
         </nav>
 
