@@ -148,7 +148,16 @@
   .font-display {
     font-family: "Orbitron", "Rajdhani", sans-serif;
     letter-spacing: 0.06em;
+    text-shadow: 0 0 10px var(--color-primary);
   }
+
+  /* Premium Display Typography Scale */
+  .text-display-xl { font-size: 3rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+  .text-display-lg { font-size: 2.25rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+  .text-display-md { font-size: 1.5rem; line-height: 1.3; font-weight: 600; letter-spacing: 0; }
+  .text-display-sm { font-size: 1.125rem; line-height: 1.4; font-weight: 500; letter-spacing: 0.02em; }
+  .text-display-xs { font-size: 0.875rem; line-height: 1.5; font-weight: 400; letter-spacing: 0.04em; text-transform: uppercase; }
+
 
   .font-mono, code, pre, kbd {
     font-family: "Share Tech Mono", ui-monospace, monospace !important;
@@ -156,19 +165,24 @@
 }
 
 /* Minimal markdown styling for the POC portfolio. */
-.prose h1 { font-size: 1.875rem; font-weight: 700; margin: 1.5rem 0 1rem; }
-.prose h2 { font-size: 1.5rem; font-weight: 600; margin: 1.5rem 0 0.75rem; }
-.prose h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
-.prose p { margin: 0.75rem 0; line-height: 1.65; }
-.prose ul { list-style: disc; padding-left: 1.5rem; margin: 0.75rem 0; }
-.prose ol { list-style: decimal; padding-left: 1.5rem; margin: 0.75rem 0; }
-.prose li { margin: 0.25rem 0; }
-.prose a { color: var(--color-primary); text-decoration: underline; }
-.prose img { display: inline-block; max-width: 100%; height: auto; vertical-align: middle; }
-.prose code { background: var(--color-muted); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.9em; }
-.prose pre { background: var(--color-muted); padding: 1rem; border-radius: 8px; overflow-x: auto; }
-.prose blockquote { border-left: 3px solid var(--color-border); padding-left: 1rem; color: var(--color-muted-foreground); margin: 1rem 0; }
-.prose hr { border: 0; border-top: 1px solid var(--color-border); margin: 2rem 0; }
+.prose {
+  max-width: 65ch;
+  margin: 0 auto;
+}
+.prose h1 { font-size: 2rem; font-weight: 800; margin: 2rem 0 1rem; line-height: 1.2; }
+.prose h2 { font-size: 1.5rem; font-weight: 700; margin: 1.75rem 0 0.75rem; line-height: 1.3; }
+.prose h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.5rem; line-height: 1.4; }
+.prose p { margin: 1rem 0; line-height: 1.7; color: var(--color-muted-foreground); }
+.prose ul { list-style: disc; padding-left: 1.5rem; margin: 1rem 0; }
+.prose ol { list-style: decimal; padding-left: 1.5rem; margin: 1rem 0; }
+.prose li { margin: 0.5rem 0; line-height: 1.6; }
+.prose a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 4px; transition: all 0.2s ease; }
+.prose a:hover { color: var(--color-foreground); text-shadow: 0 0 8px var(--color-primary); }
+.prose img { display: inline-block; max-width: 100%; height: auto; vertical-align: middle; border-radius: 8px; border: 1px solid var(--color-border); }
+.prose code { background: var(--color-muted); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; font-family: "Share Tech Mono", monospace; }
+.prose pre { background: var(--color-muted); padding: 1.25rem; border-radius: 12px; overflow-x: auto; border: 1px solid var(--color-border); }
+.prose blockquote { border-left: 4px solid var(--color-primary); padding-left: 1.25rem; color: var(--color-muted-foreground); margin: 1.5rem 0; font-style: italic; }
+.prose hr { border: 0; border-top: 1px solid var(--color-border); margin: 2.5rem 0; }
 
 /* ============================================================
    RETRO CRT TV OVERLAY
@@ -317,11 +331,21 @@
 }
 
 
-/* Tiny chromatic aberration on text only — no body filter
-   because filter on <body> reparents position:fixed children
-   and breaks full-viewport canvases. */
-body.crt-screen {
-  text-shadow: 0.4px 0 0 rgba(255, 0, 80, 0.18), -0.4px 0 0 rgba(0, 180, 255, 0.18);
+/* Glassmorphism & Premium Surface Utilities */
+.glass-panel {
+  background: oklch(var(--color-card) / 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid oklch(var(--color-border) / 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-border {
+  border: 1px solid oklch(var(--color-border) / 0.3);
+  background: linear-gradient(135deg, oklch(var(--color-border) / 0.2), transparent);
+}
+
+.phosphor-glow {
+  text-shadow: 0 0 8px var(--color-primary), 0 0 2px var(--color-primary);
 }
 
 /* ============================================================
@@ -357,25 +381,19 @@ body.crt-screen {
   scrollbar-color: rgba(34, 211, 238, 0.5) rgba(2, 6, 23, 0.65);
 }
 
-/* High-precision terminal scrollbar */
-.terminal-scrollbar::-webkit-scrollbar {
-  width: 4px;
+@keyframes cyber-glitch {
+  0%, 100% { transform: translate(0); filter: hue-rotate(0deg); }
+  2% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
+  4% { transform: translate(2px, -1px); filter: hue-rotate(-90deg); }
+  6% { transform: translate(0); filter: hue-rotate(0deg); }
 }
 
-.terminal-scrollbar::-webkit-scrollbar-track {
-  background: rgba(2, 6, 23, 0.85);
-  border-radius: 9999px;
+.animate-glitch {
+  animation: cyber-glitch 0.2s cubic-bezier(.25,.46,.45,.94) both infinite;
 }
 
-.terminal-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #22d3ee, #0ea5e9);
-  border-radius: 9999px;
-  box-shadow: 0 0 8px #22d3ee;
-}
-
-.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #67e8f9;
-  box-shadow: 0 0 12px #67e8f9;
+.glitch-transition {
+  animation: cyber-glitch 0.3s ease-out;
 }
 
 /* ============================================================

@@ -101,7 +101,8 @@ function normalizeSkills(raw: unknown): SkillGroups {
 }
 
 function parseFrontmatter(raw: string): PortfolioContent {
-  const match = raw.match(/^---\n([\s\S]*?)\n---/);
+  const normalized = raw.replace(/\r\n/g, "\n");
+  const match = normalized.match(/^---\n([\s\S]*?)\n---/);
   if (!match) throw new Error("portfolio.md is missing YAML frontmatter");
   const data = yaml.load(match[1]) as Partial<PortfolioContent> | null;
   if (
@@ -122,6 +123,21 @@ function parseFrontmatter(raw: string): PortfolioContent {
   };
 }
 
+const STATIC_FALLBACK_PORTFOLIO: PortfolioContent = {
+  brand: {
+    name: "Bacem Zarai",
+    tagline: "Robotics, Embedded Systems & Computer Vision",
+    description: "Robotics, firmware, and embedded perception engineer building autonomous systems.",
+    email: "contact@bacemzarai.dev",
+    linkedin: "https://linkedin.com/in/bacemzarai",
+    github: "https://github.com/Labmember7",
+  },
+  experiences: [],
+  projects: [],
+  skills: { technical: ["C++", "ROS 2", "Python", "Linux", "Embedded Systems"], soft: [] },
+  achievements: [],
+};
+
 import rawFallback from "./portfolio.md?raw";
 
 let cachedInitialContent: PortfolioContent | null = null;
@@ -131,9 +147,10 @@ export function getInitialPortfolioContent(): PortfolioContent {
       cachedInitialContent = parseFrontmatter(rawFallback);
     } catch (err) {
       console.error("[portfolio] Failed to parse initial rawFallback:", err);
+      cachedInitialContent = STATIC_FALLBACK_PORTFOLIO;
     }
   }
-  return cachedInitialContent!;
+  return cachedInitialContent || STATIC_FALLBACK_PORTFOLIO;
 }
 
 export async function fetchPortfolio(): Promise<PortfolioContent> {
@@ -150,7 +167,7 @@ export async function fetchPortfolio(): Promise<PortfolioContent> {
       return parseFrontmatter(rawFallback);
     } catch (fallbackErr) {
       console.error("[portfolio] Fallback parsing also failed:", fallbackErr);
-      throw err;
+      return cachedInitialContent || STATIC_FALLBACK_PORTFOLIO;
     }
   }
 }
