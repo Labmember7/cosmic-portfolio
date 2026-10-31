@@ -17,7 +17,7 @@ export function MissionBriefing({
         bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       }`}
     >
-      <div className="rounded-2xl border border-cyan-400/30 bg-slate-950/80 px-6 py-5 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.25)] ring-1 ring-cyan-300/20">
+      <div className="rounded-2xl border border-cyan-400/30 neo-surface-cyan px-6 py-5 backdrop-blur-2xl ring-1 ring-cyan-300/20">
         <div className="flex items-center justify-between gap-2 font-mono text-[9px] tracking-[0.28em] text-cyan-300 uppercase">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
@@ -35,15 +35,19 @@ export function MissionBriefing({
         </p>
 
         {caption && (
-          <p className="mt-3 text-xs leading-relaxed text-white/80 border-t border-cyan-400/15 pt-2.5">
-            {caption}
-          </p>
+          <div className="mt-3 rounded-xl neo-inset p-3 border border-white/5">
+            <p className="text-xs leading-relaxed text-white/85">{caption}</p>
+          </div>
         )}
 
-        <div className="mt-3 flex items-center justify-between border-t border-cyan-400/20 pt-2.5 text-[9px] font-mono text-white/60">
-          <span>AVIONICS: <strong className="text-emerald-300">NOMINAL</strong></span>
-          <span>·</span>
-          <span>SECTORS: <strong className="text-cyan-300">6 WAYPOINTS</strong></span>
+        <div className="mt-3.5 flex items-center justify-between rounded-lg neo-inset px-3 py-2 border border-cyan-400/15 text-[9px] font-mono text-white/60">
+          <span>
+            AVIONICS: <strong className="text-emerald-300 font-semibold">NOMINAL</strong>
+          </span>
+          <span className="text-white/20">·</span>
+          <span>
+            SECTORS: <strong className="text-cyan-300 font-semibold">6 WAYPOINTS</strong>
+          </span>
         </div>
       </div>
     </aside>
@@ -51,4 +55,3 @@ export function MissionBriefing({
 }
 
 export default MissionBriefing;
-

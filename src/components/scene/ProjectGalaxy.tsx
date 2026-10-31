@@ -144,7 +144,13 @@ export function ProjectPlanet({
   );
 }
 
-export function Galaxy({ onSelectProject, centerZ }: { onSelectProject: (i: number) => void; centerZ: number }) {
+export function Galaxy({
+  onSelectProject,
+  centerZ,
+}: {
+  onSelectProject: (i: number) => void;
+  centerZ: number;
+}) {
   const { projects: PROJECTS } = usePortfolio();
   const particles = useMemo(() => {
     const N = 3000;
@@ -167,45 +173,50 @@ export function Galaxy({ onSelectProject, centerZ }: { onSelectProject: (i: numb
 
   return (
     <group>
-      <Points ref={ref as any} positions={particles} stride={3}>
-        <PointMaterial
-          transparent
-          color="#bcaaff"
-          size={0.08}
-          sizeAttenuation
-          depthWrite={false}
-          blending={THREE.AdditiveBlending}
-        />
-      </Points>
+        <Points ref={ref} positions={particles} stride={3}>
+          <PointMaterial
+            transparent
+            color="#bcaaff"
+            size={0.08}
+            sizeAttenuation
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </Points>
 
-      <FierySun position={[0, 0, centerZ]} />
+        <FierySun position={[0, 0, centerZ]} />
 
-      {/* orbit guide rings (static) */}
-      {PROJECTS.map((p) => (
-        <mesh key={"o" + p.name} position={[0, 0, centerZ]} rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[p.radius - 0.015, p.radius + 0.015, 128]} />
-          <meshBasicMaterial color={p.color} transparent opacity={0.12} side={THREE.DoubleSide} depthWrite={false} />
-        </mesh>
-      ))}
+        {/* orbit guide rings (static) */}
+        {PROJECTS.map((p) => (
+          <mesh key={"o" + p.name} position={[0, 0, centerZ]} rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[p.radius - 0.015, p.radius + 0.015, 128]} />
+            <meshBasicMaterial
+              color={p.color}
+              transparent
+              opacity={0.12}
+              side={THREE.DoubleSide}
+              depthWrite={false}
+            />
+          </mesh>
+        ))}
 
-      {PROJECTS.map((p, i) => (
-        <ProjectPlanet
-          key={p.name}
-          angle={(i / PROJECTS.length) * Math.PI * 2}
-          radius={p.radius}
-          speed={p.speed}
-          size={p.size}
-          color={p.color}
-          accent={p.accent}
-          name={p.name}
-          pattern={p.pattern}
-          centerZ={centerZ}
-          onSelect={() => onSelectProject(i)}
-        />
-      ))}
+        {PROJECTS.map((p, i) => (
+          <ProjectPlanet
+            key={p.name}
+            angle={(i / PROJECTS.length) * Math.PI * 2}
+            radius={p.radius}
+            speed={p.speed}
+            size={p.size}
+            color={p.color}
+            accent={p.accent}
+            name={p.name}
+            pattern={p.pattern}
+            centerZ={centerZ}
+            onSelect={() => onSelectProject(i)}
+          />
+        ))}
     </group>
   );
 }
 
 export default Galaxy;
-

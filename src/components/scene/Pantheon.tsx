@@ -99,15 +99,33 @@ export function CentralShrine({
       {/* Concentric etched cosmic rings */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
         <ringGeometry args={[radius + 2.8, radius + 2.92, 96]} />
-        <meshBasicMaterial color="#ffd27a" transparent opacity={0.4} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#ffd27a"
+          transparent
+          opacity={0.4}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
         <ringGeometry args={[radius - 0.2, radius - 0.08, 96]} />
-        <meshBasicMaterial color="#c89bff" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#c89bff"
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.78, 0]}>
         <ringGeometry args={[3.8, 3.9, 96]} />
-        <meshBasicMaterial color="#ffd27a" transparent opacity={0.35} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#ffd27a"
+          transparent
+          opacity={0.35}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
 
       {/* Radial Runway Lightpaths extending from center to each exhibit */}
@@ -117,7 +135,12 @@ export function CentralShrine({
           <group key={i} rotation={[0, -a + Math.PI / 2, 0]}>
             <mesh position={[0, -1.77, radius * 0.5]} rotation={[-Math.PI / 2, 0, 0]}>
               <planeGeometry args={[0.08, radius - 1.2]} />
-              <meshBasicMaterial color="#ffd27a" transparent opacity={0.35} blending={THREE.AdditiveBlending} />
+              <meshBasicMaterial
+                color="#ffd27a"
+                transparent
+                opacity={0.35}
+                blending={THREE.AdditiveBlending}
+              />
             </mesh>
           </group>
         );
@@ -136,11 +159,23 @@ export function CentralShrine({
             </mesh>
             <mesh position={[0, -1.6, 0]}>
               <cylinderGeometry args={[0.35, 0.45, 0.4, 12]} />
-              <meshStandardMaterial color="#211738" metalness={0.9} roughness={0.2} emissive="#ffd27a" emissiveIntensity={0.2} />
+              <meshStandardMaterial
+                color="#211738"
+                metalness={0.9}
+                roughness={0.2}
+                emissive="#ffd27a"
+                emissiveIntensity={0.2}
+              />
             </mesh>
             <mesh position={[0, 4.2, 0]}>
               <cylinderGeometry args={[0.35, 0.22, 0.35, 12]} />
-              <meshStandardMaterial color="#211738" metalness={0.9} roughness={0.2} emissive="#c89bff" emissiveIntensity={0.4} />
+              <meshStandardMaterial
+                color="#211738"
+                metalness={0.9}
+                roughness={0.2}
+                emissive="#c89bff"
+                emissiveIntensity={0.4}
+              />
             </mesh>
             <mesh position={[0, 4.45, 0]}>
               <octahedronGeometry args={[0.16, 0]} />
@@ -148,7 +183,14 @@ export function CentralShrine({
             </mesh>
             <mesh position={[0, 12, 0]}>
               <cylinderGeometry args={[0.02, 0.25, 15, 12, 1, true]} />
-              <meshBasicMaterial color="#c89bff" transparent opacity={0.12} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+              <meshBasicMaterial
+                color="#c89bff"
+                transparent
+                opacity={0.12}
+                blending={THREE.AdditiveBlending}
+                side={THREE.DoubleSide}
+                depthWrite={false}
+              />
             </mesh>
           </group>
         );
@@ -157,43 +199,92 @@ export function CentralShrine({
       {/* 3. 3-Tiered Imperial Dais at Center */}
       <mesh position={[0, -1.5, 0]}>
         <cylinderGeometry args={[2.8, 3.2, 0.5, 16]} />
-        <meshStandardMaterial color="#0e0a1a" metalness={0.85} roughness={0.3} emissive="#2a1244" emissiveIntensity={0.35} />
+        <meshStandardMaterial
+          color="#0e0a1a"
+          metalness={0.85}
+          roughness={0.3}
+          emissive="#2a1244"
+          emissiveIntensity={0.35}
+        />
       </mesh>
       <mesh position={[0, -1.15, 0]}>
         <cylinderGeometry args={[2.0, 2.3, 0.4, 16]} />
-        <meshStandardMaterial color="#171128" metalness={0.88} roughness={0.25} emissive="#ffd27a" emissiveIntensity={0.25} />
+        <meshStandardMaterial
+          color="#171128"
+          metalness={0.88}
+          roughness={0.25}
+          emissive="#ffd27a"
+          emissiveIntensity={0.25}
+        />
       </mesh>
       <mesh position={[0, -0.85, 0]}>
         <cylinderGeometry args={[1.3, 1.5, 0.35, 16]} />
-        <meshStandardMaterial color="#23183d" metalness={0.92} roughness={0.2} emissive="#c89bff" emissiveIntensity={0.45} />
+        <meshStandardMaterial
+          color="#23183d"
+          metalness={0.92}
+          roughness={0.2}
+          emissive="#c89bff"
+          emissiveIntensity={0.45}
+        />
       </mesh>
 
       {/* Central Monument Pedestal Column */}
       <mesh position={[0, 0.4, 0]}>
         <cylinderGeometry args={[0.36, 0.58, 2.3, 8]} />
-        <meshStandardMaterial color="#1a1230" metalness={0.95} roughness={0.15} emissive="#7c3aed" emissiveIntensity={0.4} />
+        <meshStandardMaterial
+          color="#1a1230"
+          metalness={0.95}
+          roughness={0.15}
+          emissive="#7c3aed"
+          emissiveIntensity={0.4}
+        />
       </mesh>
 
       {/* Levitating Grand Astrolabe Monument */}
       <group ref={relicRef} position={[0, 2.4, 0]}>
         <mesh>
           <icosahedronGeometry args={[0.42, 0]} />
-          <meshStandardMaterial color="#ffd27a" emissive="#ffb84a" emissiveIntensity={2.8} metalness={1} roughness={0.05} />
+          <meshStandardMaterial
+            color="#ffd27a"
+            emissive="#ffb84a"
+            emissiveIntensity={2.8}
+            metalness={1}
+            roughness={0.05}
+          />
         </mesh>
         <mesh ref={ringRef1} rotation={[Math.PI / 3, 0, 0]}>
           <torusGeometry args={[0.82, 0.03, 12, 48]} />
-          <meshStandardMaterial color="#ffd27a" metalness={0.9} roughness={0.1} emissive="#ffb84a" emissiveIntensity={0.6} />
+          <meshStandardMaterial
+            color="#ffd27a"
+            metalness={0.9}
+            roughness={0.1}
+            emissive="#ffb84a"
+            emissiveIntensity={0.6}
+          />
         </mesh>
         <mesh ref={ringRef2} rotation={[-Math.PI / 4, 0.3, 0]}>
           <torusGeometry args={[0.98, 0.025, 12, 48]} />
-          <meshStandardMaterial color="#c89bff" metalness={0.9} roughness={0.1} emissive="#9b6bff" emissiveIntensity={0.6} />
+          <meshStandardMaterial
+            color="#c89bff"
+            metalness={0.9}
+            roughness={0.1}
+            emissive="#9b6bff"
+            emissiveIntensity={0.6}
+          />
         </mesh>
       </group>
 
       {/* Ascending Beacon Beam to Infinity */}
       <mesh ref={beaconRef} position={[0, 14, 0]}>
         <cylinderGeometry args={[0.08, 0.8, 28, 16, 1, true]} />
-        <meshBasicMaterial color="#ffd27a" transparent opacity={0.22} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial
+          color="#ffd27a"
+          transparent
+          opacity={0.22}
+          blending={THREE.AdditiveBlending}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
       </mesh>
       <pointLight position={[0, 2.4, 0]} color="#ffd27a" intensity={2.6} distance={16} />
     </group>
@@ -212,16 +303,26 @@ export function TrophySculpture({
   isHovered: boolean;
 }) {
   const trophyRef = useRef<THREE.Group>(null);
-  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring1Ref = useRef<THREE.Object3D>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
+  const speedRef = useRef(0.4);
 
   useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
+    const targetSpeed = isHovered ? 0.9 : 0.4;
+    speedRef.current = THREE.MathUtils.lerp(speedRef.current, targetSpeed, Math.min(1, dt * 4));
+
     if (trophyRef.current) {
-      trophyRef.current.rotation.y += dt * (isHovered ? 1.0 : 0.4);
+      trophyRef.current.rotation.y += dt * speedRef.current;
       trophyRef.current.position.y = 0.5 + Math.sin(t * 1.6 + type) * 0.07;
     }
-    if (ring1Ref.current) ring1Ref.current.rotation.z += dt * (isHovered ? 1.4 : 0.6);
+    if (ring1Ref.current) {
+      if (type === 4) {
+        ring1Ref.current.rotation.y += dt * (isHovered ? 1.2 : 0.5);
+      } else {
+        ring1Ref.current.rotation.z += dt * (isHovered ? 1.4 : 0.6);
+      }
+    }
     if (ring2Ref.current) ring2Ref.current.rotation.x -= dt * (isHovered ? 1.2 : 0.5);
   });
 
@@ -231,7 +332,13 @@ export function TrophySculpture({
       <group ref={trophyRef}>
         <mesh position={[0, -0.32, 0]}>
           <cylinderGeometry args={[0.3, 0.42, 0.12, 24]} />
-          <meshStandardMaterial color="#ffd27a" metalness={0.95} roughness={0.15} emissive="#d97706" emissiveIntensity={0.4} />
+          <meshStandardMaterial
+            color="#ffd27a"
+            metalness={0.95}
+            roughness={0.15}
+            emissive="#d97706"
+            emissiveIntensity={0.4}
+          />
         </mesh>
         <mesh position={[0, -0.12, 0]}>
           <cylinderGeometry args={[0.08, 0.12, 0.28, 20]} />
@@ -239,7 +346,13 @@ export function TrophySculpture({
         </mesh>
         <mesh position={[0, 0.24, 0]}>
           <cylinderGeometry args={[0.48, 0.16, 0.52, 24, 1, false]} />
-          <meshStandardMaterial color="#ffd27a" metalness={0.95} roughness={0.12} emissive="#f59e0b" emissiveIntensity={0.5} />
+          <meshStandardMaterial
+            color="#ffd27a"
+            metalness={0.95}
+            roughness={0.12}
+            emissive="#f59e0b"
+            emissiveIntensity={0.5}
+          />
         </mesh>
         <mesh position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.48, 0.03, 12, 32]} />
@@ -255,11 +368,22 @@ export function TrophySculpture({
         </mesh>
         <mesh ref={ring1Ref} position={[0, 0.72, 0]} rotation={[Math.PI / 2.2, 0, 0]}>
           <torusGeometry args={[0.62, 0.02, 8, 36]} />
-          <meshBasicMaterial color="#ffd27a" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial
+            color="#ffd27a"
+            transparent
+            opacity={0.8}
+            blending={THREE.AdditiveBlending}
+          />
         </mesh>
         <mesh position={[0, 0.78, 0]}>
           <octahedronGeometry args={[0.14, 0]} />
-          <meshStandardMaterial color="#ffd27a" emissive="#ffd27a" emissiveIntensity={2.5} metalness={1} roughness={0.05} />
+          <meshStandardMaterial
+            color="#ffd27a"
+            emissive="#ffd27a"
+            emissiveIntensity={2.5}
+            metalness={1}
+            roughness={0.05}
+          />
         </mesh>
       </group>
     );
@@ -287,14 +411,29 @@ export function TrophySculpture({
         </mesh>
         <mesh ref={ring1Ref} rotation={[Math.PI / 3, 0, 0]}>
           <torusGeometry args={[0.62, 0.028, 12, 48]} />
-          <meshStandardMaterial color={color} metalness={0.9} roughness={0.15} emissive={color} emissiveIntensity={0.5} />
+          <meshStandardMaterial
+            color={color}
+            metalness={0.9}
+            roughness={0.15}
+            emissive={color}
+            emissiveIntensity={0.5}
+          />
         </mesh>
         <mesh ref={ring2Ref} rotation={[-Math.PI / 4, 0.4, 0]}>
           <torusGeometry args={[0.76, 0.022, 12, 48]} />
-          <meshStandardMaterial color="#ffffff" metalness={0.95} roughness={0.1} emissive={color} emissiveIntensity={0.4} />
+          <meshStandardMaterial
+            color="#ffffff"
+            metalness={0.95}
+            roughness={0.1}
+            emissive={color}
+            emissiveIntensity={0.4}
+          />
         </mesh>
         {[0, 1, 2, 3].map((k) => (
-          <mesh key={k} position={[Math.cos((k * Math.PI) / 2) * 0.9, 0, Math.sin((k * Math.PI) / 2) * 0.9]}>
+          <mesh
+            key={k}
+            position={[Math.cos((k * Math.PI) / 2) * 0.9, 0, Math.sin((k * Math.PI) / 2) * 0.9]}
+          >
             <sphereGeometry args={[0.045, 12, 12]} />
             <meshBasicMaterial color={color} />
           </mesh>
@@ -309,11 +448,23 @@ export function TrophySculpture({
       <group ref={trophyRef}>
         <mesh ref={ring1Ref} rotation={[0, 0, Math.PI / 4]}>
           <torusGeometry args={[0.74, 0.035, 12, 48]} />
-          <meshStandardMaterial color={color} metalness={0.92} roughness={0.15} emissive={color} emissiveIntensity={0.6} />
+          <meshStandardMaterial
+            color={color}
+            metalness={0.92}
+            roughness={0.15}
+            emissive={color}
+            emissiveIntensity={0.6}
+          />
         </mesh>
         <mesh ref={ring2Ref} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.6, 0.028, 12, 48]} />
-          <meshStandardMaterial color="#e0f2fe" metalness={0.9} roughness={0.2} emissive="#38bdf8" emissiveIntensity={0.4} />
+          <meshStandardMaterial
+            color="#e0f2fe"
+            metalness={0.9}
+            roughness={0.2}
+            emissive="#38bdf8"
+            emissiveIntensity={0.4}
+          />
         </mesh>
         <mesh rotation={[Math.PI / 3, 0.2, 0]}>
           <torusGeometry args={[0.46, 0.022, 12, 36]} />
@@ -321,7 +472,13 @@ export function TrophySculpture({
         </mesh>
         <mesh>
           <octahedronGeometry args={[0.24, 0]} />
-          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={2.6} metalness={1} roughness={0.08} />
+          <meshStandardMaterial
+            color="#fff"
+            emissive={color}
+            emissiveIntensity={2.6}
+            metalness={1}
+            roughness={0.08}
+          />
         </mesh>
       </group>
     );
@@ -344,15 +501,31 @@ export function TrophySculpture({
         </mesh>
         <mesh position={[0, 0.52, 0]}>
           <coneGeometry args={[0.26, 0.45, 6]} />
-          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={2.8} metalness={0.9} roughness={0.1} />
+          <meshStandardMaterial
+            color="#fff"
+            emissive={color}
+            emissiveIntensity={2.8}
+            metalness={0.9}
+            roughness={0.1}
+          />
         </mesh>
         <mesh ref={ring1Ref} position={[0, 0.28, 0]} rotation={[Math.PI / 2.2, 0, 0]}>
           <torusGeometry args={[0.54, 0.018, 8, 36]} />
-          <meshBasicMaterial color={color} transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial
+            color={color}
+            transparent
+            opacity={0.8}
+            blending={THREE.AdditiveBlending}
+          />
         </mesh>
         <mesh ref={ring2Ref} position={[0, 0.34, 0]} rotation={[Math.PI / 1.9, 0.3, 0]}>
           <torusGeometry args={[0.68, 0.014, 8, 36]} />
-          <meshBasicMaterial color="#fff" transparent opacity={0.5} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial
+            color="#fff"
+            transparent
+            opacity={0.5}
+            blending={THREE.AdditiveBlending}
+          />
         </mesh>
       </group>
     );
@@ -362,25 +535,73 @@ export function TrophySculpture({
   if (type === 4) {
     return (
       <group ref={trophyRef}>
+        {/* Central Spire Column */}
         <mesh position={[0, 0.05, 0]}>
-          <cylinderGeometry args={[0.07, 0.2, 0.95, 8]} />
-          <meshStandardMaterial color="#1e1828" metalness={0.9} roughness={0.2} emissive={color} emissiveIntensity={0.5} />
+          <cylinderGeometry args={[0.07, 0.2, 0.95, 16]} />
+          <meshStandardMaterial
+            color="#1e1828"
+            metalness={0.9}
+            roughness={0.2}
+            emissive={color}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+
+        {/* Lower Tier Holographic Platform Disc */}
+        <mesh position={[0, -0.15, 0]}>
+          <cylinderGeometry args={[0.46, 0.46, 0.028, 32]} />
+          <meshStandardMaterial
+            color={color}
+            metalness={0.92}
+            roughness={0.15}
+            emissive={color}
+            emissiveIntensity={0.65}
+          />
         </mesh>
         <mesh position={[0, -0.15, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.46, 0.46, 0.025, 24]} />
-          <meshStandardMaterial color={color} metalness={0.95} roughness={0.1} emissive={color} emissiveIntensity={0.6} />
+          <torusGeometry args={[0.465, 0.012, 12, 40]} />
+          <meshBasicMaterial color="#ffffff" />
+        </mesh>
+
+        {/* Upper Tier Platform Disc */}
+        <mesh position={[0, 0.25, 0]}>
+          <cylinderGeometry args={[0.32, 0.32, 0.024, 32]} />
+          <meshStandardMaterial
+            color="#ffffff"
+            metalness={0.88}
+            roughness={0.2}
+            emissive={color}
+            emissiveIntensity={0.4}
+          />
         </mesh>
         <mesh position={[0, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.32, 0.32, 0.025, 24]} />
-          <meshStandardMaterial color="#fff" metalness={0.95} roughness={0.1} />
+          <torusGeometry args={[0.325, 0.01, 12, 36]} />
+          <meshBasicMaterial color={color} />
         </mesh>
+
+        {/* Apex Octahedron Core Crystal */}
         <mesh position={[0, 0.62, 0]}>
           <octahedronGeometry args={[0.15, 0]} />
-          <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={3.0} />
+          <meshStandardMaterial
+            color="#fff"
+            emissive={color}
+            emissiveIntensity={isHovered ? 3.2 : 2.4}
+            metalness={0.9}
+            roughness={0.1}
+          />
         </mesh>
-        <group ref={ring1Ref}>
+
+        {/* Orbiting Quantum Data Cubes */}
+        <group ref={ring1Ref as React.RefObject<THREE.Group>}>
           {[0, 1, 2].map((k) => (
-            <mesh key={k} position={[Math.cos((k * Math.PI * 2) / 3) * 0.72, 0.05, Math.sin((k * Math.PI * 2) / 3) * 0.72]}>
+            <mesh
+              key={k}
+              position={[
+                Math.cos((k * Math.PI * 2) / 3) * 0.72,
+                0.05,
+                Math.sin((k * Math.PI * 2) / 3) * 0.72,
+              ]}
+            >
               <boxGeometry args={[0.09, 0.09, 0.09]} />
               <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.0} />
             </mesh>
@@ -395,23 +616,51 @@ export function TrophySculpture({
     <group ref={trophyRef}>
       <mesh position={[0, 0, 0]}>
         <cylinderGeometry args={[0.5, 0.5, 0.28, 6]} />
-        <meshStandardMaterial color="#130d22" metalness={0.92} roughness={0.2} emissive={accent} emissiveIntensity={0.8} />
+        <meshStandardMaterial
+          color="#130d22"
+          metalness={0.92}
+          roughness={0.2}
+          emissive={accent}
+          emissiveIntensity={0.8}
+        />
       </mesh>
       <mesh position={[0, 0.15, 0]}>
         <cylinderGeometry args={[0.42, 0.42, 0.04, 6]} />
-        <meshStandardMaterial color={color} metalness={1.0} roughness={0.1} emissive={color} emissiveIntensity={0.7} />
+        <meshStandardMaterial
+          color={color}
+          metalness={1.0}
+          roughness={0.1}
+          emissive={color}
+          emissiveIntensity={0.7}
+        />
       </mesh>
       <mesh position={[0, 0.26, 0]}>
         <octahedronGeometry args={[0.2, 0]} />
-        <meshStandardMaterial color="#fff" emissive={color} emissiveIntensity={isHovered ? 3.0 : 1.8} metalness={0.8} roughness={0.1} />
+        <meshStandardMaterial
+          color="#fff"
+          emissive={color}
+          emissiveIntensity={isHovered ? 3.0 : 1.8}
+          metalness={0.8}
+          roughness={0.1}
+        />
       </mesh>
       <mesh ref={ring1Ref} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.66, 0.016, 8, 36]} />
-        <meshBasicMaterial color={color} transparent opacity={0.75} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.75}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       <mesh ref={ring2Ref} rotation={[Math.PI / 2.3, 0.2, 0]}>
         <torusGeometry args={[0.8, 0.012, 8, 36]} />
-        <meshBasicMaterial color="#fff" transparent opacity={0.4} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#fff"
+          transparent
+          opacity={0.4}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
     </group>
   );
@@ -446,10 +695,6 @@ export function TrophyExhibit({
 
   useFrame((_, dt) => {
     if (group.current) {
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      group.current.position.set(x, 0, z);
-
       const targetScale = isHovered ? 1.15 : 1.0;
       scaleRef.current = THREE.MathUtils.lerp(scaleRef.current, targetScale, Math.min(1, dt * 7));
       group.current.scale.setScalar(scaleRef.current);
@@ -457,7 +702,11 @@ export function TrophyExhibit({
 
     if (spotlightRef.current && spotlightMat.current) {
       const targetOp = isHovered ? 0.65 : 0.12;
-      spotlightMat.current.opacity = THREE.MathUtils.lerp(spotlightMat.current.opacity, targetOp, Math.min(1, dt * 8));
+      spotlightMat.current.opacity = THREE.MathUtils.lerp(
+        spotlightMat.current.opacity,
+        targetOp,
+        Math.min(1, dt * 8),
+      );
     }
   });
 
@@ -472,20 +721,29 @@ export function TrophyExhibit({
   const cardHeight = 0.58;
 
   return (
-    <group
-      ref={group}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        onHover(index);
-      }}
-      onPointerOut={() => onLeave()}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick(index);
-      }}
-    >
+    <group ref={group} position={[Math.cos(angle) * radius, 0, Math.sin(angle) * radius]}>
+      {/* 0. Stable Interaction Hit Collider (prevents hover flickering / micro-pointerout loops) */}
+      <mesh
+        position={[0, 1.25, 0]}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          onHover(index);
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation();
+          onLeave();
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(index);
+        }}
+      >
+        <cylinderGeometry args={[1.25, 1.25, 4.4, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {/* 1. Holographic Beaming Light Pillar */}
-      <mesh ref={spotlightRef} position={[0, 1.6, 0]}>
+      <mesh ref={spotlightRef} position={[0, 1.6, 0]} raycast={() => null}>
         <cylinderGeometry args={[1.05, 0.74, 3.4, 32, 1, true]} />
         <meshBasicMaterial
           ref={spotlightMat}
@@ -499,13 +757,25 @@ export function TrophyExhibit({
       </mesh>
       <mesh position={[0, 3.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[1.05, 0.02, 12, 48]} />
-        <meshBasicMaterial color={color} transparent opacity={isHovered ? 0.85 : 0.45} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={isHovered ? 0.85 : 0.45}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
 
       {/* 2. Exhibition Plinth */}
       <mesh position={[0, -1.6, 0]}>
         <cylinderGeometry args={[1.05, 1.25, 0.35, 8]} />
-        <meshStandardMaterial color="#0c0818" metalness={0.8} roughness={0.35} emissive="#1f0e35" emissiveIntensity={0.3} />
+        <meshStandardMaterial
+          color="#0c0818"
+          metalness={0.8}
+          roughness={0.35}
+          emissive="#1f0e35"
+          emissiveIntensity={0.3}
+        />
       </mesh>
       <mesh position={[0, -0.85, 0]}>
         <cylinderGeometry args={[0.62, 0.78, 1.25, 16]} />
@@ -517,7 +787,14 @@ export function TrophyExhibit({
       </mesh>
       <mesh position={[0, -0.12, 0]}>
         <cylinderGeometry args={[0.72, 0.72, 0.1, 32]} />
-        <meshPhysicalMaterial color="#211738" metalness={0.9} roughness={0.15} clearcoat={1.0} emissive={accent} emissiveIntensity={0.4} />
+        <meshPhysicalMaterial
+          color="#211738"
+          metalness={0.9}
+          roughness={0.15}
+          clearcoat={1.0}
+          emissive={accent}
+          emissiveIntensity={0.4}
+        />
       </mesh>
 
       {/* 3. The 3D Sculpted Trophy Artwork */}
@@ -580,7 +857,12 @@ export function TrophyExhibit({
         </Billboard>
       </group>
 
-      <pointLight position={[0, 1.2, 0]} color={color} intensity={isHovered ? 2.2 : 0.8} distance={6} />
+      <pointLight
+        position={[0, 1.2, 0]}
+        color={color}
+        intensity={isHovered ? 2.2 : 0.8}
+        distance={6}
+      />
     </group>
   );
 }
@@ -597,14 +879,17 @@ export function Pantheon({
   const [hoveredIdx, setHoveredIdx] = useState<number>(-1);
   const orbitGroup = useRef<THREE.Group>(null);
   const orbitAngle = useRef<number>(0);
+  const orbitSpeed = useRef<number>(0.04);
 
   useEffect(() => {
     document.body.style.cursor = hoveredIdx !== -1 ? "pointer" : "";
   }, [hoveredIdx]);
 
   useFrame((_, dt) => {
-    if (hoveredIdx === -1 && orbitGroup.current) {
-      orbitAngle.current += dt * 0.04;
+    const targetSpeed = hoveredIdx === -1 ? 0.04 : 0;
+    orbitSpeed.current = THREE.MathUtils.lerp(orbitSpeed.current, targetSpeed, Math.min(1, dt * 5));
+    if (orbitGroup.current && orbitSpeed.current > 0.0001) {
+      orbitAngle.current += dt * orbitSpeed.current;
       orbitGroup.current.rotation.y = orbitAngle.current;
     }
   });
@@ -634,4 +919,3 @@ export function Pantheon({
 }
 
 export default Pantheon;
-

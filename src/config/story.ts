@@ -35,7 +35,9 @@ export const EXP_SPACING = 30;
 export const EXP_FIRST_Z = -90;
 
 export function computeLayout(experiences: Experience[]): SceneLayout {
-  const experienceZs = experiences.map((e, i) => (typeof e.z === "number" ? e.z! : EXP_FIRST_Z - i * EXP_SPACING));
+  const experienceZs = experiences.map((e, i) =>
+    typeof e.z === "number" ? e.z! : EXP_FIRST_Z - i * EXP_SPACING,
+  );
   const minZ = experienceZs.length ? Math.min(...experienceZs) : EXP_FIRST_Z;
   const wormholeZ = minZ - 50;
   const galaxyZ = wormholeZ - 75;
@@ -46,7 +48,11 @@ export function computeLayout(experiences: Experience[]): SceneLayout {
   return { experienceZs, wormholeZ, galaxyZ, skillsZ, pantheonZ, finaleZ, blackholeZ };
 }
 
-export function buildChapters(experiences: Experience[], layout: SceneLayout, brandDescription?: string): Chapter[] {
+export function buildChapters(
+  experiences: Experience[],
+  layout: SceneLayout,
+  brandDescription?: string,
+): Chapter[] {
   const chapters: Chapter[] = [
     {
       id: "intro",
@@ -84,7 +90,8 @@ export function buildChapters(experiences: Experience[], layout: SceneLayout, br
     {
       id: "wormhole",
       title: `${String(base + 1).padStart(2, "0")} · The Rift — Interstellar Wormhole`,
-      caption: "Spacetime folds into an Einstein-Rosen bridge. Traversing the interdimensional corridor into a new galaxy.",
+      caption:
+        "Spacetime folds into an Einstein-Rosen bridge. Traversing the interdimensional corridor into a new galaxy.",
       camera: [0, 0, layout.wormholeZ - 16],
       lookAt: [0, 0, layout.wormholeZ - 50],
       via: {
@@ -95,7 +102,8 @@ export function buildChapters(experiences: Experience[], layout: SceneLayout, br
     {
       id: "galaxy",
       title: `${String(base + 2).padStart(2, "0")} · The Forge — Projects Galaxy`,
-      caption: "A luminous spiral of systems, firmware, and autonomous perception. Click any planet to open its story.",
+      caption:
+        "A luminous spiral of systems, firmware, and autonomous perception. Click any planet to open its story.",
       camera: [0, 18, layout.galaxyZ + 32],
       lookAt: [0, 0, layout.galaxyZ - 5],
       via: {
@@ -106,7 +114,8 @@ export function buildChapters(experiences: Experience[], layout: SceneLayout, br
     {
       id: "skills",
       title: `${String(base + 3).padStart(2, "0")} · The Skill Constellation`,
-      caption: "Above the galaxy, a constellation of tools, frameworks, and languages currently in orbit.",
+      caption:
+        "Above the galaxy, a constellation of tools, frameworks, and languages currently in orbit.",
       camera: [0, 14, layout.skillsZ + 22],
       lookAt: [0, 8, layout.skillsZ - 10],
     },
@@ -121,7 +130,8 @@ export function buildChapters(experiences: Experience[], layout: SceneLayout, br
     {
       id: "finale",
       title: `${String(base + 5).padStart(2, "0")} · The Singularity`,
-      caption: "Every cosmic journey arrives at the event horizon. Look back at where you've been, transmit a signal, or explore in free roam.",
+      caption:
+        "Every cosmic journey arrives at the event horizon. Look back at where you've been, transmit a signal, or explore in free roam.",
       camera: [0, 1.2, layout.finaleZ + 7],
       lookAt: [0, 0, layout.finaleZ - 5],
     },

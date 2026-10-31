@@ -34,6 +34,8 @@ import { MissionBriefing } from "@/components/hud/MissionBriefing";
 import { RiftFlightHUD } from "@/components/hud/RiftFlightHUD";
 import { ControlsCheatSheet } from "@/components/hud/ControlsCheatSheet";
 import { AmbientKeySuggestions } from "@/components/hud/AmbientKeySuggestions";
+import { SceneTitleTransition } from "@/components/hud/SceneTitleTransition";
+import { CosmicStoryTrailMiniMap } from "@/components/hud/CosmicStoryTrailMiniMap";
 import { TerminalContact } from "@/components/hud/TerminalContact";
 import { ProjectDialog } from "@/components/hud/ProjectDialog";
 import { AchievementDialog } from "@/components/hud/AchievementDialog";
@@ -54,8 +56,14 @@ export const Route = createFileRoute("/")({
           "Bacem Zarai, Robotics Engineer, Embedded Systems, Computer Vision, Autonomous Systems, ROS 2, C++, 3D Space Portfolio, Interactive Portfolio, WebGL",
       },
       { name: "author", content: "Bacem Zarai" },
-      { name: "robots", content: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" },
-      { property: "og:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        name: "robots",
+        content: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+      },
+      {
+        property: "og:title",
+        content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer",
+      },
       {
         property: "og:description",
         content:
@@ -64,7 +72,10 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Bacem Zarai Portfolio" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      {
+        name: "twitter:title",
+        content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer",
+      },
       {
         name: "twitter:description",
         content:
@@ -77,16 +88,16 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "ProfilePage",
-          "name": "Bacem Zarai — Interactive 3D Cosmic Portfolio",
-          "description":
+          name: "Bacem Zarai — Interactive 3D Cosmic Portfolio",
+          description:
             "Interactive 3D space journey showcasing robotics, embedded systems, and computer vision projects.",
-          "mainEntity": {
+          mainEntity: {
             "@type": "Person",
-            "name": "Bacem Zarai",
-            "jobTitle": "Embedded Systems, Robotics & Computer Vision Engineer",
-            "description":
+            name: "Bacem Zarai",
+            jobTitle: "Embedded Systems, Robotics & Computer Vision Engineer",
+            description:
               "Engineer specializing in robotics, embedded systems, firmware, autonomous perception, ROS 2, and embedded C++.",
-            "knowsAbout": [
+            knowsAbout: [
               "Robotics",
               "Embedded Systems",
               "Computer Vision",
@@ -130,6 +141,7 @@ function Portfolio() {
   const [selectedAchievementIndex, setSelectedAchievementIndex] = useState<number | null>(null);
   const [luminosity, setLuminosity] = useState(1);
   const [freeRoam, setFreeRoam] = useState(false);
+  const [mapOpen, setMapOpen] = useState(true);
 
   const {
     enabled: musicOn,
@@ -248,19 +260,22 @@ function Portfolio() {
   const { brand: BRAND, projects: PROJECTS } = data;
   const achievementsList =
     data.achievements && data.achievements.length > 0 ? data.achievements : DEFAULT_ACHIEVEMENTS;
+  const volumePct = musicOn ? Math.round(volume * 100) : 0;
+  const lightPct = Math.round((luminosity / 2) * 100);
 
   return (
     <PortfolioContext.Provider value={data}>
-      <main id="main-content" role="main" className="fixed inset-0 bg-[#03020a] text-white overflow-hidden select-none">
+      <main
+        id="main-content"
+        role="main"
+        className="fixed inset-0 bg-[#03020a] text-white overflow-hidden select-none"
+      >
         {/* Precision Tracking Reticle */}
         <CosmicMouseReticle />
 
         {/* Cinematic Aerospace Boot Sequence */}
         {!bootReady && (
-          <BootSequence
-            onDismiss={() => setBootReady(true)}
-            playBootChime={playBootChime}
-          />
+          <BootSequence onDismiss={() => setBootReady(true)} playBootChime={playBootChime} />
         )}
 
         {/* 3D Cosmic Canvas */}
@@ -298,31 +313,30 @@ function Portfolio() {
 
         {/* Intro Mission Briefing Card */}
         {chapter?.id === "intro" && (
-          <MissionBriefing
-            brand={BRAND}
-            caption={chapter?.caption}
-            bootReady={bootReady}
-          />
+          <MissionBriefing brand={BRAND} caption={chapter?.caption} bootReady={bootReady} />
         )}
 
         {/* Intro Anamorphic Letterbox Telemetry Bars */}
         {chapter?.id === "intro" && (
           <div
-            className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${
-              bootReady ? "opacity-100" : "opacity-0"
-            }`}
+            className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0"
+              }`}
           >
             <div className="h-10 w-full bg-black/85 border-b border-cyan-400/20 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-cyan-300 backdrop-blur-md">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
                 <span>STARPORT ALPHA // SECTOR 07-B</span>
               </div>
-              <span className="text-white/40 hidden sm:inline">TELEMETRY: ALL 12 CHANNELS NOMINAL</span>
+              <span className="text-white/40 hidden sm:inline">
+                TELEMETRY: ALL 12 CHANNELS NOMINAL
+              </span>
               <span className="text-cyan-200">ORBITAL LAUNCH PAD READY</span>
             </div>
             <div className="h-10 w-full bg-black/85 border-t border-cyan-400/20 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-white/50 backdrop-blur-md">
               <span>MISSION CLOCK: T-00:00:00</span>
-              <span className="text-cyan-300 hidden sm:inline">COORDINATES: 28.5721° N, 80.6480° W</span>
+              <span className="text-cyan-300 hidden sm:inline">
+                COORDINATES: 28.5721° N, 80.6480° W
+              </span>
               <span className="text-emerald-400">HYPERDRIVE: ARMED</span>
             </div>
           </div>
@@ -331,40 +345,52 @@ function Portfolio() {
         {/* Rift Traversal Avionics Reticle */}
         {chapter?.id === "wormhole" && <RiftFlightHUD />}
 
+        {/* Cinematic Scene Title Transitions — restricted to the Boarding scene */}
+        {chapter?.id === "intro" && (
+          <SceneTitleTransition
+            chapter={chapter}
+            chapterIndex={index}
+            bootReady={bootReady}
+          />
+        )}
+
         {/* Top Control Bar */}
         <header
           id="site-header"
           role="banner"
-          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-4 px-6 transition-all duration-700 ${
-            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-          } ${chapter?.id === "intro" ? "top-12" : "top-4"}`}
+          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-4 px-6 transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+            } ${chapter?.id === "intro" ? "top-12" : "top-4"}`}
         >
           {/* Brand */}
           <div className="pointer-events-none">
             <h1 className="text-xs tracking-[0.4em] text-white/80 font-mono">
               ✧ {BRAND.name.toUpperCase().split(" ").join(" · ")}
             </h1>
-            <p className="text-[10px] uppercase tracking-widest text-white/40 font-mono">a cosmic journey</p>
+            <p className="text-[10px] uppercase tracking-widest text-white/40 font-mono">
+              a cosmic journey
+            </p>
           </div>
 
-          {/* Center Glass Controls */}
-          <div className="flex items-center gap-4 rounded-full border border-white/10 bg-black/60 px-5 py-2 backdrop-blur-xl shadow-2xl">
+          {/* Center Glass Controls — Subtle & Minimalist */}
+          <div className="flex items-center gap-2.5 sm:gap-3 rounded-full border border-white/[0.08] bg-black/30 px-3.5 py-1 backdrop-blur-md opacity-75 hover:opacity-100 transition-all duration-300">
             <button
               id="music-toggle-btn"
               onClick={toggleMusic}
-              className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.2em] text-white/80 hover:text-white transition whitespace-nowrap"
+              className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.15em] text-white/60 hover:text-white transition whitespace-nowrap cursor-pointer px-2 py-0.5 rounded-full hover:bg-white/[0.05]"
               title={musicOn ? "Mute soundtrack" : "Play space atmospheric soundtrack"}
             >
               <span
-                className={`inline-block h-2 w-2 rounded-full ${musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"}`}
+                className={`inline-block h-1.5 w-1.5 rounded-full ${
+                  musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                }`}
               />
-              ♪ {musicOn ? "Audio On" : "Audio Off"}
+              ♪ {musicOn ? "Audio" : "Muted"}
             </button>
 
-            <div className="hidden sm:flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5">
               <label
                 htmlFor="volume-control"
-                className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 whitespace-nowrap"
+                className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40 whitespace-nowrap"
               >
                 Vol
               </label>
@@ -377,18 +403,23 @@ function Portfolio() {
                 value={volume}
                 disabled={!musicOn}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-16 accent-emerald-400 disabled:opacity-30 cursor-pointer"
+                className="w-14 h-1 neo-slider-emerald disabled:opacity-20 cursor-pointer"
+                style={{
+                  background: musicOn
+                    ? `linear-gradient(to right, #059669 0%, #10b981 ${Math.max(0, volumePct - 8)}%, #34d399 ${volumePct}%, rgba(4, 7, 16, 0.9) ${volumePct}%, rgba(4, 7, 16, 0.9) 100%)`
+                    : "rgba(4, 7, 16, 0.9)",
+                }}
               />
             </div>
 
-            <span className="hidden sm:inline-block h-4 w-px bg-white/10" />
+            <span className="hidden sm:inline-block h-3 w-px bg-white/10" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <label
                 htmlFor="light-control"
-                className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/50 whitespace-nowrap"
+                className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40 whitespace-nowrap"
               >
-                ☀ Light
+                ☀
               </label>
               <input
                 id="light-control"
@@ -398,31 +429,43 @@ function Portfolio() {
                 step={0.05}
                 value={luminosity}
                 onChange={(e) => setLuminosity(parseFloat(e.target.value))}
-                className="w-20 accent-amber-300 cursor-pointer"
+                className="w-14 h-1 neo-slider-amber cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #d97706 0%, #f59e0b ${Math.max(0, lightPct - 8)}%, #fbbf24 ${lightPct}%, rgba(4, 7, 16, 0.9) ${lightPct}%, rgba(4, 7, 16, 0.9) 100%)`,
+                }}
               />
-              <span className="text-[10px] font-mono text-white/50 tabular-nums whitespace-nowrap w-8 text-right">
-                {luminosity.toFixed(1)}
-              </span>
             </div>
 
-            <span className="h-4 w-px bg-white/10" />
+            <span className="h-3 w-px bg-white/10" />
 
             <button
               id="roam-toggle-btn"
               onClick={() => setFreeRoam((v) => !v)}
-              className={`text-[11px] font-mono uppercase tracking-[0.2em] transition whitespace-nowrap ${freeRoam ? "text-emerald-300" : "text-white/80 hover:text-white"}`}
+              className={`text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${
+                freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
+              }`}
               title="Free roam (WASD + mouse look, Shift boost, Space/Ctrl ascend/descend, Esc release)"
             >
               <span
-                className={`inline-block h-2 w-2 rounded-full mr-2 ${freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"}`}
+                className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${
+                  freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                }`}
               />
-              Roam {freeRoam ? "On" : "Off"}
+              Roam
             </button>
           </div>
 
-          {/* Chapter Progress Indicators */}
-          <nav id="chapter-nav" aria-label="Cosmic Journey Chapters" className="flex flex-col items-end gap-2">
-            <div className="flex gap-1.5" role="tablist" aria-label="Chapter Indicators">
+          {/* Chapter Progress Indicators — Fluid Transition & Clean Celestial Blue Hue */}
+          <nav
+            id="chapter-nav"
+            aria-label="Cosmic Journey Chapters"
+            className="flex flex-col items-end gap-1.5"
+          >
+            <div
+              className="flex items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md p-1.5 shadow-inner"
+              role="tablist"
+              aria-label="Chapter Indicators"
+            >
               {CHAPTERS.map((c, i) => (
                 <button
                   key={c.id}
@@ -432,14 +475,18 @@ function Portfolio() {
                   title={c.title}
                   role="tab"
                   aria-selected={i === index}
-                  className={`h-1.5 rounded-full transition-all ${
-                    i === index ? "w-8 bg-cyan-400 shadow-[0_0_8px_#22d3ee]" : visited.has(c.id) ? "w-3 bg-white/70" : "w-3 bg-white/20"
+                  className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                    i === index
+                      ? "w-8 bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.7),0_0_24px_rgba(14,165,233,0.35)]"
+                      : visited.has(c.id)
+                        ? "w-2.5 bg-sky-400/40 hover:bg-sky-300/70 shadow-[0_0_6px_rgba(56,189,248,0.25)]"
+                        : "w-2 bg-white/15 hover:bg-white/30"
                   }`}
                 />
               ))}
             </div>
             <p className="text-[10px] font-mono uppercase tracking-widest text-white/40">
-              chapter {index + 1} / {CHAPTERS.length}
+              chapter <span className="text-cyan-300 font-bold tabular-nums">{index + 1}</span> / {CHAPTERS.length}
             </p>
           </nav>
         </header>
@@ -449,24 +496,29 @@ function Portfolio() {
           <section
             id="chapter-caption-panel"
             aria-labelledby="chapter-caption-title"
-            className={`absolute left-6 z-20 w-[380px] max-w-[min(380px,calc(50vw-180px))] transition-all duration-700 ${
-              bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-            } bottom-24`}
+            className={`absolute left-6 z-20 w-[380px] max-w-[min(380px,calc(50vw-180px))] transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+              } bottom-24`}
           >
             <div
               key={chapter?.id}
-              className="rounded-2xl border border-cyan-400/30 bg-[#0a0d18]/85 p-6 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] ring-1 ring-cyan-400/10"
+              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-5 sm:p-6 backdrop-blur-2xl ring-1 ring-cyan-400/20"
               style={{ animation: "fadein .4s ease-out" }}
             >
               <h2
                 id="chapter-caption-title"
-                className="font-display text-xs font-bold uppercase tracking-[0.3em] text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+                className="font-display text-xs font-bold uppercase tracking-[0.3em] text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all duration-300"
               >
                 {chapter?.title}
               </h2>
-              <p className="mt-3 text-white/90 leading-relaxed text-[15px] font-sans font-normal">
-                {chapter?.caption}
-              </p>
+              {/* Neomorphed debossed container for the description like the initial Card */}
+              <div className="mt-3 rounded-xl neo-inset p-4 border border-white/5">
+                <p
+                  className="text-[15px] text-white/90 leading-relaxed font-sans font-normal"
+                  style={{ letterSpacing: "normal" }}
+                >
+                  {chapter?.caption}
+                </p>
+              </div>
 
               {/* Pantheon: Quick Trophy Exhibition Drawer */}
               {chapter?.id === "pantheon" && (
@@ -485,7 +537,7 @@ function Portfolio() {
                         key={i}
                         id={`pantheon-artifact-btn-${i}`}
                         onClick={() => setSelectedAchievementIndex(i)}
-                        className="group flex items-center gap-2 rounded-lg border border-amber-400/25 bg-amber-400/5 px-2.5 py-1.5 text-left text-xs text-white/85 transition hover:border-amber-300 hover:bg-amber-400/20"
+                        className="group flex items-center gap-2 rounded-xl neo-btn-amber px-2.5 py-1.5 text-left text-xs text-white/90 transition border border-amber-400/25 cursor-pointer"
                       >
                         <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
                         <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
@@ -497,33 +549,45 @@ function Portfolio() {
                 </div>
               )}
 
-              {/* Finale: Visited Checkmarks */}
+              {/* Finale: Telemetry & Course Map Toggle */}
               {chapter?.id === "finale" && (
-                <div className="mt-4 pt-3 border-t border-orange-400/20">
-                  <p className="text-xs uppercase tracking-[0.25em] text-orange-300 mb-2 font-mono">
-                    SECTORS EXPLORED
-                  </p>
-                  <ul className="grid grid-cols-2 gap-1.5 text-xs">
-                    {CHAPTERS.map((c, i) => (
-                      <li key={c.id}>
-                        <button
-                          id={`visited-section-btn-${c.id}`}
-                          onClick={() => go(i)}
-                          className={`w-full text-left rounded-md border px-2 py-1.5 transition font-mono text-[11px] ${
-                            visited.has(c.id)
-                              ? "border-orange-400/50 bg-orange-400/10 text-white"
-                              : "border-white/10 bg-white/[0.03] text-white/40"
-                          }`}
-                        >
-                          {visited.has(c.id) ? "✓" : "○"} {c.title}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="mt-3.5 pt-3 border-t border-cyan-400/20">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase tracking-[0.25em] text-cyan-300 font-mono font-bold whitespace-nowrap">
+                      ✓ 12 / 12 SECTORS LOGGED
+                    </span>
+                    <button
+                      id="toggle-course-map-btn"
+                      onClick={() => setMapOpen((v) => !v)}
+                      className="text-[10px] font-mono text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/35 px-2.5 py-1 rounded-full transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+                    >
+                      <span>🌐</span>
+                      <span>{mapOpen ? "Hide Map" : "3D Course Map"}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </section>
+        )}
+
+        {/* Floating Interactive 3D Cosmic Course Mini Map */}
+        {chapter?.id === "finale" && mapOpen && (
+          <aside
+            id="floating-cosmic-mini-map"
+            aria-label="Interactive 3D Cosmic Course Mini Map"
+            className={`fixed right-6 sm:right-10 bottom-20 z-35 w-[440px] sm:w-[500px] max-w-[calc(100vw-3rem)] transition-all duration-500 ${
+              bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+            }`}
+          >
+            <CosmicStoryTrailMiniMap
+              chapters={CHAPTERS}
+              visited={visited}
+              currentIndex={index}
+              onSelectChapter={(i) => go(i)}
+              onClose={() => setMapOpen(false)}
+            />
+          </aside>
         )}
 
         {/* Controls Cheat Sheet — bottom-right */}
@@ -532,7 +596,10 @@ function Portfolio() {
             bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
         >
-          <ControlsCheatSheet freeRoam={freeRoam} />
+          <ControlsCheatSheet
+            freeRoam={freeRoam}
+            isIntro={chapter?.id === "intro"}
+          />
         </div>
 
         {/* Ambient Key Hints */}
@@ -540,49 +607,48 @@ function Portfolio() {
           <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
         )}
 
-        {/* Spacebar Orbit Prompt when Idle */}
+        {/* Spacebar Orbit Prompt when Idle — Subtle & Glassy */}
         <div
-          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-3 transition-all duration-700 ${
-            bootReady &&
-            isIdle &&
-            !contactOpen &&
-            projectIndex === null &&
-            selectedAchievementIndex === null &&
-            index < CHAPTERS.length - 1 &&
-            chapter?.id !== "intro" &&
-            chapter?.id !== "wormhole"
-              ? "opacity-100 translate-y-0 scale-100"
+          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-2 transition-all duration-700 ${bootReady &&
+              isIdle &&
+              !contactOpen &&
+              projectIndex === null &&
+              selectedAchievementIndex === null &&
+              index < CHAPTERS.length - 1 &&
+              chapter?.id !== "intro" &&
+              chapter?.id !== "wormhole"
+              ? "opacity-55 translate-y-0 scale-100"
               : "opacity-0 translate-y-2 scale-95 pointer-events-none"
-          } bottom-18`}
+            } bottom-15`}
         >
-          <div className="flex items-center gap-2.5 rounded-full border border-cyan-400/50 bg-slate-950/90 px-5 py-2 backdrop-blur-2xl shadow-[0_0_35px_rgba(34,211,238,0.35)] ring-1 ring-cyan-300/30">
-            <kbd className="rounded border border-cyan-300/70 bg-cyan-400/20 px-2.5 py-0.5 text-[11px] font-mono font-bold tracking-widest text-cyan-200">
+          <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 backdrop-blur-md">
+            <kbd className="rounded px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-400/25 bg-cyan-950/40">
               SPACE
             </kbd>
-            <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-cyan-100 font-medium">
-              Advance Orbit
+            <span className="text-[10px] font-mono tracking-[0.15em] uppercase text-white/55">
+              Advance Orbit ➔
             </span>
-            <span className="text-cyan-400 text-sm">➔</span>
           </div>
         </div>
 
-        {/* Bottom Navigation Buttons */}
+        {/* Subtle Bottom Navigation Buttons */}
         <nav
           id="chapter-step-controls"
           aria-label="Chapter step controls"
-          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 transition-all duration-700 ${
-            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-          } ${chapter?.id === "intro" ? "bottom-14" : "bottom-6"}`}
+          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/35 backdrop-blur-md transition-all duration-500 opacity-75 hover:opacity-100 ${bootReady ? "translate-y-0" : "translate-y-4 opacity-0 pointer-events-none"
+            } ${chapter?.id === "intro" ? "bottom-12" : "bottom-5"}`}
         >
           <button
             id="prev-chapter-btn"
             onClick={() => go(index - 1)}
             disabled={index === 0}
             aria-label="Previous chapter"
-            className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm backdrop-blur-md font-mono disabled:opacity-25 hover:border-white transition-colors"
+            className="rounded-full px-3.5 py-1.5 text-xs font-mono text-white/50 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
           >
-            ← Previous
+            <span>←</span>
+            <span>Prev</span>
           </button>
+          <span className="h-3 w-px bg-white/10" />
           <button
             id="next-chapter-btn"
             onClick={() => {
@@ -590,22 +656,37 @@ function Portfolio() {
               go(index + 1);
             }}
             disabled={index === CHAPTERS.length - 1}
-            aria-label={index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"}
-            className="rounded-full border border-cyan-400 bg-cyan-400 text-black px-6 py-2 text-sm font-semibold font-mono backdrop-blur-md disabled:opacity-30 hover:bg-cyan-300 hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all"
+            aria-label={
+              index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"
+            }
+            className="rounded-full px-4 py-1.5 text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.12] hover:bg-cyan-400/[0.22] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.1)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer"
           >
-            {index === 0 ? "Initiate Odyssey →" : index === CHAPTERS.length - 1 ? "Journey Complete" : "Continue →"}
+            <span>
+              {index === 0
+                ? "Initiate Odyssey"
+                : index === CHAPTERS.length - 1
+                  ? "Singularity"
+                  : "Continue"}
+            </span>
+            <span>→</span>
           </button>
         </nav>
 
         {/* Screen Reader & SEO Manifest */}
-        <section id="accessible-portfolio-manifest" className="sr-only" aria-label="Portfolio Dossier and Experience Manifest">
+        <section
+          id="accessible-portfolio-manifest"
+          className="sr-only"
+          aria-label="Portfolio Dossier and Experience Manifest"
+        >
           <h2>About Bacem Zarai</h2>
           <p>{BRAND.description}</p>
           <h2>Engineering Waypoints & Experiences</h2>
           <ul>
             {(data.experiences ?? []).map((e: Experience, i: number) => (
               <li key={i}>
-                <h3>{e.name} — {e.place ?? "Engineering Milestone"} ({e.year})</h3>
+                <h3>
+                  {e.name} — {e.place ?? "Engineering Milestone"} ({e.year})
+                </h3>
                 <p>{e.description}</p>
               </li>
             ))}
@@ -625,7 +706,9 @@ function Portfolio() {
           <ul>
             {achievementsList.map((a: Achievement, i: number) => (
               <li key={i}>
-                <h3>{a.name} — {a.issuer} ({a.year})</h3>
+                <h3>
+                  {a.name} — {a.issuer} ({a.year})
+                </h3>
                 <p>{a.description}</p>
               </li>
             ))}
@@ -659,13 +742,17 @@ function Portfolio() {
             currentIndex={selectedAchievementIndex}
             totalCount={achievementsList.length}
             onClose={() => setSelectedAchievementIndex(null)}
-            onNext={() => setSelectedAchievementIndex((selectedAchievementIndex + 1) % achievementsList.length)}
-            onPrev={() => setSelectedAchievementIndex((selectedAchievementIndex - 1 + achievementsList.length) % achievementsList.length)}
+            onNext={() =>
+              setSelectedAchievementIndex((selectedAchievementIndex + 1) % achievementsList.length)
+            }
+            onPrev={() =>
+              setSelectedAchievementIndex(
+                (selectedAchievementIndex - 1 + achievementsList.length) % achievementsList.length,
+              )
+            }
           />
         )}
       </main>
     </PortfolioContext.Provider>
   );
 }
-
-export default Portfolio;

@@ -85,22 +85,22 @@ npm run dev          # → http://localhost:8080
 brand:
   name: "Your Name"
   tagline: "embedded · robotics · vision"
-  description: "One-line pitch shown on the intro screen."   # optional
+  description: "One-line pitch shown on the intro screen." # optional
   email: "you@example.com"
   linkedin: "https://www.linkedin.com/in/you/"
   github: "https://github.com/you"
 
-experiences:            # planets BEFORE the wormhole (in order)
-  - place: "Company"    # big display name on the planet
+experiences: # planets BEFORE the wormhole (in order)
+  - place: "Company" # big display name on the planet
     name: "Job Title"
     year: "2024 → now"
-    description: "What you did."                # optional
-    color: "#3da9ff"    # planet main color
-    accent: "#06203d"   # planet secondary color
-    pattern: "grid"     # grid | stripes | gas | ice | lava
+    description: "What you did." # optional
+    color: "#3da9ff" # planet main color
+    accent: "#06203d" # planet secondary color
+    pattern: "grid" # grid | stripes | gas | ice | lava
     # z: -60            # optional; auto-spaced if omitted
 
-projects:               # planets orbiting in the galaxy
+projects: # planets orbiting in the galaxy
   - name: "Project"
     desc: "Short subtitle"
     details: "Longer text shown in the modal."
@@ -108,24 +108,23 @@ projects:               # planets orbiting in the galaxy
     color: "#3cf0a0"
     accent: "#0a3b2a"
     pattern: "ice"
-    radius: 5           # orbit radius
-    speed: 0.18         # orbit speed
-    size: 1.0           # planet size
+    radius: 5 # orbit radius
+    speed: 0.18 # orbit speed
+    size: 1.0 # planet size
 
-skills:                 # or a flat list → treated as technical
+skills: # or a flat list → treated as technical
   technical: ["C++", "Python"]
   soft: ["Leadership", "Teamwork"]
 
-achievements:           # optional — orbiting medals in "The Pantheon"
+achievements: # optional — orbiting medals in "The Pantheon"
   - name: "Certification"
-    issuer: "Issuer"    # optional
-    year: "2024"        # optional
-    icon: "★"           # optional
-    color: "#ffd27a"    # optional
-    accent: "#5a3a00"   # optional
-    description: "..."  # optional
+    issuer: "Issuer" # optional
+    year: "2024" # optional
+    icon: "★" # optional
+    color: "#ffd27a" # optional
+    accent: "#5a3a00" # optional
+    description: "..." # optional
 ---
-
 Anything below the frontmatter is ignored by the app, so you can keep a normal README here.
 ```
 

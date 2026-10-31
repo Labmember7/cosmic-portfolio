@@ -127,7 +127,8 @@ const STATIC_FALLBACK_PORTFOLIO: PortfolioContent = {
   brand: {
     name: "Bacem Zarai",
     tagline: "Robotics, Embedded Systems & Computer Vision",
-    description: "Robotics, firmware, and embedded perception engineer building autonomous systems.",
+    description:
+      "Robotics, firmware, and embedded perception engineer building autonomous systems.",
     email: "contact@bacemzarai.dev",
     linkedin: "https://linkedin.com/in/bacemzarai",
     github: "https://github.com/Labmember7",
@@ -179,9 +180,7 @@ export const PortfolioContext = createContext<PortfolioContent | null>(null);
 export function usePortfolio(): PortfolioContent {
   const ctx = useContext(PortfolioContext);
   if (!ctx) {
-    throw new Error(
-      "usePortfolio() called outside of <PortfolioContext.Provider>",
-    );
+    throw new Error("usePortfolio() called outside of <PortfolioContext.Provider>");
   }
   return ctx;
 }

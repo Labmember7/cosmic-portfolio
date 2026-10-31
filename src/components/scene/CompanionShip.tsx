@@ -13,7 +13,7 @@ function applyHudOverlay(g: THREE.Object3D) {
     const m = (obj as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
     if (!m) return;
     (Array.isArray(m) ? m : [m]).forEach((mat) => {
-      (mat as any).fog = false;
+      (mat as THREE.Material & { fog?: boolean }).fog = false;
       mat.depthTest = false;
       mat.depthWrite = false;
       mat.transparent = true;
@@ -39,7 +39,12 @@ function BroadcastRings({ hoverRef }: { hoverRef: React.MutableRefObject<number>
       {[0, 1, 2].map((i) => (
         <mesh key={i}>
           <ringGeometry args={[0.36, 0.385, 48]} />
-          <meshBasicMaterial color="#67e8f9" transparent opacity={0} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial
+            color="#67e8f9"
+            transparent
+            opacity={0}
+            blending={THREE.AdditiveBlending}
+          />
         </mesh>
       ))}
     </group>
@@ -86,14 +91,18 @@ function GroundControlLabel({
         style={{
           pointerEvents: "auto",
           transform: "translate(-100%, 0)",
-          animation: transmitting ? undefined : "gcIn .6s ease-out both, gcPing 6s ease-in-out 1.5s infinite",
+          animation: transmitting
+            ? undefined
+            : "gcIn .6s ease-out both, gcPing 6s ease-in-out 1.5s infinite",
           border: `1px solid ${hovered || transmitting ? "rgba(103,232,249,.75)" : "rgba(103,232,249,.3)"}`,
           background: "linear-gradient(135deg, rgba(8,20,38,.88), rgba(17,10,40,.82))",
           backdropFilter: "blur(14px)",
           padding: "8px 12px 9px 10px",
           minWidth: 196,
           transition: "border-color .25s, box-shadow .25s",
-          boxShadow: hovered ? "0 0 30px rgba(34,211,238,.45)" : undefined,
+          boxShadow: hovered
+            ? "-3px -3px 10px rgba(103,232,249,.35), 6px 6px 18px rgba(0,0,0,.85), 0 0 30px rgba(34,211,238,.45), inset 1px 1px 1px rgba(255,255,255,0.25)"
+            : "-3px -3px 8px rgba(255,255,255,.06), 5px 5px 14px rgba(0,0,0,.8), inset 1px 1px 1px rgba(255,255,255,0.12), inset -1px -1px 1px rgba(0,0,0,0.5)",
           cursor: "pointer",
         }}
       >
@@ -107,8 +116,14 @@ function GroundControlLabel({
           }}
         />
         {/* corner brackets */}
-        <span aria-hidden className="pointer-events-none absolute left-1 top-1 h-2 w-2 border-l border-t border-cyan-300/70" />
-        <span aria-hidden className="pointer-events-none absolute bottom-1 right-1 h-2 w-2 border-b border-r border-cyan-300/70" />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1 top-1 h-2 w-2 border-l border-t border-cyan-300/70"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-1 right-1 h-2 w-2 border-b border-r border-cyan-300/70"
+        />
 
         <span className="relative flex items-center gap-2.5">
           {/* signal meter */}
@@ -119,7 +134,11 @@ function GroundControlLabel({
                 className="w-[3px] origin-bottom rounded-sm"
                 style={{
                   height: `${hgt * 100}%`,
-                  background: transmitting ? "#f0abfc" : hovered ? "#67e8f9" : "rgba(103,232,249,.7)",
+                  background: transmitting
+                    ? "#f0abfc"
+                    : hovered
+                      ? "#67e8f9"
+                      : "rgba(103,232,249,.7)",
                   animation: `gcBars ${transmitting ? 0.35 : hovered ? 0.6 : 1.4}s ease-in-out ${i * 0.15}s infinite`,
                 }}
               />
@@ -146,7 +165,10 @@ function GroundControlLabel({
             </span>
             <span
               className="overflow-hidden font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-200/80 transition-all duration-300"
-              style={{ maxHeight: hovered && !transmitting ? 16 : 0, opacity: hovered && !transmitting ? 1 : 0 }}
+              style={{
+                maxHeight: hovered && !transmitting ? 16 : 0,
+                opacity: hovered && !transmitting ? 1 : 0,
+              }}
             >
               ▸ click to transmit
             </span>
@@ -162,7 +184,10 @@ function GroundControlLabel({
         </span>
 
         {/* uplink progress */}
-        <span aria-hidden className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-white/10">
+        <span
+          aria-hidden
+          className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-white/10"
+        >
           <span
             className="absolute inset-y-0 left-0 rounded-full"
             style={{
@@ -179,7 +204,13 @@ function GroundControlLabel({
   );
 }
 
-export function CompanionShip({ onContact, isWormhole = false }: { onContact: () => void; isWormhole?: boolean }) {
+export function CompanionShip({
+  onContact,
+  isWormhole = false,
+}: {
+  onContact: () => void;
+  isWormhole?: boolean;
+}) {
   const { camera, scene } = useThree();
   const root = useRef<THREE.Group>(null);
   const sat = useRef<THREE.Group>(null);
@@ -372,11 +403,21 @@ export function CompanionShip({ onContact, isWormhole = false }: { onContact: ()
         <group>
           <mesh>
             <sphereGeometry args={[1.85, 32, 32]} />
-            <meshBasicMaterial color="#38bdf8" transparent opacity={0.16} blending={THREE.AdditiveBlending} />
+            <meshBasicMaterial
+              color="#38bdf8"
+              transparent
+              opacity={0.16}
+              blending={THREE.AdditiveBlending}
+            />
           </mesh>
           <mesh rotation={[Math.PI / 2.4, 0, 0]}>
             <torusGeometry args={[1.9, 0.03, 12, 64]} />
-            <meshBasicMaterial color="#00f5ff" transparent opacity={0.6} blending={THREE.AdditiveBlending} />
+            <meshBasicMaterial
+              color="#00f5ff"
+              transparent
+              opacity={0.6}
+              blending={THREE.AdditiveBlending}
+            />
           </mesh>
         </group>
       )}
@@ -389,7 +430,14 @@ export function CompanionShip({ onContact, isWormhole = false }: { onContact: ()
         </mesh>
         <group ref={packets}>
           {[0, 1, 2].map((i) => (
-            <mesh key={i} position={[Math.cos((i * Math.PI * 2) / 3) * 1.3, Math.sin((i * Math.PI * 2) / 3) * 1.3, 0]}>
+            <mesh
+              key={i}
+              position={[
+                Math.cos((i * Math.PI * 2) / 3) * 1.3,
+                Math.sin((i * Math.PI * 2) / 3) * 1.3,
+                0,
+              ]}
+            >
               <sphereGeometry args={[i === 0 ? 0.06 : 0.04, 12, 12]} />
               <meshBasicMaterial color={i === 0 ? "#f0abfc" : "#67e8f9"} />
             </mesh>
@@ -403,11 +451,21 @@ export function CompanionShip({ onContact, isWormhole = false }: { onContact: ()
       {/* uplink shockwaves */}
       <mesh ref={shock}>
         <ringGeometry args={[0.92, 1, 64]} />
-        <meshBasicMaterial color="#67e8f9" transparent opacity={0} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#67e8f9"
+          transparent
+          opacity={0}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       <mesh ref={shock2}>
         <ringGeometry args={[0.95, 1, 64]} />
-        <meshBasicMaterial color="#f0abfc" transparent opacity={0} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial
+          color="#f0abfc"
+          transparent
+          opacity={0}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
 
       {/* ── the satellite ── */}
@@ -415,7 +473,13 @@ export function CompanionShip({ onContact, isWormhole = false }: { onContact: ()
         {/* gold-foil bus */}
         <mesh>
           <cylinderGeometry args={[0.3, 0.3, 0.5, 8]} />
-          <meshStandardMaterial color="#c9a24b" metalness={0.95} roughness={0.32} emissive="#3a2806" emissiveIntensity={0.6} />
+          <meshStandardMaterial
+            color="#c9a24b"
+            metalness={0.95}
+            roughness={0.32}
+            emissive="#3a2806"
+            emissiveIntensity={0.6}
+          />
         </mesh>
         <mesh>
           <cylinderGeometry args={[0.31, 0.31, 0.08, 8]} />
@@ -437,7 +501,11 @@ export function CompanionShip({ onContact, isWormhole = false }: { onContact: ()
             [wingL, -1],
           ] as const
         ).map(([ref, side]) => (
-          <group key={side} position={[side * 0.3, 0, 0]} rotation={[0, side === 1 ? 0 : Math.PI, 0]}>
+          <group
+            key={side}
+            position={[side * 0.3, 0, 0]}
+            rotation={[0, side === 1 ? 0 : Math.PI, 0]}
+          >
             <group ref={ref}>
               <mesh position={[0.12, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
                 <cylinderGeometry args={[0.02, 0.02, 0.24, 6]} />

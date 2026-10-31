@@ -24,7 +24,10 @@ export function TachyonStream({ count = 380 }: { count?: number }) {
       spd[i] = 14 + Math.random() * 18;
 
       const p = (z + 26) / 52;
-      const color = p > 0.5 ? cCyan.clone().lerp(cViolet, (1 - p) * 2) : cViolet.clone().lerp(cGold, (0.5 - p) * 2);
+      const color =
+        p > 0.5
+          ? cCyan.clone().lerp(cViolet, (1 - p) * 2)
+          : cViolet.clone().lerp(cGold, (0.5 - p) * 2);
       cols[i * 3] = color.r;
       cols[i * 3 + 1] = color.g;
       cols[i * 3 + 2] = color.b;
@@ -87,15 +90,36 @@ export function GravitationalRipples({ z = 24 }: { z?: number }) {
     <group position={[0, 0, z]}>
       <mesh ref={ripple1}>
         <ringGeometry args={[6.8, 7.05, 96]} />
-        <meshBasicMaterial color="#38bdf8" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial
+          color="#38bdf8"
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
       <mesh ref={ripple2}>
         <ringGeometry args={[6.8, 7.05, 96]} />
-        <meshBasicMaterial color="#818cf8" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial
+          color="#818cf8"
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
       <mesh ref={ripple3}>
         <ringGeometry args={[6.8, 7.05, 96]} />
-        <meshBasicMaterial color="#c084fc" transparent opacity={0.3} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial
+          color="#c084fc"
+          transparent
+          opacity={0.3}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
       </mesh>
     </group>
   );
@@ -239,7 +263,8 @@ export function Wormhole({
         const y = Math.sin(theta) * r + (Math.random() - 0.5) * 16;
         const dotSize = Math.max(0.5, (1 - r / 220) * 3.5 + Math.random() * 2);
         const alpha = (1 - r / 240) * 0.85;
-        g.fillStyle = i % 2 === 0 ? `rgba(255, 220, 140, ${alpha})` : `rgba(200, 150, 255, ${alpha})`;
+        g.fillStyle =
+          i % 2 === 0 ? `rgba(255, 220, 140, ${alpha})` : `rgba(200, 150, 255, ${alpha})`;
         g.beginPath();
         g.arc(x, y, dotSize, 0, Math.PI * 2);
         g.fill();
@@ -454,4 +479,3 @@ export function Wormhole({
 }
 
 export default Wormhole;
-

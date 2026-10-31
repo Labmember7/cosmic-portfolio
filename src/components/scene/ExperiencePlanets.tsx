@@ -136,7 +136,9 @@ export function ExperiencePlanet({
         <sphereGeometry args={[2, 64, 64]} />
         <meshPhysicalMaterial
           map={tex}
-          roughness={telemetry.biomeType === "oceanic" ? 0.28 : telemetry.biomeType === "ice" ? 0.35 : 0.58}
+          roughness={
+            telemetry.biomeType === "oceanic" ? 0.28 : telemetry.biomeType === "ice" ? 0.35 : 0.58
+          }
           metalness={telemetry.biomeType === "cyber" ? 0.35 : 0.08}
           clearcoat={telemetry.biomeType === "oceanic" || telemetry.biomeType === "ice" ? 0.8 : 0.4}
           clearcoatRoughness={0.2}
@@ -189,18 +191,33 @@ export function ExperiencePlanet({
       )}
 
       {/* Subtle planetary local illumination */}
-      <pointLight position={[0, 0, 2.5]} intensity={0.7} color={telemetry.atmosphereColor} distance={12} />
+      <pointLight
+        position={[0, 0, 2.5]}
+        intensity={0.7}
+        color={telemetry.atmosphereColor}
+        distance={12}
+      />
 
       {/* Orbiting holographic telemetry scan rings when hovered */}
       {isActiveWaypoint && hovered && (
         <group ref={scanRingRef} raycast={() => null}>
           <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
             <ringGeometry args={[2.3, 2.34, 64]} />
-            <meshBasicMaterial color={telemetry.atmosphereColor} transparent opacity={0.65} side={THREE.DoubleSide} />
+            <meshBasicMaterial
+              color={telemetry.atmosphereColor}
+              transparent
+              opacity={0.65}
+              side={THREE.DoubleSide}
+            />
           </mesh>
           <mesh rotation={[0, Math.PI / 2, 0]} raycast={() => null}>
             <ringGeometry args={[2.35, 2.38, 48]} />
-            <meshBasicMaterial color={telemetry.sunsetLimbColor} transparent opacity={0.45} side={THREE.DoubleSide} />
+            <meshBasicMaterial
+              color={telemetry.sunsetLimbColor}
+              transparent
+              opacity={0.45}
+              side={THREE.DoubleSide}
+            />
           </mesh>
         </group>
       )}
@@ -212,7 +229,12 @@ export function ExperiencePlanet({
           <group position={[isLeft ? -2.15 : 2.15, 0.15, 0]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
               <ringGeometry args={[0.07, 0.12, 24]} />
-              <meshBasicMaterial color={telemetry.atmosphereColor} side={THREE.DoubleSide} transparent opacity={0.9} />
+              <meshBasicMaterial
+                color={telemetry.atmosphereColor}
+                side={THREE.DoubleSide}
+                transparent
+                opacity={0.9}
+              />
             </mesh>
             <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
               <circleGeometry args={[0.035, 16]} />
@@ -235,7 +257,7 @@ export function ExperiencePlanet({
                       color: telemetry.atmosphereColor,
                       transparent: true,
                       opacity: 0.85,
-                    })
+                    }),
                   )
                 }
               />
@@ -357,4 +379,3 @@ export function ExperiencePlanet({
     </group>
   );
 }
-

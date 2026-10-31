@@ -83,7 +83,11 @@ function ConstellationGroup({
     () =>
       template.map((p, i) => {
         const jitterZ = Math.sin(i * 2.1) * 0.4;
-        return new THREE.Vector3(origin[0] + p.x * scale, origin[1] + p.y * scale, origin[2] + jitterZ);
+        return new THREE.Vector3(
+          origin[0] + p.x * scale,
+          origin[1] + p.y * scale,
+          origin[2] + jitterZ,
+        );
       }),
     [template, origin, scale],
   );
@@ -113,7 +117,14 @@ function ConstellationGroup({
             <sphereGeometry args={[0.34, 16, 16]} />
             <meshBasicMaterial color={starColor} transparent opacity={0.18} />
           </mesh>
-          <Text font={FUTURA_FONT} position={[0, 0.5, 0]} fontSize={0.26} color="#fff" outlineWidth={0.008} outlineColor="#000">
+          <Text
+            font={FUTURA_FONT}
+            position={[0, 0.5, 0]}
+            fontSize={0.26}
+            color="#fff"
+            outlineWidth={0.008}
+            outlineColor="#000"
+          >
             {labels[i]}
           </Text>
         </group>
@@ -170,4 +181,3 @@ export function SkillConstellation({ centerZ }: { centerZ: number }) {
 }
 
 export default SkillConstellation;
-

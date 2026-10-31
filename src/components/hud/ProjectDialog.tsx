@@ -37,10 +37,9 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
       aria-label={project.name}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl border bg-[#0b0c16]/90 p-6 md:p-8 shadow-[0_20px_70px_rgba(0,0,0,0.85)] backdrop-blur-xl transition-all"
+        className="relative w-full max-w-lg rounded-2xl border neo-surface-cyan p-6 md:p-8 backdrop-blur-xl transition-all"
         style={{
           borderColor: `${color}44`,
-          boxShadow: `0 0 50px ${color}15, 0 25px 60px rgba(0,0,0,0.8)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -54,24 +53,26 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-2">
             <span
-              className="inline-block h-2 w-2 rounded-full animate-pulse"
+              className="inline-block h-2.5 w-2.5 rounded-full animate-pulse shadow-sm"
               style={{ background: color, boxShadow: `0 0 10px ${color}` }}
             />
-            <p
-              className="text-[11px] font-mono uppercase tracking-[0.25em]"
-              style={{ color }}
-            >
+            <p className="text-[11px] font-mono uppercase tracking-[0.25em]" style={{ color }}>
               PROJECT DOSSIER // DEPLOYED
             </p>
           </div>
           <button
             id="close-project-modal-btn"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+            className="rounded-xl neo-btn p-2 text-white/50 hover:text-white transition cursor-pointer"
             aria-label="Close project modal"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -84,67 +85,65 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
           <p className="mt-1 text-sm font-medium" style={{ color: `${color}cc` }}>
             {project.desc}
           </p>
-          <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.03] p-4">
-            <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-line font-sans">
-              {project.details}
-            </p>
-          </div>
-        </div>
-
-        {/* Tech Stack Badges */}
-        <div className="mt-5">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">
-            TECHNOLOGY STACK
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {project.stack.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-md border px-2.5 py-1 text-[11px] font-mono tracking-wide"
-                style={{
-                  borderColor: `${color}33`,
-                  backgroundColor: `${color}10`,
-                  color: color,
-                }}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer controls if prev/next present */}
-        {(onPrev || onNext) && (
-          <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
-            <div className="flex gap-2">
-              {onPrev && (
-                <button
-                  onClick={onPrev}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 hover:border-white/30 hover:text-white transition"
-                >
-                  ← Previous
-                </button>
-              )}
-              {onNext && (
-                <button
-                  onClick={onNext}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70 hover:border-white/30 hover:text-white transition"
-                >
-                  Next →
-                </button>
-              )}
+            <div className="mt-4 rounded-xl neo-inset border border-white/10 p-4.5">
+              <p className="text-[14px] leading-relaxed text-white/80 whitespace-pre-line font-sans">
+                {project.details}
+              </p>
             </div>
-            <button
-              onClick={onClose}
-              className="rounded-lg px-4 py-1.5 text-xs font-semibold text-black transition hover:opacity-90"
-              style={{ background: color }}
-            >
-              Done
-            </button>
           </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
+          {/* Tech Stack Badges */}
+          <div className="mt-5">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">
+              TECHNOLOGY STACK
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {project.stack.map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-lg neo-inset border px-3 py-1 text-[11px] font-mono tracking-wide"
+                  style={{
+                    borderColor: `${color}44`,
+                    color: color,
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer controls if prev/next present */}
+          {(onPrev || onNext) && (
+            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+              <div className="flex gap-2">
+                {onPrev && (
+                  <button
+                    onClick={onPrev}
+                    className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-xs text-white/70 hover:text-white transition cursor-pointer font-mono"
+                  >
+                    ← Previous
+                  </button>
+                )}
+                {onNext && (
+                  <button
+                    onClick={onNext}
+                    className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-xs text-white/70 hover:text-white transition cursor-pointer font-mono"
+                  >
+                    Next →
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={onClose}
+                className="rounded-xl neo-btn-cyan px-5 py-2 text-xs font-semibold text-black transition hover:opacity-95 cursor-pointer font-mono shadow-md"
+                style={{ background: color }}
+              >
+                Done
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      );
+};

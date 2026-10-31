@@ -13,6 +13,7 @@ import { Galaxy } from "./ProjectGalaxy";
 import { SkillConstellation } from "./SkillConstellations";
 import { Pantheon } from "./Pantheon";
 import { BlackHole } from "./CelestialBodies";
+import { UniverseTrail } from "./UniverseTrail";
 
 export function SectionTitle({
   position,
@@ -32,50 +33,65 @@ export function SectionTitle({
   maxDist?: number;
 }) {
   const ref = useRef<THREE.Group>(null);
-  const [inRange, setInRange] = useState(false);
+  const opacityRef = useRef(0);
+  const [opacity, setOpacity] = useState(0);
   const targetPos = useMemo(() => new THREE.Vector3(...position), [position]);
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const dist = state.camera.position.distanceTo(targetPos);
-    const visible = dist < maxDist;
-    if (inRange !== visible) {
-      setInRange(visible);
+    // Smooth distance fade: begins fading at maxDist, full opacity by maxDist - 14
+    const fadeStart = maxDist;
+    const fadeEnd = Math.max(8, maxDist - 14);
+    const target =
+      dist >= fadeStart
+        ? 0
+        : dist <= fadeEnd
+          ? 1
+          : 1 - (dist - fadeEnd) / (fadeStart - fadeEnd);
+
+    opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, target, Math.min(1, dt * 5.5));
+    if (Math.abs(opacityRef.current - opacity) > 0.015) {
+      setOpacity(opacityRef.current);
     }
-    if (visible && ref.current) {
+
+    if (opacityRef.current > 0.01 && ref.current) {
       const t = state.clock.elapsedTime;
       ref.current.scale.setScalar(1 + Math.sin(t * 1.6) * 0.03);
     }
   });
 
-  if (!inRange) return null;
+  if (opacity <= 0.01) return null;
 
   return (
     <group ref={ref} position={position}>
       <Html center distanceFactor={distance} transform sprite zIndexRange={[5, 0]}>
         <div
-          className="pointer-events-none select-none flex flex-col items-center"
-          style={{ fontFamily: "'Orbitron','Rajdhani',monospace" }}
+          className="pointer-events-none select-none flex flex-col items-center transition-all duration-300"
+          style={{
+            fontFamily: "'Orbitron','Rajdhani',monospace",
+            opacity,
+            transform: `translateY(${(1 - opacity) * 10}px) scale(${0.95 + opacity * 0.05})`,
+          }}
         >
           <div
             className="whitespace-nowrap font-black"
             style={{
-              fontSize: 22,
+              fontSize: 24,
               letterSpacing: "0.35em",
-              color,
-              textShadow: `0 0 8px ${glow}, 0 0 20px ${glow}, 0 0 2px #000`,
-              WebkitTextStroke: "1px rgba(0,0,0,0.6)",
+              color: "#ffffff",
+              textShadow: `0 0 10px ${color}, 0 0 22px ${glow}, 0 0 45px ${glow}`,
             }}
           >
             {primary}
           </div>
           <div
-            className="whitespace-nowrap mt-1"
+            className="whitespace-nowrap mt-1 font-semibold"
             style={{
-              fontSize: 8,
-              letterSpacing: "0.6em",
+              fontSize: 8.5,
+              letterSpacing: "0.55em",
               color,
-              opacity: 0.8,
-              textShadow: `0 0 6px ${glow}`,
+              opacity: 0.95,
+              textShadow: `0 0 8px ${glow}`,
             }}
           >
             {secondary}
@@ -83,10 +99,10 @@ export function SectionTitle({
           <div
             style={{
               marginTop: 4,
-              width: 120,
-              height: 1,
+              width: 130,
+              height: 1.5,
               background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
-              boxShadow: `0 0 6px ${glow}`,
+              boxShadow: `0 0 8px ${glow}`,
             }}
           />
         </div>
@@ -98,16 +114,33 @@ export function SectionTitle({
 export function SunTitle({ centerZ }: { centerZ: number }) {
   const ringRef = useRef<THREE.Group>(null);
   const labelRef = useRef<THREE.Group>(null);
-  const [inRange, setInRange] = useState(false);
+  const opacityRef = useRef(0);
+  const [opacity, setOpacity] = useState(0);
   const targetPos = useMemo(() => new THREE.Vector3(0, 0, centerZ), [centerZ]);
 
-  useFrame((state) => {
+  useFrame((state, dt) => {
     const t = state.clock.elapsedTime;
     if (ringRef.current) ringRef.current.rotation.z = t * 0.25;
     const dist = state.camera.position.distanceTo(targetPos);
-    const visible = dist < 50;
-    if (inRange !== visible) setInRange(visible);
-    if (visible && labelRef.current) labelRef.current.scale.setScalar(1 + Math.sin(t * 1.4) * 0.04);
+    
+    // Smooth distance fade
+    const fadeStart = 50;
+    const fadeEnd = 36;
+    const target =
+      dist >= fadeStart
+        ? 0
+        : dist <= fadeEnd
+          ? 1
+          : 1 - (dist - fadeEnd) / (fadeStart - fadeEnd);
+
+    opacityRef.current = THREE.MathUtils.lerp(opacityRef.current, target, Math.min(1, dt * 5.5));
+    if (Math.abs(opacityRef.current - opacity) > 0.015) {
+      setOpacity(opacityRef.current);
+    }
+
+    if (opacityRef.current > 0.01 && labelRef.current) {
+      labelRef.current.scale.setScalar(1 + Math.sin(t * 1.4) * 0.04);
+    }
   });
 
   return (
@@ -138,13 +171,17 @@ export function SunTitle({ centerZ }: { centerZ: number }) {
         </mesh>
       </group>
 
-      {/* floating label above the sun */}
-      {inRange && (
+      {/* floating label above the sun with smooth fade transition */}
+      {opacity > 0.01 && (
         <group ref={labelRef} position={[0, 4.5, 2]}>
           <Html center distanceFactor={14} transform sprite zIndexRange={[5, 0]}>
             <div
-              className="pointer-events-none select-none flex flex-col items-center"
-              style={{ fontFamily: "'Orbitron','Rajdhani',monospace" }}
+              className="pointer-events-none select-none flex flex-col items-center transition-all duration-300"
+              style={{
+                fontFamily: "'Orbitron','Rajdhani',monospace",
+                opacity,
+                transform: `translateY(${(1 - opacity) * 10}px) scale(${0.95 + opacity * 0.05})`,
+              }}
             >
               <div
                 className="whitespace-nowrap font-black"
@@ -152,7 +189,8 @@ export function SunTitle({ centerZ }: { centerZ: number }) {
                   fontSize: 26,
                   letterSpacing: "0.4em",
                   color: "#ffd27a",
-                  textShadow: "0 0 10px rgba(255,180,80,0.95), 0 0 28px rgba(255,120,40,0.8), 0 0 2px #2a0a00",
+                  textShadow:
+                    "0 0 10px rgba(255,180,80,0.95), 0 0 28px rgba(255,120,40,0.8), 0 0 2px #2a0a00",
                   WebkitTextStroke: "1px rgba(40,10,0,0.7)",
                 }}
               >
@@ -212,11 +250,18 @@ export function CosmicWorld({
     <>
       <ambientLight intensity={0.35 * luminosity} />
       <pointLight position={[20, 10, 20]} intensity={1.1 * luminosity} color="#ffffff" />
-      <pointLight position={[-15, -5, layout.wormholeZ + 10]} intensity={0.9 * luminosity} color="#7a3cff" />
+      <pointLight
+        position={[-15, -5, layout.wormholeZ + 10]}
+        intensity={0.9 * luminosity}
+        color="#7a3cff"
+      />
       <UniversalCosmicStars />
       <ShootingStars layout={layout} />
 
       <IntroAstronaut />
+
+      {/* Radiant Journey Constellation Flight Trail */}
+      <UniverseTrail layout={layout} experiences={EXPERIENCES} />
 
       {EXPERIENCES.map((e: Experience, i: number) => (
         <ExperiencePlanet
@@ -268,13 +313,13 @@ export function CosmicWorld({
         maxDist={36}
       />
       <SectionTitle
-        position={[0, 4.5, layout.blackholeZ + 3]}
+        position={[0, 3.8, layout.finaleZ - 4]}
         primary="THE SINGULARITY"
         secondary="// END OF TRANSMISSION"
-        color="#ff7a8a"
-        glow="rgba(255,122,138,0.9)"
-        distance={10}
-        maxDist={30}
+        color="#ff3366"
+        glow="rgba(255, 51, 102, 1)"
+        distance={12}
+        maxDist={65}
       />
     </>
   );

@@ -189,7 +189,12 @@ export function FierySun({ position }: { position: [number, number, number] }) {
       </mesh>
       {/* corona billboard */}
       <sprite ref={coronaRef} scale={[10, 10, 1]}>
-        <spriteMaterial map={coronaTex} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        <spriteMaterial
+          map={coronaTex}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
       </sprite>
       <pointLight intensity={3} color="#ffb86b" distance={80} />
       <Sparkles count={80} scale={6} size={3} speed={0.6} color="#ffd9a3" />
@@ -198,4 +203,3 @@ export function FierySun({ position }: { position: [number, number, number] }) {
 }
 
 export default BlackHole;
-

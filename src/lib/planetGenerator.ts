@@ -6,15 +6,7 @@ import { type ProjectPattern } from "@/content/portfolio";
 /* ================================================================== */
 
 export type BiomeType =
-  | "oceanic"
-  | "continental"
-  | "lava"
-  | "gas"
-  | "ice"
-  | "desert"
-  | "toxic"
-  | "crystal"
-  | "cyber";
+  "oceanic" | "continental" | "lava" | "gas" | "ice" | "desert" | "toxic" | "crystal" | "cyber";
 
 export interface AtmosphereTelemetry {
   biomeType: BiomeType;
@@ -63,9 +55,9 @@ export function hexToRgb(h: string): [number, number, number] {
   const v = parseInt(
     s.length === 3
       ? s
-          .split("")
-          .map((c) => c + c)
-          .join("")
+        .split("")
+        .map((c) => c + c)
+        .join("")
       : s,
     16,
   );
@@ -90,10 +82,7 @@ export function lerpColor(
 }
 
 /* Map input pattern string to extended BiomeType with fallback */
-export function resolveBiomeType(
-  pattern: string | undefined,
-  seedStr: string,
-): BiomeType {
+export function resolveBiomeType(pattern: string | undefined, seedStr: string): BiomeType {
   if (pattern === "lava") return "lava";
   if (pattern === "ice") return "ice";
   if (pattern === "gas") return "gas";
@@ -446,13 +435,7 @@ export function getBiomeTexture(
   const cDeep = lerpColor(cAcc, [10, 10, 20], 0.6);
 
   // Soft stamp helper
-  const drawBlob = (
-    x: number,
-    y: number,
-    r: number,
-    rgbaStart: string,
-    rgbaEnd: string,
-  ) => {
+  const drawBlob = (x: number, y: number, r: number, rgbaStart: string, rgbaEnd: string) => {
     const grd = g.createRadialGradient(x, y, 0, x, y, r);
     grd.addColorStop(0, rgbaStart);
     grd.addColorStop(1, rgbaEnd);
@@ -638,8 +621,8 @@ export function getBiomeTexture(
       // Deep cyan subsurface ocean fracture rifts
       g.lineCap = "round";
       for (let i = 0; i < 110; i++) {
-        let x = rng() * W;
-        let y = rng() * H;
+        const x = rng() * W;
+        const y = rng() * H;
         const len = 40 + rng() * 120;
         const ang = rng() * Math.PI * 2;
         g.beginPath();
@@ -652,7 +635,13 @@ export function getBiomeTexture(
 
       // Frost rime textures
       for (let i = 0; i < 70; i++) {
-        drawBlob(rng() * W, rng() * H, 30 + rng() * 70, "rgba(255, 255, 255, 0.45)", "rgba(0,0,0,0)");
+        drawBlob(
+          rng() * W,
+          rng() * H,
+          30 + rng() * 70,
+          "rgba(255, 255, 255, 0.45)",
+          "rgba(0,0,0,0)",
+        );
       }
       break;
     }
@@ -685,7 +674,13 @@ export function getBiomeTexture(
 
       // Swirling golden sand dunes & salt flats
       for (let i = 0; i < 90; i++) {
-        drawBlob(rng() * W, rng() * H, 25 + rng() * 80, "rgba(251, 191, 36, 0.45)", "rgba(0,0,0,0)");
+        drawBlob(
+          rng() * W,
+          rng() * H,
+          25 + rng() * 80,
+          "rgba(251, 191, 36, 0.45)",
+          "rgba(0,0,0,0)",
+        );
       }
       break;
     }
@@ -768,7 +763,13 @@ export function getBiomeTexture(
 
       // Intense high-tech power hubs
       for (let i = 0; i < 60; i++) {
-        drawBlob(rng() * W, rng() * H, 6 + rng() * 15, "rgba(255, 255, 255, 0.95)", "rgba(0,0,0,0)");
+        drawBlob(
+          rng() * W,
+          rng() * H,
+          6 + rng() * 15,
+          "rgba(255, 255, 255, 0.95)",
+          "rgba(0,0,0,0)",
+        );
       }
       break;
     }

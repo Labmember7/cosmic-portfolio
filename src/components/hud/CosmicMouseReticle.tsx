@@ -33,7 +33,9 @@ export function CosmicMouseReticle() {
       const targetEl = e.target as HTMLElement | null;
       const isInteractive =
         document.body.style.cursor === "pointer" ||
-        targetEl?.closest("button, a, [role='button'], input, select, textarea, .cursor-pointer") !== null;
+        targetEl?.closest(
+          "button, a, [role='button'], input, select, textarea, .cursor-pointer",
+        ) !== null;
       setHovered(isInteractive);
     };
 
@@ -151,11 +153,7 @@ export function CosmicMouseReticle() {
 
       {/* 3. Small Subtle Water Droplet Space-Time Ripple */}
       {ripples.map((r) => (
-        <div
-          key={r.id}
-          className="pointer-events-none absolute"
-          style={{ left: r.x, top: r.y }}
-        >
+        <div key={r.id} className="pointer-events-none absolute" style={{ left: r.x, top: r.y }}>
           <div
             className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300 pointer-events-none"
             style={{
@@ -181,4 +179,3 @@ export function CosmicMouseReticle() {
 }
 
 export default CosmicMouseReticle;
-

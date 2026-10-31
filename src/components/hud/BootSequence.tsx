@@ -23,7 +23,7 @@ export function BootSequence({
     setProgress(100);
     try {
       playBootChime?.();
-    } catch {}
+    } catch { }
     setReady(true);
     setTimeout(() => {
       setDismissed(true);
@@ -80,11 +80,10 @@ export function BootSequence({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#02040a] text-white overflow-hidden transition-all duration-700 ${
-        ready
-          ? "opacity-0 scale-105 pointer-events-none filter blur-md"
-          : "opacity-100 scale-100"
-      }`}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#02040a] text-white overflow-hidden transition-all duration-700 ${ready
+        ? "opacity-0 scale-105 pointer-events-none filter blur-md"
+        : "opacity-100 scale-100"
+        }`}
     >
       {/* Background Star Matrix & Aerospace Grid */}
       <div
@@ -107,7 +106,7 @@ export function BootSequence({
       {/* Skip Button (Top Right) */}
       <button
         onClick={finishBoot}
-        className="absolute top-6 right-6 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan-400/70 hover:text-cyan-200 border border-cyan-500/30 hover:border-cyan-400 bg-slate-950/60 px-3 py-1.5 rounded-md backdrop-blur-md transition-all z-20"
+        className="absolute top-6 right-6 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan-300 hover:text-white border border-cyan-500/40 neo-btn px-4 py-2 rounded-full backdrop-blur-md transition-all z-20 cursor-pointer"
       >
         [SKIP INTRO ⏭]
       </button>
@@ -199,7 +198,7 @@ export function BootSequence({
 
       {/* Segmented Glowing Progress Bar */}
       <div className="w-[360px] max-w-[85vw] mb-6">
-        <div className="relative h-2.5 w-full rounded-full border border-cyan-400/50 bg-slate-950/90 overflow-hidden shadow-[0_0_20px_rgba(34,211,238,0.35)] p-0.5">
+        <div className="relative h-3 w-full rounded-full border border-cyan-400/40 neo-inset overflow-hidden p-0.5">
           {/* Calibration marks at 25%, 50%, 75% */}
           <div className="absolute inset-0 flex justify-between px-3 pointer-events-none z-10 opacity-30">
             <span className="w-px h-full bg-cyan-200" />
@@ -207,27 +206,27 @@ export function BootSequence({
             <span className="w-px h-full bg-cyan-200" />
           </div>
           <div
-            className="relative h-full rounded-full bg-gradient-to-r from-cyan-500 via-sky-300 to-emerald-400 transition-all duration-150 shadow-[0_0_14px_#22d3ee]"
+            className="relative h-full rounded-full bg-gradient-to-r from-cyan-500 via-sky-300 to-emerald-400 transition-all duration-150 shadow-[0_0_14px_#22d3ee,-1px_-1px_2px_rgba(255,255,255,0.7)]"
             style={{ width: `${progress}%` }}
           >
             <span className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-[0_0_8px_#fff,0_0_12px_#22d3ee]" />
           </div>
         </div>
         {/* Status badges */}
-        <div className="flex items-center justify-between mt-2 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50">
-          <span>CORE: <strong className="text-cyan-300">ONLINE</strong></span>
-          <span>BIOMES: <strong className="text-emerald-300">STABILIZED</strong></span>
-          <span>AVIONICS: <strong className="text-sky-300">READY</strong></span>
+        <div className="flex items-center justify-between mt-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50">
+          <span className="px-2 py-0.5 rounded-full neo-inset">CORE: <strong className="text-cyan-300">ONLINE</strong></span>
+          <span className="px-2 py-0.5 rounded-full neo-inset">BIOMES: <strong className="text-emerald-300">STABILIZED</strong></span>
+          <span className="px-2 py-0.5 rounded-full neo-inset">AVIONICS: <strong className="text-sky-300">READY</strong></span>
         </div>
       </div>
 
       {/* Dynamic Telemetry Terminal Output */}
-      <div className="w-[480px] max-w-[90vw] rounded-xl border border-cyan-400/30 bg-slate-950/85 p-4 font-mono text-[11px] shadow-2xl backdrop-blur-xl">
+      <div className="w-[480px] max-w-[90vw] rounded-2xl border border-cyan-400/30 neo-surface-cyan p-4 font-mono text-[11px] backdrop-blur-xl ring-1 ring-cyan-400/20">
         <div className="flex items-center justify-between border-b border-cyan-400/20 pb-2 mb-2 text-[9px] uppercase tracking-widest text-cyan-400">
           <span>◈ SYSTEM DIAGNOSTIC LOG</span>
           <span className="animate-pulse text-emerald-400">● REAL-TIME COMPILATION</span>
         </div>
-        <div className="space-y-1.5 max-h-24 overflow-y-auto pr-2 text-white/80">
+        <div className="space-y-1.5 max-h-24 overflow-y-auto pr-2 text-white/80 neo-inset rounded-xl p-3 border border-cyan-500/15">
           {logs.map((line, idx) => (
             <div key={idx} className="leading-tight">
               <span className="text-cyan-300">{line}</span>

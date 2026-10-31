@@ -41,10 +41,9 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
       aria-label={achievement.name}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl border bg-[#0b081c]/95 p-6 md:p-8 shadow-[0_20px_70px_rgba(0,0,0,0.9)] backdrop-blur-xl transition-all"
+        className="relative w-full max-w-lg rounded-2xl border neo-surface-amber p-6 md:p-8 backdrop-blur-xl transition-all"
         style={{
           borderColor: `${color}44`,
-          boxShadow: `0 0 50px ${color}15, 0 25px 60px rgba(0,0,0,0.85)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -58,20 +57,16 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
             <span
-              className="flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-bold shadow-inner"
+              className="flex h-9 w-9 items-center justify-center rounded-xl neo-inset text-sm font-bold border"
               style={{
-                borderColor: `${color}88`,
+                borderColor: `${color}66`,
                 color,
-                background: `${color}15`,
               }}
             >
               {achievement.icon ?? "✦"}
             </span>
             <div>
-              <p
-                className="text-[10px] font-mono uppercase tracking-[0.25em]"
-                style={{ color }}
-              >
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em]" style={{ color }}>
                 PANTHEON // VERIFIED HONORS
               </p>
               <p className="text-[11px] font-mono text-white/50 tracking-wider">
@@ -83,10 +78,15 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
             id="close-achievement-modal-btn"
             aria-label="Close honors dossier modal"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition"
+            className="rounded-xl neo-btn p-2 text-white/50 hover:text-white transition cursor-pointer"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -98,71 +98,69 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
           </h2>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
             {achievement.issuer && (
-              <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-white/80 font-mono">
-                ISSUER: <strong className="text-white font-semibold">{achievement.issuer}</strong>
-              </span>
+                <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/80 font-mono">
+                  ISSUER: <strong className="text-white font-semibold">{achievement.issuer}</strong>
+                </span>
             )}
-            {achievement.year && (
-              <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-white/80 font-mono">
-                YEAR: <strong style={{ color }}>{achievement.year}</strong>
-              </span>
+                {achievement.year && (
+                    <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/80 font-mono">
+                      YEAR: <strong style={{ color }}>{achievement.year}</strong>
+                    </span>
             )}
-            {currentIndex !== null && totalCount > 0 && (
-              <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-white/50 font-mono ml-auto">
-                {currentIndex + 1} / {totalCount}
-              </span>
+                    {currentIndex !== null && totalCount > 0 && (
+                        <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/50 font-mono ml-auto">
+                          {currentIndex + 1} / {totalCount}
+                        </span>
             )}
-          </div>
+                      </div>
         </div>
 
         {/* Description / Dossier */}
-        <div className="mt-5 rounded-xl border border-white/10 bg-black/40 p-4">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-2 font-mono">
+                  <div className="mt-5 rounded-xl neo-inset border border-white/10 p-4.5">
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-2 font-mono">
             // MILESTONE SUMMARY
-          </p>
-          <p className="text-[14px] leading-relaxed text-white/85 whitespace-pre-line font-sans">
-            {achievement.description ??
-              `Official credential recognized in ${achievement.year ?? "the archives"} by ${
-                achievement.issuer ?? "accrediting body"
-              }. Demonstrates advanced applied engineering mastery and autonomous systems execution.`}
-          </p>
-        </div>
+                    </p>
+                    <p className="text-[14px] leading-relaxed text-white/85 whitespace-pre-line font-sans">
+                      {achievement.description ??
+                        `Official credential recognized in ${achievement.year ?? "the archives"} by ${achievement.issuer ?? "accrediting body"
+                        }. Demonstrates advanced applied engineering mastery and autonomous systems execution.`}
+                    </p>
+                  </div>
 
-        {/* Navigation & Done Button */}
-        <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs">
-          <div className="flex gap-2">
-            {onPrev && (
-              <button
-                onClick={onPrev}
-                className="rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-white/70 hover:border-white/50 hover:text-white transition font-mono"
-              >
-                ← Prev Honor
-              </button>
-            )}
-            {onNext && (
-              <button
-                onClick={onNext}
-                className="rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-white/70 hover:border-white/50 hover:text-white transition font-mono"
-              >
-                Next Honor →
-              </button>
-            )}
-          </div>
+                  {/* Navigation & Done Button */}
+                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs">
+                    <div className="flex gap-2">
+                      {onPrev && (
+                        <button
+                          onClick={onPrev}
+                          className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer"
+                        >
+                          ← Prev Honor
+                        </button>
+                      )}
+                      {onNext && (
+                        <button
+                          onClick={onNext}
+                          className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer"
+                        >
+                          Next Honor →
+                        </button>
+                      )}
+                    </div>
 
-          <button
-            id="achievement-done-btn"
-            aria-label="Done inspecting honor"
-            onClick={onClose}
-            className="rounded-lg px-4 py-1.5 font-semibold text-black transition hover:opacity-90 font-mono"
-            style={{
-              background: color,
-            }}
-          >
-            Done
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+                    <button
+                      id="achievement-done-btn"
+                      aria-label="Done inspecting honor"
+                      onClick={onClose}
+                      className="rounded-xl neo-btn-amber px-5 py-2 font-semibold text-black transition hover:opacity-95 font-mono cursor-pointer shadow-md"
+                      style={{
+                        background: color,
+                      }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
 };
-

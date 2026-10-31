@@ -30,43 +30,40 @@ export function useSpaceMusic() {
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
 
-  const scheduleChord = useCallback(
-    (freqs: number[], at: number, duration: number) => {
-      const ctx = ctxRef.current;
-      const master = masterRef.current;
-      if (!ctx || !master) return;
+  const scheduleChord = useCallback((freqs: number[], at: number, duration: number) => {
+    const ctx = ctxRef.current;
+    const master = masterRef.current;
+    if (!ctx || !master) return;
 
-      const chordGain = ctx.createGain();
-      chordGain.gain.setValueAtTime(0, at);
-      chordGain.gain.linearRampToValueAtTime(0.9, at + 2.0);
-      chordGain.gain.linearRampToValueAtTime(0.7, at + duration - 1.5);
-      chordGain.gain.linearRampToValueAtTime(0, at + duration);
-      chordGain.connect(master);
+    const chordGain = ctx.createGain();
+    chordGain.gain.setValueAtTime(0, at);
+    chordGain.gain.linearRampToValueAtTime(0.9, at + 2.0);
+    chordGain.gain.linearRampToValueAtTime(0.7, at + duration - 1.5);
+    chordGain.gain.linearRampToValueAtTime(0, at + duration);
+    chordGain.connect(master);
 
-      freqs.forEach((f, i) => {
-        [1, 2].forEach((mult, j) => {
-          const o = ctx.createOscillator();
-          o.type = "sine";
-          o.frequency.setValueAtTime(f * mult, at);
-          const g = ctx.createGain();
-          g.gain.setValueAtTime(0.18 / (j + 1) / freqs.length, at);
-          o.connect(g).connect(chordGain);
-          o.start(at);
-          o.stop(at + duration + 0.2);
-        });
-        const saw = ctx.createOscillator();
-        saw.type = "sawtooth";
-        saw.frequency.setValueAtTime(f * 0.5, at);
-        saw.detune.setValueAtTime(i * 4 - 4, at);
-        const sg = ctx.createGain();
-        sg.gain.setValueAtTime(0.04 / freqs.length, at);
-        saw.connect(sg).connect(chordGain);
-        saw.start(at);
-        saw.stop(at + duration + 0.2);
+    freqs.forEach((f, i) => {
+      [1, 2].forEach((mult, j) => {
+        const o = ctx.createOscillator();
+        o.type = "sine";
+        o.frequency.setValueAtTime(f * mult, at);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.18 / (j + 1) / freqs.length, at);
+        o.connect(g).connect(chordGain);
+        o.start(at);
+        o.stop(at + duration + 0.2);
       });
-    },
-    [],
-  );
+      const saw = ctx.createOscillator();
+      saw.type = "sawtooth";
+      saw.frequency.setValueAtTime(f * 0.5, at);
+      saw.detune.setValueAtTime(i * 4 - 4, at);
+      const sg = ctx.createGain();
+      sg.gain.setValueAtTime(0.04 / freqs.length, at);
+      saw.connect(sg).connect(chordGain);
+      saw.start(at);
+      saw.stop(at + duration + 0.2);
+    });
+  }, []);
 
   // Synchronous bootstrap so the AudioContext is created inside the user-gesture
   // microtask (otherwise some browsers leave it suspended forever).
@@ -74,8 +71,7 @@ export function useSpaceMusic() {
     if (ctxRef.current) return ctxRef.current;
     const Ctx =
       window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext;
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return null;
     const ctx = new Ctx();
     ctxRef.current = ctx;
@@ -168,99 +164,105 @@ export function useSpaceMusic() {
   const warpGainRef = useRef<GainNode | null>(null);
   const warpOscsRef = useRef<OscillatorNode[]>([]);
 
-  const setRiftActive = useCallback((active: boolean) => {
-    const ctx = ensureContext();
-    if (!ctx) return;
+  const setRiftActive = useCallback(
+    (active: boolean) => {
+      const ctx = ensureContext();
+      if (!ctx) return;
 
-    if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
-    }
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => { });
+      }
 
-    const now = ctx.currentTime;
+      const now = ctx.currentTime;
 
-    if (active) {
-      if (!warpGainRef.current) {
-        const wg = ctx.createGain();
-        wg.gain.setValueAtTime(0, now);
+      if (active) {
+        if (!warpGainRef.current) {
+          const wg = ctx.createGain();
+          wg.gain.setValueAtTime(0, now);
 
-        if (masterRef.current) {
-          wg.connect(masterRef.current);
-        } else {
-          wg.connect(ctx.destination);
+          if (masterRef.current) {
+            wg.connect(masterRef.current);
+          } else {
+            wg.connect(ctx.destination);
+          }
+          warpGainRef.current = wg;
+
+          // Sub-bass resonance (deep warp core hum: 52Hz + 55.5Hz gentle binaural thrum)
+          const sub1 = ctx.createOscillator();
+          sub1.type = "sine";
+          sub1.frequency.setValueAtTime(52, now);
+
+          const sub2 = ctx.createOscillator();
+          sub2.type = "sine";
+          sub2.frequency.setValueAtTime(55.5, now);
+
+          const subGain = ctx.createGain();
+          subGain.gain.setValueAtTime(0.32, now);
+          sub1.connect(subGain);
+          sub2.connect(subGain);
+          subGain.connect(wg);
+
+          // Harmonic shimmer (slipstream atmosphere)
+          const saw = ctx.createOscillator();
+          saw.type = "triangle";
+          saw.frequency.setValueAtTime(104, now);
+
+          const bp = ctx.createBiquadFilter();
+          bp.type = "bandpass";
+          bp.frequency.setValueAtTime(880, now);
+          bp.Q.setValueAtTime(2.8, now);
+
+          const sawGain = ctx.createGain();
+          sawGain.gain.setValueAtTime(0.06, now);
+          saw.connect(bp).connect(sawGain).connect(wg);
+
+          sub1.start(now);
+          sub2.start(now);
+          saw.start(now);
+          warpOscsRef.current = [sub1, sub2, saw];
         }
-        warpGainRef.current = wg;
 
-        // Sub-bass resonance (deep warp core hum: 52Hz + 55.5Hz gentle binaural thrum)
-        const sub1 = ctx.createOscillator();
-        sub1.type = "sine";
-        sub1.frequency.setValueAtTime(52, now);
+        if (warpGainRef.current) {
+          warpGainRef.current.gain.cancelScheduledValues(now);
+          warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
+          warpGainRef.current.gain.linearRampToValueAtTime(
+            0.42 * (volumeRef.current || 0.4),
+            now + 1.6,
+          );
+        }
 
-        const sub2 = ctx.createOscillator();
-        sub2.type = "sine";
-        sub2.frequency.setValueAtTime(55.5, now);
-
-        const subGain = ctx.createGain();
-        subGain.gain.setValueAtTime(0.32, now);
-        sub1.connect(subGain);
-        sub2.connect(subGain);
-        subGain.connect(wg);
-
-        // Harmonic shimmer (slipstream atmosphere)
-        const saw = ctx.createOscillator();
-        saw.type = "triangle";
-        saw.frequency.setValueAtTime(104, now);
-
-        const bp = ctx.createBiquadFilter();
-        bp.type = "bandpass";
-        bp.frequency.setValueAtTime(880, now);
-        bp.Q.setValueAtTime(2.8, now);
-
-        const sawGain = ctx.createGain();
-        sawGain.gain.setValueAtTime(0.06, now);
-        saw.connect(bp).connect(sawGain).connect(wg);
-
-        sub1.start(now);
-        sub2.start(now);
-        saw.start(now);
-        warpOscsRef.current = [sub1, sub2, saw];
+        // Celestial entry chime (D-maj9 / celestial open harmony)
+        const chord = [N(62), N(66), N(69), N(73), N(76)];
+        chord.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(f, now + idx * 0.07);
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0, now);
+          g.gain.linearRampToValueAtTime(0.07 / chord.length, now + 0.2 + idx * 0.07);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 3.6);
+          osc.connect(g);
+          if (masterRef.current) g.connect(masterRef.current);
+          else g.connect(ctx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + 4.0);
+        });
+      } else {
+        if (warpGainRef.current) {
+          warpGainRef.current.gain.cancelScheduledValues(now);
+          warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
+          warpGainRef.current.gain.linearRampToValueAtTime(0, now + 1.4);
+        }
       }
-
-      if (warpGainRef.current) {
-        warpGainRef.current.gain.cancelScheduledValues(now);
-        warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
-        warpGainRef.current.gain.linearRampToValueAtTime(0.42 * (volumeRef.current || 0.4), now + 1.6);
-      }
-
-      // Celestial entry chime (D-maj9 / celestial open harmony)
-      const chord = [N(62), N(66), N(69), N(73), N(76)];
-      chord.forEach((f, idx) => {
-        const osc = ctx.createOscillator();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(f, now + idx * 0.07);
-        const g = ctx.createGain();
-        g.gain.setValueAtTime(0, now);
-        g.gain.linearRampToValueAtTime(0.07 / chord.length, now + 0.2 + idx * 0.07);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + 3.6);
-        osc.connect(g);
-        if (masterRef.current) g.connect(masterRef.current);
-        else g.connect(ctx.destination);
-        osc.start(now + idx * 0.07);
-        osc.stop(now + 4.0);
-      });
-    } else {
-      if (warpGainRef.current) {
-        warpGainRef.current.gain.cancelScheduledValues(now);
-        warpGainRef.current.gain.setValueAtTime(warpGainRef.current.gain.value, now);
-        warpGainRef.current.gain.linearRampToValueAtTime(0, now + 1.4);
-      }
-    }
-  }, [ensureContext]);
+    },
+    [ensureContext],
+  );
 
   const playLaunchSound = useCallback(() => {
     const ctx = ensureContext();
     if (!ctx) return;
     if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
+      ctx.resume().catch(() => { });
     }
     const now = ctx.currentTime;
 
@@ -323,7 +325,7 @@ export function useSpaceMusic() {
     const ctx = ensureContext();
     if (!ctx) return;
     if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
+      ctx.resume().catch(() => { });
     }
     const now = ctx.currentTime;
     [N(60), N(64), N(67), N(72)].forEach((f, i) => {
@@ -355,25 +357,27 @@ export function useSpaceMusic() {
       warpOscsRef.current.forEach((o) => {
         try {
           o.stop();
-        } catch {}
-      });
-      warpOscsRef.current = [];
-      warpGainRef.current = null;
-      if (ctxRef.current) {
-        ctxRef.current.close().catch(() => {});
-        ctxRef.current = null;
-        masterRef.current = null;
+      } catch {
+        // Audio oscillator already stopped
       }
-    };
+    });
+  warpOscsRef.current = [];
+  warpGainRef.current = null;
+  if (ctxRef.current) {
+    ctxRef.current.close().catch(() => { });
+    ctxRef.current = null;
+    masterRef.current = null;
+  }
+};
   }, [stopScheduler]);
 
-  return {
-    enabled,
-    toggle,
-    volume,
-    setVolume,
-    setRiftActive,
-    playLaunchSound,
-    playBootChime,
-  };
+return {
+  enabled,
+  toggle,
+  volume,
+  setVolume,
+  setRiftActive,
+  playLaunchSound,
+  playBootChime,
+};
 }

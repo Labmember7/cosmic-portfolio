@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface AmbientKeySuggestionsProps {
   isIdle: boolean;
@@ -11,7 +11,7 @@ export function AmbientKeySuggestions({
 }: AmbientKeySuggestionsProps) {
   const hints = useMemo(
     () => [
-      { key: "🖱️ Right-Drag", desc: "Grab & rotate the cosmic scene · holds on release" },
+      { key: "🖱️ Right-Drag", desc: "Grab & rotate the cosmic scene" },
       { key: "⚲ Scroll", desc: "Zoom in/out · double-click to reset" },
       { key: "⌨️ Space / →", desc: "Advance to next cosmic waypoint" },
       { key: "⌨️ ←", desc: "Reverse camera travel without turning" },
@@ -38,17 +38,18 @@ export function AmbientKeySuggestions({
 
   return (
     <div
-      className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-25 transition-all duration-500 ${
-        visible && !isIdle ? "opacity-80 translate-y-0" : "opacity-0 translate-y-1"
-      } ${isIntro ? "bottom-26" : "bottom-18"} hidden md:block`}
+      className={`pointer-events-none fixed top-14 sm:top-16 left-6 z-30 max-w-[min(380px,calc(100vw-48px))] transition-all duration-500 ${
+        visible && !isIdle
+          ? "opacity-55 translate-y-0"
+          : "opacity-0 -translate-y-1.5"
+      } ${isIntro ? "hidden" : "block"}`}
     >
-      <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/60 px-4 py-1.5 backdrop-blur-xl text-[11px] font-mono tracking-wider text-white/80 shadow-2xl ring-1 ring-white/10">
-        <span className="font-bold text-cyan-300">{current.key}:</span>
-        <span className="text-white/70">{current.desc}</span>
+      <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/25 px-3 py-1 backdrop-blur-md text-[10px] font-mono tracking-wider text-white/55">
+        <span className="font-semibold text-cyan-300/80">{current.key}:</span>
+        <span className="text-white/50 truncate">{current.desc}</span>
       </div>
     </div>
   );
 }
 
 export default AmbientKeySuggestions;
-

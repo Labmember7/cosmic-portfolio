@@ -8,8 +8,14 @@ export function CameraRig({ chapter }: { chapter: Chapter }) {
   const { camera } = useThree();
   const finalPos = useMemo(() => new THREE.Vector3(...chapter.camera), [chapter]);
   const finalLook = useMemo(() => new THREE.Vector3(...chapter.lookAt), [chapter]);
-  const viaPos = useMemo(() => (chapter.via ? new THREE.Vector3(...chapter.via.camera) : null), [chapter]);
-  const viaLook = useMemo(() => (chapter.via ? new THREE.Vector3(...chapter.via.lookAt) : null), [chapter]);
+  const viaPos = useMemo(
+    () => (chapter.via ? new THREE.Vector3(...chapter.via.camera) : null),
+    [chapter],
+  );
+  const viaLook = useMemo(
+    () => (chapter.via ? new THREE.Vector3(...chapter.via.lookAt) : null),
+    [chapter],
+  );
   const lookHelper = useMemo(() => new THREE.Object3D(), []);
 
   // Relative look offset from camera position to target point (avoids flipping on reverse travel)

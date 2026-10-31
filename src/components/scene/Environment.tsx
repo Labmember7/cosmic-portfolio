@@ -140,12 +140,16 @@ export function MoonDust() {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.045} color="#d8c8b0" transparent opacity={0.3} depthWrite={false} sizeAttenuation />
+      <pointsMaterial
+        size={0.045}
+        color="#d8c8b0"
+        transparent
+        opacity={0.3}
+        depthWrite={false}
+        sizeAttenuation
+      />
     </points>
   );
 }
@@ -276,7 +280,13 @@ export function ShootingStar({ layout, seed }: { layout: SceneLayout; seed: numb
 
   return (
     <group>
-      <Trail width={0.55} length={6} color={"#ffffff"} attenuation={(t: number) => t * t * t} decay={1.4}>
+      <Trail
+        width={0.55}
+        length={6}
+        color={"#ffffff"}
+        attenuation={(t: number) => t * t * t}
+        decay={1.4}
+      >
         <mesh ref={head}>
           <sphereGeometry args={[0.06, 12, 12]} />
           <meshBasicMaterial transparent opacity={0} toneMapped={false} depthWrite={false} />
