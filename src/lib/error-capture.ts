@@ -1,6 +1,26 @@
 // Captures the original Error out-of-band so server.ts can recover the stack
 // when h3 has already swallowed the throw into a generic 500 Response.
 
+// Polyfill ProgressEvent in Node.js SSR environments (required by Three.js FileLoader / GLTFLoader)
+if (typeof globalThis.ProgressEvent === "undefined" && typeof globalThis.Event !== "undefined") {
+  class ProgressEventPolyfill<T extends EventTarget = EventTarget> extends Event {
+    readonly lengthComputable: boolean;
+    readonly loaded: number;
+    readonly total: number;
+    constructor(
+      type: string,
+      eventInitDict?: { lengthComputable?: boolean; loaded?: number; total?: number },
+    ) {
+      super(type);
+      this.lengthComputable = Boolean(eventInitDict?.lengthComputable);
+      this.loaded = Number(eventInitDict?.loaded ?? 0);
+      this.total = Number(eventInitDict?.total ?? 0);
+    }
+  }
+  (globalThis as unknown as { ProgressEvent: typeof ProgressEventPolyfill }).ProgressEvent =
+    ProgressEventPolyfill;
+}
+
 let lastCapturedError: { error: unknown; at: number } | undefined;
 const TTL_MS = 5_000;
 

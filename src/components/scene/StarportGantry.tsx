@@ -11,7 +11,11 @@ export const ASTRONAUT_URL = "https://modelviewer.dev/shared-assets/models/Astro
     const cloned = useMemo(() => scene.clone(), [scene]);
     return <primitive object={cloned} {...props} />;
   }
-  useGLTF.preload(ASTRONAUT_URL);
+
+  // Preload only in client/browser context to prevent SSR stream crashes in Node.js
+  if (typeof window !== "undefined") {
+    useGLTF.preload(ASTRONAUT_URL);
+  }
 
   export function AnimatedAstronaut() {
     const groupRef = useRef<THREE.Group>(null);
