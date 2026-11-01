@@ -179,24 +179,40 @@ export function TerminalContact({
             <div className="mt-6 border-t border-cyan-500/20 pt-4 text-[11px] text-cyan-300/80">
               <div className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-cyan-400/90">// DIRECT COMMS FREQUENCIES</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div className="p-3 rounded-xl neo-btn border border-cyan-500/25">
-                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5">DIRECT EMAIL</div>
-                  <a href={`mailto:${email}`} className="text-white hover:text-cyan-300 truncate block transition-colors font-medium">
+                <a
+                  href={`mailto:${email}`}
+                  id="direct-channel-email-btn"
+                  className="p-3 rounded-xl neo-btn border border-cyan-500/25 block transition-all group cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                >
+                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5 group-hover:text-cyan-300 transition-colors">DIRECT EMAIL</div>
+                  <span className="text-white group-hover:text-cyan-300 truncate block transition-colors font-medium">
                     {email}
-                  </a>
-                </div>
-                <div className="p-3 rounded-xl neo-btn border border-cyan-500/25">
-                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5">LINKEDIN NETWORK</div>
-                  <a href={linkedin} target="_blank" rel="noreferrer" className="text-white hover:text-cyan-300 truncate block transition-colors font-medium">
+                  </span>
+                </a>
+                <a
+                  href={linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  id="direct-channel-linkedin-btn"
+                  className="p-3 rounded-xl neo-btn border border-cyan-500/25 block transition-all group cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                >
+                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5 group-hover:text-cyan-300 transition-colors">LINKEDIN NETWORK</div>
+                  <span className="text-white group-hover:text-cyan-300 truncate block transition-colors font-medium">
                     in/{linkedin.replace(/^.*\/in\//, "").replace(/\/$/, "")}
-                  </a>
-                </div>
-                <div className="p-3 rounded-xl neo-btn border border-cyan-500/25">
-                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5">GITHUB REPOSITORY</div>
-                  <a href={github} target="_blank" rel="noreferrer" className="text-white hover:text-cyan-300 truncate block transition-colors font-medium">
+                  </span>
+                </a>
+                <a
+                  href={github}
+                  target="_blank"
+                  rel="noreferrer"
+                  id="direct-channel-github-btn"
+                  className="p-3 rounded-xl neo-btn border border-cyan-500/25 block transition-all group cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                >
+                  <div className="text-[9px] uppercase tracking-widest text-cyan-400 font-bold mb-0.5 group-hover:text-cyan-300 transition-colors">GITHUB REPOSITORY</div>
+                  <span className="text-white group-hover:text-cyan-300 truncate block transition-colors font-medium">
                     gh/{github.replace(/^.*github\.com\//, "")}
-                  </a>
-                </div>
+                  </span>
+                </a>
               </div>
             </div>
           </div>

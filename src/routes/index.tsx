@@ -44,16 +44,16 @@ export const Route = createFileRoute("/")({
   component: Portfolio,
   head: () => ({
     meta: [
-      { title: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer" },
+      { title: "Bacem Zarai Cosmic's Journey" },
       {
         name: "description",
         content:
-          "Explore the interactive 3D cosmic journey of Bacem Zarai — robotics, embedded systems, firmware, and computer vision engineer. Board the ship, traverse the interstellar rift, and discover autonomous perception projects.",
+          "Explore the interactive 3D cosmic journey of Bacem Zarai - Web design UI/UX for embedded systems. Board the ship, traverse the interstellar rift, and discover autonomous perception projects.",
       },
       {
         name: "keywords",
         content:
-          "Bacem Zarai, Robotics Engineer, Embedded Systems, Computer Vision, Autonomous Systems, ROS 2, C++, 3D Space Portfolio, Interactive Portfolio, WebGL",
+          "Bacem Zarai,  Web Engineer, 3D Space Portfolio, Interactive Portfolio, WebGL",
       },
       { name: "author", content: "Bacem Zarai" },
       {
@@ -62,7 +62,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer",
+        content: "Bacem Zarai - A Cosmic Journey | Robotics & Embedded Systems Engineer",
       },
       {
         property: "og:description",
@@ -74,7 +74,7 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:title",
-        content: "Bacem Zarai — A Cosmic Journey | Robotics & Embedded Systems Engineer",
+        content: "Bacem Zarai - A Cosmic Journey | Robotics & Embedded Systems Engineer",
       },
       {
         name: "twitter:description",
@@ -88,7 +88,7 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "ProfilePage",
-          name: "Bacem Zarai — Interactive 3D Cosmic Portfolio",
+          name: "Bacem Zarai - Interactive 3D Cosmic Portfolio",
           description:
             "Interactive 3D space journey showcasing robotics, embedded systems, and computer vision projects.",
           mainEntity: {
@@ -345,7 +345,7 @@ function Portfolio() {
         {/* Rift Traversal Avionics Reticle */}
         {chapter?.id === "wormhole" && <RiftFlightHUD />}
 
-        {/* Cinematic Scene Title Transitions — restricted to the Boarding scene */}
+        {/* Cinematic Scene Title Transitions - restricted to the Boarding scene */}
         {chapter?.id === "intro" && (
           <SceneTitleTransition
             chapter={chapter}
@@ -371,7 +371,7 @@ function Portfolio() {
             </p>
           </div>
 
-          {/* Center Glass Controls — Subtle & Minimalist */}
+          {/* Center Glass Controls - Subtle & Minimalist */}
           <div className="flex items-center gap-2.5 sm:gap-3 rounded-full border border-white/[0.08] bg-black/30 px-3.5 py-1 backdrop-blur-md opacity-75 hover:opacity-100 transition-all duration-300">
             <button
               id="music-toggle-btn"
@@ -380,9 +380,8 @@ function Portfolio() {
               title={musicOn ? "Mute soundtrack" : "Play space atmospheric soundtrack"}
             >
               <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${
-                  musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
-                }`}
+                className={`inline-block h-1.5 w-1.5 rounded-full ${musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                  }`}
               />
               ♪ {musicOn ? "Audio" : "Muted"}
             </button>
@@ -441,21 +440,19 @@ function Portfolio() {
             <button
               id="roam-toggle-btn"
               onClick={() => setFreeRoam((v) => !v)}
-              className={`text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${
-                freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
-              }`}
+              className={`text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
+                }`}
               title="Free roam (WASD + mouse look, Shift boost, Space/Ctrl ascend/descend, Esc release)"
             >
               <span
-                className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${
-                  freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
-                }`}
+                className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                  }`}
               />
               Roam
             </button>
           </div>
 
-          {/* Chapter Progress Indicators — Fluid Transition & Clean Celestial Blue Hue */}
+          {/* Chapter Progress Indicators - Fluid Transition & Clean Celestial Blue Hue */}
           <nav
             id="chapter-nav"
             aria-label="Cosmic Journey Chapters"
@@ -475,13 +472,12 @@ function Portfolio() {
                   title={c.title}
                   role="tab"
                   aria-selected={i === index}
-                  className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                    i === index
-                      ? "w-8 bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.7),0_0_24px_rgba(14,165,233,0.35)]"
-                      : visited.has(c.id)
-                        ? "w-2.5 bg-sky-400/40 hover:bg-sky-300/70 shadow-[0_0_6px_rgba(56,189,248,0.25)]"
-                        : "w-2 bg-white/15 hover:bg-white/30"
-                  }`}
+                  className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${i === index
+                    ? "w-8 bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.7),0_0_24px_rgba(14,165,233,0.35)]"
+                    : visited.has(c.id)
+                      ? "w-2.5 bg-sky-400/40 hover:bg-sky-300/70 shadow-[0_0_6px_rgba(56,189,248,0.25)]"
+                      : "w-2 bg-white/15 hover:bg-white/30"
+                    }`}
                 />
               ))}
             </div>
@@ -491,7 +487,7 @@ function Portfolio() {
           </nav>
         </header>
 
-        {/* Chapter Caption Card — bottom-left */}
+        {/* Chapter Caption Card - bottom-left */}
         {chapter?.id !== "intro" && (
           <section
             id="chapter-caption-panel"
@@ -576,9 +572,8 @@ function Portfolio() {
           <aside
             id="floating-cosmic-mini-map"
             aria-label="Interactive 3D Cosmic Course Mini Map"
-            className={`fixed right-6 sm:right-10 bottom-20 z-35 w-[440px] sm:w-[500px] max-w-[calc(100vw-3rem)] transition-all duration-500 ${
-              bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-            }`}
+            className={`fixed right-6 sm:right-10 bottom-20 z-35 w-[440px] sm:w-[500px] max-w-[calc(100vw-3rem)] transition-all duration-500 ${bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+              }`}
           >
             <CosmicStoryTrailMiniMap
               chapters={CHAPTERS}
@@ -590,11 +585,10 @@ function Portfolio() {
           </aside>
         )}
 
-        {/* Controls Cheat Sheet — bottom-right */}
+        {/* Controls Cheat Sheet - bottom-right */}
         <div
-          className={`transition-opacity duration-700 ${
-            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+          className={`transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
         >
           <ControlsCheatSheet
             freeRoam={freeRoam}
@@ -607,18 +601,18 @@ function Portfolio() {
           <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
         )}
 
-        {/* Spacebar Orbit Prompt when Idle — Subtle & Glassy */}
+        {/* Spacebar Orbit Prompt when Idle - Subtle & Glassy */}
         <div
           className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-2 transition-all duration-700 ${bootReady &&
-              isIdle &&
-              !contactOpen &&
-              projectIndex === null &&
-              selectedAchievementIndex === null &&
-              index < CHAPTERS.length - 1 &&
-              chapter?.id !== "intro" &&
-              chapter?.id !== "wormhole"
-              ? "opacity-55 translate-y-0 scale-100"
-              : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+            isIdle &&
+            !contactOpen &&
+            projectIndex === null &&
+            selectedAchievementIndex === null &&
+            index < CHAPTERS.length - 1 &&
+            chapter?.id !== "intro" &&
+            chapter?.id !== "wormhole"
+            ? "opacity-55 translate-y-0 scale-100"
+            : "opacity-0 translate-y-2 scale-95 pointer-events-none"
             } bottom-15`}
         >
           <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 backdrop-blur-md">
@@ -685,7 +679,7 @@ function Portfolio() {
             {(data.experiences ?? []).map((e: Experience, i: number) => (
               <li key={i}>
                 <h3>
-                  {e.name} — {e.place ?? "Engineering Milestone"} ({e.year})
+                  {e.name} - {e.place ?? "Engineering Milestone"} ({e.year})
                 </h3>
                 <p>{e.description}</p>
               </li>
@@ -707,7 +701,7 @@ function Portfolio() {
             {achievementsList.map((a: Achievement, i: number) => (
               <li key={i}>
                 <h3>
-                  {a.name} — {a.issuer} ({a.year})
+                  {a.name} - {a.issuer} ({a.year})
                 </h3>
                 <p>{a.description}</p>
               </li>
