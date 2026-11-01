@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant mobile-landscape (@media (orientation: landscape) and (max-height: 500px));
 
 /*
  * Design system definition.
