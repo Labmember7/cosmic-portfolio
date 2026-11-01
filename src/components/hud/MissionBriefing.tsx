@@ -58,9 +58,9 @@ export function MissionBriefing({
         <div
           className={`rounded-2xl border border-cyan-400/30 neo-surface-cyan p-2.5 sm:p-4 backdrop-blur-2xl ring-1 ring-cyan-300/20 shadow-[0_0_25px_rgba(0,0,0,0.9)] animate-in fade-in zoom-in-95 duration-200 ${
             isLandscape
-              ? "max-h-[175px] overflow-y-auto"
+              ? "max-h-[175px] overflow-y-auto overflow-x-hidden"
               : isMobile
-                ? "max-h-[48vh] overflow-y-auto"
+                ? "max-h-[48vh] overflow-y-auto overflow-x-hidden"
                 : "max-h-none overflow-visible"
           }`}
         >

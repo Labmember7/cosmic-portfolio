@@ -30,24 +30,26 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200 overflow-x-hidden"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={project.name}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl border neo-surface-cyan p-4.5 sm:p-6 md:p-8 backdrop-blur-xl transition-all max-h-[88vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-2xl border neo-surface-cyan p-4.5 sm:p-6 md:p-8 backdrop-blur-xl transition-all max-h-[88vh] overflow-y-auto overflow-x-hidden"
         style={{
           borderColor: `${color}44`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle accent corner highlight */}
-        <div
-          className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-20"
-          style={{ background: color }}
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <div
+            className="absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-20"
+            style={{ background: color }}
+          />
+        </div>
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
@@ -78,22 +80,22 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
         </div>
 
         {/* Content */}
-        <div className="mt-4 sm:mt-5">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display">
+        <div className="mt-4 sm:mt-5 min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-display break-words">
             {project.name}
           </h2>
-          <p className="mt-1 text-xs sm:text-sm font-medium" style={{ color: `${color}cc` }}>
+          <p className="mt-1 text-xs sm:text-sm font-medium break-words" style={{ color: `${color}cc` }}>
             {project.desc}
           </p>
           <div className="mt-3 sm:mt-4 rounded-xl neo-inset border border-white/10 p-3.5 sm:p-4.5">
-            <p className="text-[13px] sm:text-[14px] leading-relaxed text-white/80 whitespace-pre-line font-sans">
+            <p className="text-[13px] sm:text-[14px] leading-relaxed text-white/80 whitespace-pre-line font-sans break-words">
               {project.details}
             </p>
           </div>
         </div>
 
         {/* Tech Stack Badges */}
-        <div className="mt-4 sm:mt-5">
+        <div className="mt-4 sm:mt-5 min-w-0">
           <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-widest text-white/40 mb-2">
             TECHNOLOGY STACK
           </p>
@@ -101,7 +103,7 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
             {project.stack.map((tech) => (
               <span
                 key={tech}
-                className="rounded-lg neo-inset border px-2.5 py-1 text-[10px] sm:text-[11px] font-mono tracking-wide"
+                className="rounded-lg neo-inset border px-2.5 py-1 text-[10px] sm:text-[11px] font-mono tracking-wide break-words max-w-full"
                 style={{
                   borderColor: `${color}44`,
                   color: color,

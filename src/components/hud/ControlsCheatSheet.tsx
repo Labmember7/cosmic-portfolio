@@ -44,7 +44,7 @@ export function ControlsCheatSheet({
             {open ? "Hide flight tips" : "Flight tips"}
           </button>
           {open && (
-            <div className="rounded-2xl border border-cyan-500/30 neo-surface-cyan p-3.5 sm:p-4 text-white/85 backdrop-blur-xl font-mono text-xs animate-in fade-in slide-in-from-bottom-2 duration-200 ring-1 ring-cyan-400/20 max-h-[55vh] overflow-y-auto">
+            <div className="rounded-2xl border border-cyan-500/30 neo-surface-cyan p-3.5 sm:p-4 text-white/85 backdrop-blur-xl font-mono text-xs animate-in fade-in slide-in-from-bottom-2 duration-200 ring-1 ring-cyan-400/20 max-h-[55vh] overflow-y-auto overflow-x-hidden">
               <p className="text-[10px] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-cyan-400 mb-2 font-bold">
                 {freeRoam ? "// FREE ROAM PILOT AVIONICS" : "// ORBITAL NAVIGATION CONTROLS"}
               </p>
@@ -143,7 +143,7 @@ export function ControlsCheatSheet({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-sm rounded-2xl border border-cyan-400/40 neo-surface-cyan p-4 sm:p-5 text-white/90 backdrop-blur-2xl ring-1 ring-cyan-400/30 shadow-[0_0_40px_rgba(34,211,238,0.25)] font-mono animate-in zoom-in-95 duration-200 max-h-[85vh] overflow-y-auto"
+            className="relative w-full max-w-sm rounded-2xl border border-cyan-400/40 neo-surface-cyan p-4 sm:p-5 text-white/90 backdrop-blur-2xl ring-1 ring-cyan-400/30 shadow-[0_0_40px_rgba(34,211,238,0.25)] font-mono animate-in zoom-in-95 duration-200 max-h-[85vh] overflow-y-auto overflow-x-hidden"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-cyan-500/20">

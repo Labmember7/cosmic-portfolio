@@ -34,24 +34,26 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200 overflow-x-hidden"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={achievement.name}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl border neo-surface-amber p-4.5 sm:p-6 md:p-8 backdrop-blur-xl transition-all max-h-[88vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-2xl border neo-surface-amber p-4.5 sm:p-6 md:p-8 backdrop-blur-xl transition-all max-h-[88vh] overflow-y-auto overflow-x-hidden"
         style={{
           borderColor: `${color}44`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Subtle accent glow */}
-        <div
-          className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-20"
-          style={{ background: color }}
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <div
+            className="absolute -top-16 -right-16 h-40 w-40 rounded-full blur-3xl opacity-20"
+            style={{ background: color }}
+          />
+        </div>
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
