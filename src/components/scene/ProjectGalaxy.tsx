@@ -1,7 +1,7 @@
 import { useRef, useState, useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { Text, Points, PointMaterial } from "@react-three/drei";
+import { Text, Points, PointMaterial, Billboard } from "@react-three/drei";
 import { usePortfolio, type ProjectPattern } from "@/content/portfolio";
 import {
   generateAtmosphereTelemetry,
@@ -128,18 +128,21 @@ export function ProjectPlanet({
         />
       </group>
 
-      {/* Always-visible small name label so planets are identifiable from afar */}
-      <Text
-        font={FUTURA_FONT}
-        position={[0, 1.1 * size + 0.35, 0]}
-        fontSize={0.32}
-        color={color}
-        outlineWidth={0.012}
-        outlineColor="#000"
-        anchorY="bottom"
-      >
-        {name}
-      </Text>
+      {/* Always-visible small name label facing camera so planets are identifiable from afar */}
+      <Billboard follow lockX={false} lockY={false} lockZ={false}>
+        <Text
+          font={FUTURA_FONT}
+          position={[0, 1.1 * size + 0.38, 0]}
+          fontSize={hovered ? 0.38 : 0.32}
+          color={hovered ? "#ffffff" : color}
+          outlineWidth={hovered ? 0.02 : 0.012}
+          outlineColor="#000"
+          anchorY="bottom"
+          letterSpacing={0.06}
+        >
+          {name}
+        </Text>
+      </Billboard>
     </group>
   );
 }

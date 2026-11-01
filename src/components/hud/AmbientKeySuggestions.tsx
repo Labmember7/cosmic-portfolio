@@ -38,7 +38,7 @@ export function AmbientKeySuggestions({
 
   return (
     <div
-      className={`pointer-events-none fixed top-14 sm:top-16 left-6 z-30 max-w-[min(380px,calc(100vw-48px))] transition-all duration-500 hidden md:block ${
+      className={`pointer-events-none fixed top-14 sm:top-16 left-6 z-30 max-w-[min(380px,calc(100vw-48px))] transition-all duration-500 hidden lg:block ${
         visible && !isIdle
           ? "opacity-55 translate-y-0"
           : "opacity-0 -translate-y-1.5"

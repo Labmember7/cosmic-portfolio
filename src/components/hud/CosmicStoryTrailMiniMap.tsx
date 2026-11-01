@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import type { Chapter } from "@/config/story";
+import { useIsLandscape } from "@/hooks/use-mobile";
 
 export interface MapWaypoint {
   index: number;
@@ -478,17 +479,24 @@ export function CosmicStoryTrailMiniMap({
           ctx.fill();
         }
 
-        // Clean Single-Line Layered Landmark Labels
-        if (node.isMain || isHovered) {
-          ctx.font = `bold ${Math.max(9, Math.round(9 * node.scale))}px 'Orbitron', 'Rajdhani', sans-serif`;
+        // Clean Single-Line Layered Landmark Labels — only render active node and hovered node to prevent messy collisions
+        const shouldShowLabel = isHovered || node.index === currentIndex;
+        if (shouldShowLabel) {
+          ctx.font = `bold ${Math.max(8, Math.round(8 * node.scale))}px 'Orbitron', 'Rajdhani', sans-serif`;
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
 
-          const labelY = node.screenY - radius * 1.6 - 3;
+          const labelY = node.screenY - radius * 1.6 - 4;
 
-          // Legibility Underlay
-          ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-          ctx.fillText(node.shortLabel, node.screenX + 1, labelY + 1);
+          // Legibility Underlay pill with glowing border
+          const textMetrics = ctx.measureText(node.shortLabel);
+          const badgeW = textMetrics.width + 10;
+          const badgeH = 14;
+          ctx.fillStyle = "rgba(0, 0, 0, 0.88)";
+          ctx.fillRect(node.screenX - badgeW / 2, labelY - badgeH + 2, badgeW, badgeH);
+          ctx.strokeStyle = isHovered ? "#ffffff" : node.accent;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(node.screenX - badgeW / 2, labelY - badgeH + 2, badgeW, badgeH);
 
           ctx.fillStyle = isHovered ? "#ffffff" : node.accent;
           ctx.fillText(node.shortLabel, node.screenX, labelY);
@@ -569,11 +577,24 @@ export function CosmicStoryTrailMiniMap({
     }
   };
 
-  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const delta = e.deltaY * -0.0012;
-    zoomRef.current = Math.max(0.65, Math.min(1.9, zoomRef.current + delta));
-  };
+  // Non-passive wheel listener for smooth zooming without browser scroll collision
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY * -0.0012;
+      zoomRef.current = Math.max(0.65, Math.min(1.9, zoomRef.current + delta));
+    };
+
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      canvas.removeEventListener("wheel", onWheel);
+    };
+  }, []);
+
+  const isLandscape = useIsLandscape();
 
   const handleResetOrientation = () => {
     yawRef.current = 0.4;
@@ -588,19 +609,19 @@ export function CosmicStoryTrailMiniMap({
       className="relative flex flex-col w-full rounded-2xl border border-cyan-400/30 bg-black/80 backdrop-blur-xl shadow-[0_0_35px_rgba(0,0,0,0.85),0_0_20px_rgba(34,211,238,0.15)] overflow-hidden max-h-[85vh]"
     >
       {/* Top Header — Clean Single-Line */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 border-b border-white/10 bg-white/[0.03]">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
-          <h3 className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em] text-cyan-300 font-bold whitespace-nowrap">
-            3D COSMIC COURSE TRAIL
+      <div className="flex items-center justify-between px-2.5 sm:px-4 py-1 sm:py-2 border-b border-white/10 bg-white/[0.03]">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse flex-shrink-0" />
+          <h3 className="text-[8px] sm:text-[10px] font-mono uppercase tracking-[0.15em] sm:tracking-[0.25em] text-cyan-300 font-bold whitespace-nowrap">
+            <span className="hidden sm:inline">3D </span>COSMIC TRAIL
           </h3>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1">
           <button
             onClick={handleResetOrientation}
             title="Reset 3D Camera"
-            className="text-[8px] sm:text-[9px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
+            className="text-[7px] sm:text-[9px] font-mono text-white/60 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-1.5 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
           >
             ↺ Reset
           </button>
@@ -608,7 +629,7 @@ export function CosmicStoryTrailMiniMap({
             <button
               onClick={onClose}
               title="Close Map View"
-              className="text-[9px] sm:text-[10px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/15 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
+              className="text-[8px] sm:text-[10px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/15 px-1.5 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
             >
               ✕
             </button>
@@ -617,14 +638,19 @@ export function CosmicStoryTrailMiniMap({
       </div>
 
       {/* Main Interactive 3D Canvas — Pure 3D Viewport */}
-      <div className="relative w-full h-[180px] xs:h-[220px] sm:h-[280px] md:h-[320px] landscape:h-[160px] bg-gradient-to-b from-transparent to-[#02050f]/80">
+      <div
+        className={`relative w-full ${
+          isLandscape
+            ? "h-[125px]"
+            : "h-[180px] xs:h-[220px] sm:h-[280px] md:h-[320px]"
+        } bg-gradient-to-b from-transparent to-[#02050f]/80`}
+      >
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onClick={handleClick}
-          onWheel={handleWheel}
           className="w-full h-full touch-none select-none"
           style={{ cursor: "grab" }}
         />

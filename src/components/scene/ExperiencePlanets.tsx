@@ -343,39 +343,187 @@ export function ExperiencePlanet({
         </Html>
       )}
 
-      {/* Floating Milestone Titles (Only displayed for the active waypoint to prevent background clutter) */}
+      {/* Floating Milestone Titles with Clean Holographic Animations */}
       {!isIntroActive && isActiveWaypoint && (
-        <Billboard follow lockX={false} lockY={false} lockZ={false}>
-          <Text
-            font={FUTURA_FONT}
-            position={[0, 4.1, 0]}
-            fontSize={0.95}
-            color={color}
-            outlineWidth={0.03}
-            outlineColor="#000"
-            letterSpacing={0.18}
-            anchorY="bottom"
-          >
-            {displayPlace.toUpperCase()}
-          </Text>
-          {place && (
-            <Text
-              font={FUTURA_FONT}
-              position={[0, 3.35, 0]}
-              fontSize={0.32}
-              color="#fff"
-              outlineWidth={0.01}
-              outlineColor="#000"
-              letterSpacing={0.05}
-            >
-              {name}
-            </Text>
-          )}
-          <Text font={FUTURA_FONT} position={[0, 2.9, 0]} fontSize={0.22} color="#ffffffaa">
-            {year}
-          </Text>
-        </Billboard>
+        <AnimatedPlanetTitle
+          displayPlace={displayPlace}
+          name={name}
+          year={year}
+          color={color}
+          accent={accent}
+          hasPlace={Boolean(place)}
+          isHovered={hovered}
+        />
       )}
     </group>
+  );
+}
+
+/**
+ * AnimatedPlanetTitle:
+ * Delivers clean, fluid 3D animations for the active planet's billboard text:
+ * 1. Critically damped spring entrance (blooming scale & ascending glide into focus).
+ * 2. Harmonic zero-G microgravity floating (subtle vertical bobbing and gentle sway).
+ * 3. Holographic laser underline that expands into place with glowing end caps.
+ * 4. Interactive pointer hover reaction (elevated scale and intensified laser luminance).
+ */
+function AnimatedPlanetTitle({
+  displayPlace,
+  name,
+  year,
+  color,
+  accent,
+  hasPlace,
+  isHovered = false,
+}: {
+  displayPlace: string;
+  name: string;
+  year: string;
+  color: string;
+  accent: string;
+  hasPlace: boolean;
+  isHovered?: boolean;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+  const lineRef = useRef<THREE.Mesh>(null);
+  const dotLeftRef = useRef<THREE.Mesh>(null);
+  const dotRightRef = useRef<THREE.Mesh>(null);
+
+  // Smooth entrance interpolation progress (0 -> 1)
+  const animProgressRef = useRef(0);
+  const hoverFactorRef = useRef(0);
+
+  useFrame((state, delta) => {
+    if (!groupRef.current) return;
+
+    // Critically damped entrance spring (fast, fluid, no overshoot oscillation)
+    animProgressRef.current = THREE.MathUtils.damp(animProgressRef.current, 1, 5.5, delta);
+    const p = animProgressRef.current;
+
+    // Smooth hover factor damping
+    hoverFactorRef.current = THREE.MathUtils.damp(
+      hoverFactorRef.current,
+      isHovered ? 1 : 0,
+      8,
+      delta
+    );
+    const h = hoverFactorRef.current;
+
+    const t = state.clock.getElapsedTime();
+
+    // Idle microgravity harmonic floating
+    const floatY = Math.sin(t * 1.5) * 0.08 + h * 0.15;
+    const floatRotZ = Math.sin(t * 0.9) * (0.012 - h * 0.006);
+
+    // Vertical position: smoothly rises into final orbital altitude
+    const entryY = (1 - p) * -0.6;
+    groupRef.current.position.y = entryY + floatY;
+    groupRef.current.rotation.z = floatRotZ;
+
+    // Scale: springs up from 0.82 to 1.0 with subtle rhythmic breathing + hover magnification
+    const breath = 1 + Math.sin(t * 1.2) * 0.012;
+    const hoverScale = 1 + h * 0.07;
+    const targetScale = THREE.MathUtils.lerp(0.82, 1.0, p) * breath * hoverScale;
+    groupRef.current.scale.set(targetScale, targetScale, targetScale);
+
+    // Expanding holographic laser divider line
+    if (lineRef.current) {
+      lineRef.current.scale.x = p * (0.96 + Math.sin(t * 2.2) * 0.04 + h * 0.1);
+      const lineMat = lineRef.current.material as THREE.MeshBasicMaterial;
+      if (lineMat) {
+        lineMat.opacity = THREE.MathUtils.lerp(p * 0.7, 0.95, h);
+      }
+    }
+
+    // Holographic corner dots
+    if (dotLeftRef.current && dotRightRef.current) {
+      const leftMat = dotLeftRef.current.material as THREE.MeshBasicMaterial;
+      const rightMat = dotRightRef.current.material as THREE.MeshBasicMaterial;
+      const dotOpacity = THREE.MathUtils.lerp(p * 0.95, 1.0, h);
+      if (leftMat) leftMat.opacity = dotOpacity;
+      if (rightMat) rightMat.opacity = dotOpacity;
+    }
+  });
+
+  return (
+    <Billboard follow lockX={false} lockY={false} lockZ={false}>
+      <group ref={groupRef}>
+        {/* Main Planet Title */}
+        <Text
+          font={FUTURA_FONT}
+          position={[0, 4.15, 0]}
+          fontSize={0.95}
+          color={color}
+          outlineWidth={0.035}
+          outlineColor="#000"
+          letterSpacing={0.18}
+          anchorY="bottom"
+        >
+          {displayPlace.toUpperCase()}
+        </Text>
+
+        {/* Holographic Glowing Laser Divider with End Beacons */}
+        <group position={[0, 3.82, 0]}>
+          <mesh ref={lineRef}>
+            <planeGeometry args={[2.2, 0.02]} />
+            <meshBasicMaterial
+              color={accent || color}
+              transparent
+              opacity={0.7}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+          <mesh ref={dotLeftRef} position={[-1.1, 0, 0]}>
+            <circleGeometry args={[0.03, 16]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.95}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+          <mesh ref={dotRightRef} position={[1.1, 0, 0]}>
+            <circleGeometry args={[0.03, 16]} />
+            <meshBasicMaterial
+              color="#ffffff"
+              transparent
+              opacity={0.95}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
+
+        {/* Subtitle / Role */}
+        {hasPlace && (
+          <Text
+            font={FUTURA_FONT}
+            position={[0, 3.42, 0]}
+            fontSize={0.32}
+            color="#fff"
+            outlineWidth={0.015}
+            outlineColor="#000"
+            letterSpacing={0.06}
+          >
+            {name}
+          </Text>
+        )}
+
+        {/* Era / Year Telemetry Tag */}
+        <Text
+          font={FUTURA_FONT}
+          position={[0, hasPlace ? 2.95 : 3.42, 0]}
+          fontSize={0.22}
+          color="#ffffffbb"
+          outlineWidth={0.01}
+          outlineColor="#000"
+          letterSpacing={0.08}
+        >
+          {year}
+        </Text>
+      </group>
+    </Billboard>
   );
 }

@@ -3,7 +3,7 @@ import { Suspense, useRef, useState, useMemo, useEffect, useCallback } from "rea
 import { Canvas } from "@react-three/fiber";
 
 import { useSpaceMusic } from "@/hooks/useSpaceMusic";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile, useIsLandscape } from "@/hooks/use-mobile";
 import {
   PortfolioContext,
   fetchPortfolio,
@@ -155,6 +155,14 @@ function Portfolio() {
     }
   });
   const isMobile = useIsMobile();
+  const isLandscape = useIsLandscape();
+
+  // Auto-collapse caption descriptions in landscape view for widescreen immersion
+  useEffect(() => {
+    if (isLandscape) {
+      setCaptionCollapsed(true);
+    }
+  }, [isLandscape]);
 
   // Detect portrait orientation for mobile panoramic suggestion
   useEffect(() => {
@@ -221,6 +229,22 @@ function Portfolio() {
     () => (data ? buildChapters(data.experiences, layout, data.brand.description) : []),
     [data, layout],
   );
+
+  // Deep-link direct chapter navigation via URL query parameter (e.g. ?ch=7 or ?chapter=wormhole)
+  useEffect(() => {
+    if (typeof window === "undefined" || !CHAPTERS.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const chParam = params.get("ch") || params.get("chapter");
+    if (chParam) {
+      const parsed = parseInt(chParam, 10);
+      if (!isNaN(parsed) && parsed >= 0 && parsed < CHAPTERS.length) {
+        setIndex(parsed);
+      } else {
+        const found = CHAPTERS.findIndex((c) => c.id === chParam);
+        if (found !== -1) setIndex(found);
+      }
+    }
+  }, [CHAPTERS]);
 
   const baseChapter = CHAPTERS[index] ?? CHAPTERS[0];
 
@@ -378,27 +402,40 @@ function Portfolio() {
           <MissionBriefing brand={BRAND} caption={chapter?.caption} bootReady={bootReady} />
         )}
 
-        {/* Intro Anamorphic Letterbox Telemetry Bars */}
+        {/* Intro Anamorphic Letterbox Telemetry Bars — Adaptive Height */}
         {chapter?.id === "intro" && (
           <div
-            className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0"
-              }`}
+            className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${
+              bootReady ? "opacity-100" : "opacity-0"
+            }`}
           >
-            <div className="h-9 sm:h-10 w-full bg-black/85 border-b border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[9px] sm:text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] text-cyan-300 backdrop-blur-md">
+            <div
+              className={`${
+                isLandscape ? "h-6" : "h-6 sm:h-8 md:h-10"
+              } w-full bg-black/85 border-b border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[8px] sm:text-[9px] md:text-[10px] font-mono tracking-[0.12em] sm:tracking-[0.25em] text-cyan-300 backdrop-blur-md`}
+            >
               <div className="flex items-center gap-1.5 sm:gap-2 truncate">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping flex-shrink-0" />
                 <span className="truncate">STARPORT ALPHA // SECTOR 07-B</span>
               </div>
-              <span className="text-white/40 hidden md:inline">
-                TELEMETRY: ALL 12 CHANNELS NOMINAL
-              </span>
+              {!isMobile && (
+                <span className="text-white/40 hidden md:inline">
+                  TELEMETRY: ALL 12 CHANNELS NOMINAL
+                </span>
+              )}
               <span className="text-cyan-200 truncate hidden xs:inline">ORBITAL LAUNCH PAD READY</span>
             </div>
-            <div className="h-9 sm:h-10 w-full bg-black/85 border-t border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[9px] sm:text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] text-white/50 backdrop-blur-md">
+            <div
+              className={`${
+                isLandscape ? "h-6" : "h-6 sm:h-8 md:h-10"
+              } w-full bg-black/85 border-t border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[8px] sm:text-[9px] md:text-[10px] font-mono tracking-[0.12em] sm:tracking-[0.25em] text-white/50 backdrop-blur-md`}
+            >
               <span className="truncate">MISSION CLOCK: T-00:00:00</span>
-              <span className="text-cyan-300 hidden md:inline">
-                COORDINATES: 28.5721° N, 80.6480° W
-              </span>
+              {!isMobile && (
+                <span className="text-cyan-300 hidden md:inline">
+                  COORDINATES: 28.5721° N, 80.6480° W
+                </span>
+              )}
               <span className="text-emerald-400 truncate">HYPERDRIVE: ARMED</span>
             </div>
           </div>
@@ -416,16 +453,17 @@ function Portfolio() {
           />
         )}
 
-        {/* Top Control Bar */}
+        {/* Top Control Bar — Reduced & Cleanly Aligned */}
         <header
           id="site-header"
           role="banner"
-          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-            } ${chapter?.id === "intro" ? "top-11 sm:top-14" : "top-3 sm:top-4"}`}
+          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-1.5 sm:gap-4 px-2.5 sm:px-6 transition-all duration-700 ${
+            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          } ${chapter?.id === "intro" ? "top-7 sm:top-9 md:top-12" : "top-1.5 sm:top-2.5 md:top-4"}`}
         >
           {/* Brand */}
-          <div className="pointer-events-none max-w-[130px] xs:max-w-[180px] sm:max-w-none">
-            <h1 className="text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] text-white/80 font-mono truncate">
+          <div className="pointer-events-none max-w-[120px] xs:max-w-[160px] sm:max-w-none truncate">
+            <h1 className="text-[9px] sm:text-xs tracking-[0.15em] sm:tracking-[0.4em] text-white/80 font-mono truncate">
               ✧ {BRAND.name.toUpperCase().split(" ").join(" · ")}
             </h1>
             <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-white/40 font-mono hidden sm:block">
@@ -433,36 +471,28 @@ function Portfolio() {
             </p>
           </div>
 
-          {/* Center Glass Controls - Subtle & Minimalist */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 sm:gap-3 rounded-full border border-white/[0.08] bg-black/30 px-2.5 sm:px-3.5 py-1 backdrop-blur-md opacity-85 sm:opacity-75 hover:opacity-100 transition-all duration-300">
+          {/* Center Glass Controls — Centered, Compact Audio, Volume & Light */}
+          <div className="absolute left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 sm:gap-2 rounded-full border border-white/[0.08] bg-black/60 px-2 sm:px-3 py-0.5 sm:py-1 backdrop-blur-md opacity-95 hover:opacity-100 transition-all duration-300 max-w-[calc(100vw-7rem)] overflow-x-auto shadow-md">
             <button
               id="music-toggle-btn"
               onClick={toggleMusic}
-              className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.15em] text-white/60 hover:text-white transition whitespace-nowrap cursor-pointer px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05]"
+              className="flex items-center gap-1 text-[8px] sm:text-[10px] font-mono uppercase tracking-[0.1em] text-white/70 hover:text-white transition whitespace-nowrap cursor-pointer px-1 py-0.5 rounded-full hover:bg-white/[0.05]"
               title={musicOn ? "Mute soundtrack" : "Play space atmospheric soundtrack"}
             >
               <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
-                  }`}
+                className={`inline-block h-1.5 w-1.5 rounded-full ${
+                  musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                }`}
               />
-              ♪ <span className="hidden xs:inline">{musicOn ? "Audio" : "Muted"}</span>
+              <span>♪</span>
+              <span className="hidden md:inline">{musicOn ? "Audio" : "Muted"}</span>
             </button>
 
-            {/* Mobile Touch Avionics Hints Pill */}
-            <button
-              id="mobile-hints-btn"
-              onClick={() => setHintsModalOpen(true)}
-              className="flex sm:hidden items-center gap-1 text-[9px] font-mono uppercase tracking-[0.1em] text-cyan-200/90 hover:text-white transition whitespace-nowrap cursor-pointer px-2 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/35 hover:bg-cyan-400/25 shadow-[0_0_8px_rgba(34,211,238,0.2)]"
-              title="View touch avionics gestures"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              Hints
-            </button>
-
-            <div className="hidden sm:flex items-center gap-1.5">
+            {/* Compact Volume Control — Available on Mobile & Desktop */}
+            <div className="flex items-center gap-1">
               <label
                 htmlFor="volume-control"
-                className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40 whitespace-nowrap"
+                className="text-[7px] sm:text-[9px] font-mono uppercase tracking-wider text-white/40 whitespace-nowrap"
               >
                 Vol
               </label>
@@ -475,7 +505,7 @@ function Portfolio() {
                 value={volume}
                 disabled={!musicOn}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-14 h-1 neo-slider-emerald disabled:opacity-20 cursor-pointer"
+                className="w-8 xs:w-10 sm:w-14 h-1 neo-slider-emerald disabled:opacity-20 cursor-pointer"
                 style={{
                   background: musicOn
                     ? `linear-gradient(to right, #059669 0%, #10b981 ${Math.max(0, volumePct - 8)}%, #34d399 ${volumePct}%, rgba(4, 7, 16, 0.9) ${volumePct}%, rgba(4, 7, 16, 0.9) 100%)`
@@ -484,12 +514,13 @@ function Portfolio() {
               />
             </div>
 
-            <span className="hidden md:inline-block h-3 w-px bg-white/10" />
+            <span className="inline-block h-2.5 sm:h-3 w-px bg-white/10" />
 
-            <div className="hidden md:flex items-center gap-1.5">
+            {/* Compact Light Control — Available on Mobile & Desktop */}
+            <div className="flex items-center gap-1">
               <label
                 htmlFor="light-control"
-                className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40 whitespace-nowrap"
+                className="text-[7px] sm:text-[9px] font-mono uppercase tracking-wider text-white/40 whitespace-nowrap"
               >
                 ☀
               </label>
@@ -501,80 +532,106 @@ function Portfolio() {
                 step={0.05}
                 value={luminosity}
                 onChange={(e) => setLuminosity(parseFloat(e.target.value))}
-                className="w-14 h-1 neo-slider-amber cursor-pointer"
+                className="w-8 xs:w-10 sm:w-14 h-1 neo-slider-amber cursor-pointer"
                 style={{
                   background: `linear-gradient(to right, #d97706 0%, #f59e0b ${Math.max(0, lightPct - 8)}%, #fbbf24 ${lightPct}%, rgba(4, 7, 16, 0.9) ${lightPct}%, rgba(4, 7, 16, 0.9) 100%)`,
                 }}
               />
             </div>
 
-            <span className="hidden md:inline-block h-3 w-px bg-white/10" />
+            {/* Mobile Touch Avionics Hints Pill */}
+            {isMobile && (
+              <>
+                <span className="inline-block h-2.5 w-px bg-white/10" />
+                <button
+                  id="mobile-hints-btn"
+                  onClick={() => setHintsModalOpen(true)}
+                  className="flex items-center gap-1 text-[7px] sm:text-[9px] font-mono uppercase tracking-[0.1em] text-cyan-200/90 hover:text-white transition whitespace-nowrap cursor-pointer px-1.5 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/35 hover:bg-cyan-400/25 shadow-[0_0_8px_rgba(34,211,238,0.2)]"
+                  title="View touch avionics gestures"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  Hints
+                </button>
+              </>
+            )}
 
-            <button
-              id="roam-toggle-btn"
-              onClick={() => setFreeRoam((v) => !v)}
-              className={`hidden md:inline-flex text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
-                }`}
-              title="Free roam (WASD + mouse look, Shift boost, Space/Ctrl ascend/descend, Esc release)"
-            >
-              <span
-                className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+            {/* Desktop Free Roam Button */}
+            {!isMobile && (
+              <>
+                <span className="inline-block h-3 w-px bg-white/10" />
+                <button
+                  id="roam-toggle-btn"
+                  onClick={() => setFreeRoam((v) => !v)}
+                  className={`inline-flex text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${
+                    freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
                   }`}
-              />
-              Roam
-            </button>
+                  title="Free roam (WASD + mouse look, Shift boost, Space/Ctrl ascend/descend, Esc release)"
+                >
+                  <span
+                    className={`inline-block h-1.5 w-1.5 rounded-full mr-1 ${
+                      freeRoam ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
+                    }`}
+                  />
+                  Roam
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Chapter Progress Indicators - Fluid Transition & Clean Celestial Blue Hue */}
+          {/* Chapter Progress Indicators */}
           <nav
             id="chapter-nav"
             aria-label="Cosmic Journey Chapters"
             className="flex flex-col items-end gap-1"
           >
-            {/* Desktop 12 Dots */}
-            <div
-              className="hidden md:flex items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md p-1.5 shadow-inner"
-              role="tablist"
-              aria-label="Chapter Indicators"
-            >
-              {CHAPTERS.map((c, i) => (
-                <button
-                  key={c.id}
-                  id={`chapter-dot-${c.id}`}
-                  onClick={() => go(i)}
-                  aria-label={`Jump to chapter ${i + 1}: ${c.title}`}
-                  title={c.title}
-                  role="tab"
-                  aria-selected={i === index}
-                  className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${i === index
-                    ? "w-8 bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.7),0_0_24px_rgba(14,165,233,0.35)]"
-                    : visited.has(c.id)
-                      ? "w-2.5 bg-sky-400/40 hover:bg-sky-300/70 shadow-[0_0_6px_rgba(56,189,248,0.25)]"
-                      : "w-2 bg-white/15 hover:bg-white/30"
-                    }`}
-                />
-              ))}
-            </div>
-
-            {/* Mobile Compact Chapter Indicator */}
-            <div
-              className="flex md:hidden items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md px-2.5 py-1 text-[9px] font-mono tracking-widest shadow-inner"
-              role="status"
-              aria-label={`Chapter ${index + 1} of ${CHAPTERS.length}`}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#22d3ee]" />
-              <span className="text-cyan-300 font-bold tabular-nums">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="text-white/30">/</span>
-              <span className="text-white/50 tabular-nums">
-                {String(CHAPTERS.length).padStart(2, "0")}
-              </span>
-            </div>
-
-            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 hidden md:block">
-              chapter <span className="text-cyan-300 font-bold tabular-nums">{index + 1}</span> / {CHAPTERS.length}
-            </p>
+            {!isMobile ? (
+              <>
+                {/* Desktop 12 Dots */}
+                <div
+                  className="flex items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md p-1.5 shadow-inner"
+                  role="tablist"
+                  aria-label="Chapter Indicators"
+                >
+                  {CHAPTERS.map((c, i) => (
+                    <button
+                      key={c.id}
+                      id={`chapter-dot-${c.id}`}
+                      onClick={() => go(i)}
+                      aria-label={`Jump to chapter ${i + 1}: ${c.title}`}
+                      title={c.title}
+                      role="tab"
+                      aria-selected={i === index}
+                      className={`h-2 rounded-full cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                        i === index
+                          ? "w-8 bg-gradient-to-r from-blue-500 via-sky-400 to-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.7),0_0_24px_rgba(14,165,233,0.35)]"
+                          : visited.has(c.id)
+                            ? "w-2.5 bg-sky-400/40 hover:bg-sky-300/70 shadow-[0_0_6px_rgba(56,189,248,0.25)]"
+                            : "w-2 bg-white/15 hover:bg-white/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-white/40">
+                  chapter <span className="text-cyan-300 font-bold tabular-nums">{index + 1}</span> / {CHAPTERS.length}
+                </p>
+              </>
+            ) : (
+              /* Mobile Compact Chapter Indicator */
+              <div
+                className="flex items-center gap-1.5 rounded-full bg-black/50 border border-white/[0.08] backdrop-blur-md px-2 py-0.5 text-[8px] sm:text-[9px] font-mono tracking-widest shadow-inner"
+                role="status"
+                aria-label={`Chapter ${index + 1} of ${CHAPTERS.length}`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#22d3ee]" />
+                <span className="text-cyan-300 font-bold tabular-nums">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="text-white/30">/</span>
+                <span className="text-white/50 tabular-nums">
+                  {String(CHAPTERS.length).padStart(2, "0")}
+                </span>
+              </div>
+            )}
           </nav>
         </header>
 
@@ -610,99 +667,158 @@ function Portfolio() {
           </div>
         )}
 
-        {/* Chapter Caption Card - bottom-left on desktop, bottom docked above nav on mobile, corner docked on landscape */}
+        {/* Chapter Caption Card — Adaptive, Reduced, & Click-to-Collapse */}
         {chapter?.id !== "intro" && (
           <section
             id="chapter-caption-panel"
             aria-labelledby="chapter-caption-title"
-            className={`absolute left-3 right-3 sm:left-6 sm:right-auto landscape:left-3 landscape:right-auto landscape:bottom-3 landscape:w-[320px] landscape:max-w-[44vw] z-20 w-auto sm:w-[380px] sm:max-w-[380px] transition-all duration-700 pointer-events-auto ${
+            className={`fixed left-2.5 sm:left-6 md:left-8 z-35 transition-all duration-500 pointer-events-auto ${
               bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-            } bottom-[max(4.25rem,calc(env(safe-area-inset-bottom,0px)+3.5rem))] sm:bottom-24`}
+            } ${
+              isLandscape
+                ? "bottom-2.5 w-[260px] max-w-[38vw]"
+                : isMobile
+                  ? "bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3.2rem))] left-2.5 right-2.5 w-auto max-w-[340px]"
+                  : "bottom-14 md:bottom-16 w-[360px] md:w-[440px] lg:w-[480px]"
+            }`}
           >
-            <div
-              key={chapter?.id}
-              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-3.5 sm:p-5 md:p-6 landscape:p-3 backdrop-blur-2xl ring-1 ring-cyan-400/20 max-h-[46vh] sm:max-h-none landscape:max-h-[82vh] overflow-y-auto"
-              style={{ animation: "fadein .4s ease-out" }}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <h2
-                  id="chapter-caption-title"
-                  className="font-display text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all duration-300 truncate"
+            {captionCollapsed ? (
+              /* Ultra-compact collapsed chip — Click to expand */
+              <button
+                onClick={() => setCaptionCollapsed(false)}
+                className="group flex items-center justify-between gap-2 rounded-xl border border-cyan-400/35 bg-black/80 px-2.5 py-1.5 backdrop-blur-xl ring-1 ring-cyan-400/25 shadow-[0_0_15px_rgba(0,0,0,0.8)] hover:border-cyan-400/70 transition-all cursor-pointer text-left w-full"
+                aria-label="Expand chapter summary"
+              >
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#22d3ee] flex-shrink-0" />
+                  <span className="font-display text-[9px] font-bold text-cyan-300 tracking-wider truncate uppercase">
+                    {(chapter?.title ?? "").split("—")[0].split(" - ")[0].trim()}
+                  </span>
+                </div>
+                <span className="text-[8px] font-mono text-cyan-200/90 uppercase px-1.5 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/30 group-hover:bg-cyan-400/25 flex-shrink-0">
+                  ▲ Expand
+                </span>
+              </button>
+            ) : (
+              /* Adaptive expanded card — Click header or description to collapse */
+              <div
+                key={chapter?.id}
+                className={`rounded-2xl border border-cyan-400/30 neo-surface-cyan p-2.5 sm:p-4 backdrop-blur-2xl ring-1 ring-cyan-400/20 shadow-[0_0_25px_rgba(0,0,0,0.9)] animate-in fade-in zoom-in-95 duration-200 ${
+                  isLandscape
+                    ? "max-h-[160px] overflow-y-auto"
+                    : isMobile
+                      ? "max-h-[48vh] overflow-y-auto"
+                      : "max-h-none overflow-visible"
+                }`}
+              >
+                {/* Header (clickable to collapse) */}
+                <div
+                  onClick={() => setCaptionCollapsed(true)}
+                  className="flex items-center justify-between gap-2 cursor-pointer pb-1.5 border-b border-cyan-400/20 hover:opacity-90 transition-opacity"
+                  title="Click to collapse description"
                 >
-                  {chapter?.title}
-                </h2>
-                {/* Mobile & Landscape collapse / expand toggle */}
-                <button
-                  onClick={() => setCaptionCollapsed((v) => !v)}
-                  className="md:hidden text-[9px] font-mono uppercase tracking-wider text-cyan-300/80 hover:text-white px-2 py-0.5 rounded-full border border-cyan-400/30 neo-btn flex-shrink-0 cursor-pointer"
-                  aria-label={captionCollapsed ? "Expand chapter summary" : "Collapse chapter summary"}
-                >
-                  {captionCollapsed ? "▲ Expand" : "▼ Hide"}
-                </button>
-              </div>
+                  {(() => {
+                    const rawTitle = chapter?.title ?? "";
+                    const parts = rawTitle.includes("—")
+                      ? rawTitle.split("—")
+                      : rawTitle.includes(" - ")
+                        ? rawTitle.split(" - ")
+                        : [rawTitle];
+                    const numDate = parts[0]?.trim() ?? "";
+                    const heading = parts.slice(1).join(" — ").trim();
+                    return (
+                      <div className="flex flex-col truncate">
+                        <span className="font-mono text-[8px] sm:text-[9px] text-cyan-300/80 tracking-wider uppercase truncate">
+                          {numDate}
+                        </span>
+                        {heading && (
+                          <span className="font-display text-[10px] sm:text-xs font-bold text-white tracking-wide truncate">
+                            {heading}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCaptionCollapsed(true);
+                    }}
+                    className="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-cyan-300/80 hover:text-white px-2 py-0.5 rounded-full border border-cyan-400/30 neo-btn flex-shrink-0 cursor-pointer"
+                    aria-label="Collapse chapter summary"
+                  >
+                    ▼ Hide
+                  </button>
+                </div>
 
-              {!captionCollapsed && (
-                <>
-                  {/* Neomorphed debossed container for the description like the initial Card */}
-                  <div className="mt-2.5 sm:mt-3 rounded-xl neo-inset p-3 sm:p-4 border border-white/5">
-                    <p
-                      className="text-[12px] sm:text-[15px] text-white/90 leading-relaxed font-sans font-normal"
-                      style={{ letterSpacing: "normal" }}
+                {/* Description Body (clickable to collapse) */}
+                <div
+                  onClick={() => setCaptionCollapsed(true)}
+                  className="mt-1.5 sm:mt-2 rounded-lg neo-inset p-2 border border-white/5 cursor-pointer hover:border-cyan-400/20 transition-all"
+                  title="Click description to collapse"
+                >
+                  <p
+                    className={`text-[10px] sm:text-[11px] md:text-xs text-white/85 leading-relaxed font-sans ${
+                      isLandscape ? "line-clamp-3" : isMobile ? "line-clamp-4" : ""
+                    }`}
+                  >
+                    {chapter?.caption}
+                  </p>
+                </div>
+
+                {/* Pantheon: Curated Honors Drawer */}
+                {chapter?.id === "pantheon" && (
+                  <div className="mt-2 pt-1.5 border-t border-amber-400/20">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-amber-300 font-mono">
+                        🏆 Credentials
+                      </p>
+                      <span className="text-[8px] font-mono text-white/50">
+                        {achievementsList.length} items
+                      </span>
+                    </div>
+                    <div
+                      className={`grid grid-cols-1 sm:grid-cols-2 gap-1 pr-1 ${
+                        isLandscape || isMobile
+                          ? "max-h-24 overflow-y-auto"
+                          : "max-h-none overflow-visible"
+                      }`}
                     >
-                      {chapter?.caption}
-                    </p>
-                  </div>
-
-                  {/* Pantheon: Quick Trophy Exhibition Drawer */}
-                  {chapter?.id === "pantheon" && (
-                    <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-amber-400/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-amber-300 font-mono">
-                          🏆 Curated Honors & Credentials
-                        </p>
-                        <span className="text-[9px] sm:text-[10px] font-mono text-white/50">
-                          {achievementsList.length} Credentials
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 xs:grid-cols-2 gap-1.5 max-h-28 sm:max-h-36 overflow-y-auto pr-1">
-                        {achievementsList.map((a, i) => (
-                          <button
-                            key={i}
-                            id={`pantheon-artifact-btn-${i}`}
-                            onClick={() => setSelectedAchievementIndex(i)}
-                            className="group flex items-center gap-2 rounded-xl neo-btn-amber px-2.5 py-1.5 text-left text-xs text-white/90 transition border border-amber-400/25 cursor-pointer min-h-[36px]"
-                          >
-                            <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
-                            <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
-                              {a.name}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Finale: Telemetry & Course Map Toggle */}
-                  {chapter?.id === "finale" && (
-                    <div className="mt-3 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-cyan-400/20">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-cyan-300 font-mono font-bold whitespace-nowrap">
-                          ✓ 12 / 12 SECTORS LOGGED
-                        </span>
+                      {achievementsList.map((a, i) => (
                         <button
-                          id="toggle-course-map-btn"
-                          onClick={() => setMapOpen((v) => !v)}
-                          className="text-[9px] sm:text-[10px] font-mono text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/35 px-2.5 py-1 rounded-full transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+                          key={i}
+                          id={`pantheon-artifact-btn-${i}`}
+                          onClick={() => setSelectedAchievementIndex(i)}
+                          className="group flex items-center gap-1.5 rounded-lg neo-btn-amber px-2 py-1 text-left text-[10px] text-white/90 transition border border-amber-400/25 cursor-pointer min-h-[30px]"
                         >
-                          <span>🌐</span>
-                          <span>{mapOpen ? "Hide Map" : "3D Course Map"}</span>
+                          <span className="text-amber-300 font-bold text-[10px]">{a.icon ?? "✦"}</span>
+                          <span className="truncate text-[10px] font-medium group-hover:text-amber-200">
+                            {a.name}
+                          </span>
                         </button>
-                      </div>
+                      ))}
                     </div>
-                  )}
-                </>
-              )}
-            </div>
+                  </div>
+                )}
+
+                {/* Finale: Telemetry & Map Toggle */}
+                {chapter?.id === "finale" && (
+                  <div className="mt-2 pt-1.5 border-t border-cyan-400/20 flex items-center justify-between gap-2">
+                    <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-cyan-300 font-mono font-bold whitespace-nowrap">
+                      ✓ 12 SECTORS LOGGED
+                    </span>
+                    <button
+                      id="toggle-course-map-btn"
+                      onClick={() => setMapOpen((v) => !v)}
+                      className="text-[8px] sm:text-[9px] font-mono text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/35 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer flex items-center gap-1"
+                    >
+                      <span>🌐</span>
+                      <span>{mapOpen ? "Hide Map" : "3D Map"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
@@ -711,8 +827,14 @@ function Portfolio() {
           <aside
             id="floating-cosmic-mini-map"
             aria-label="Interactive 3D Cosmic Course Mini Map"
-            className={`fixed left-3 right-3 sm:left-auto sm:right-6 md:right-10 bottom-[max(4.25rem,calc(env(safe-area-inset-bottom,0px)+3.25rem))] sm:bottom-20 landscape:left-auto landscape:right-3 landscape:bottom-3 landscape:w-[360px] landscape:max-w-[48vw] z-35 w-auto sm:w-[460px] md:w-[500px] transition-all duration-500 pointer-events-auto ${
+            className={`fixed z-35 transition-all duration-500 pointer-events-auto ${
               bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+            } ${
+              isLandscape
+                ? "bottom-2.5 right-2.5 w-[240px] max-w-[38vw]"
+                : isMobile
+                  ? "bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3.2rem))] left-2.5 right-2.5 w-auto"
+                  : "bottom-20 right-6 md:right-10 w-[460px] md:w-[500px]"
             }`}
           >
             <CosmicStoryTrailMiniMap
@@ -727,8 +849,9 @@ function Portfolio() {
 
         {/* Controls Cheat Sheet - bottom-right on desktop, triggered modal on mobile */}
         <div
-          className={`transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+          className={`transition-opacity duration-700 ${
+            bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         >
           <ControlsCheatSheet
             freeRoam={freeRoam}
@@ -738,45 +861,93 @@ function Portfolio() {
           />
         </div>
 
-        {/* Ambient Key Hints */}
-        {bootReady && !freeRoam && chapter?.id !== "intro" && chapter?.id !== "wormhole" && (
+        {/* Mobile Dedicated Ground Control Pill — Sleek, Compact, Docked in Bottom-Right */}
+        {isMobile && bootReady && (
+          <aside
+            id="mobile-ground-control-dock"
+            aria-label="Mobile Ground Control Comms"
+            className={`fixed z-35 transition-all duration-500 pointer-events-auto ${
+              chapter?.id === "intro"
+                ? isLandscape
+                  ? "bottom-9 sm:bottom-10 right-2.5 sm:right-6"
+                  : "bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3.2rem))] right-2.5"
+                : chapter?.id === "finale" && mapOpen
+                  ? "top-10 sm:top-12 right-2.5"
+                  : isLandscape
+                    ? "bottom-2.5 right-2.5 sm:right-6"
+                    : "bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3.2rem))] right-2.5"
+            }`}
+          >
+            <button
+              id="mobile-ground-control-btn"
+              onClick={() => setContactOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-cyan-400/40 bg-black/80 backdrop-blur-xl shadow-[0_0_15px_rgba(0,0,0,0.8),0_0_10px_rgba(34,211,238,0.2)] hover:border-cyan-400/70 active:scale-95 transition-all cursor-pointer"
+              title="Open communications terminal"
+              aria-label="Contact Ground Control"
+            >
+              <span className="flex h-2.5 items-end gap-[1.5px]">
+                <span className="w-[1.5px] h-[40%] bg-cyan-400 rounded-sm" />
+                <span className="w-[1.5px] h-[75%] bg-cyan-400 rounded-sm" />
+                <span className="w-[1.5px] h-[100%] bg-cyan-400 rounded-sm" />
+              </span>
+              <span className="font-mono text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] text-cyan-200">
+                Ground Control
+              </span>
+              <span className="text-[9px] text-cyan-400">↗</span>
+            </button>
+          </aside>
+        )}
+
+        {/* Ambient Key Hints — strictly desktop only to prevent mobile clutter */}
+        {bootReady && !isMobile && !freeRoam && chapter?.id !== "intro" && chapter?.id !== "wormhole" && (
           <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
         )}
 
-        {/* Spacebar / Swipe Orbit Prompt when Idle (Desktop only to prevent mobile clutter) */}
-        <div
-          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 hidden sm:flex items-center gap-2 transition-all duration-700 ${bootReady &&
-            isIdle &&
-            !contactOpen &&
-            projectIndex === null &&
-            selectedAchievementIndex === null &&
-            index < CHAPTERS.length - 1 &&
-            chapter?.id !== "intro" &&
-            chapter?.id !== "wormhole"
-            ? "opacity-60 translate-y-0 scale-100"
-            : "opacity-0 translate-y-2 scale-95 pointer-events-none"
-            } bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3rem))] sm:bottom-15`}
-        >
-          <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1 backdrop-blur-md shadow-md">
-            <kbd className="rounded px-1.5 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-400/25 bg-cyan-950/40">
-              {isMobile ? "SWIPE" : "SPACE"}
-            </kbd>
-            <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.12em] sm:tracking-[0.15em] uppercase text-white/60">
-              Advance Orbit ➔
-            </span>
+        {/* Spacebar Orbit Prompt when Idle — strictly desktop only */}
+        {!isMobile && (
+          <div
+            className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-2 transition-all duration-700 ${
+              bootReady &&
+              isIdle &&
+              !contactOpen &&
+              projectIndex === null &&
+              selectedAchievementIndex === null &&
+              index < CHAPTERS.length - 1 &&
+              chapter?.id !== "intro" &&
+              chapter?.id !== "wormhole"
+                ? "opacity-60 translate-y-0 scale-100"
+                : "opacity-0 translate-y-2 scale-95 pointer-events-none"
+            } bottom-15`}
+          >
+            <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1 backdrop-blur-md shadow-md">
+              <kbd className="rounded px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-400/25 bg-cyan-950/40">
+                SPACE
+              </kbd>
+              <span className="text-[10px] font-mono tracking-[0.15em] uppercase text-white/60">
+                Advance Orbit ➔
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Subtle Bottom Navigation Buttons — Strictly Single-Line */}
+        {/* Subtle Bottom Navigation Buttons — Strictly Single-Line & Adaptive */}
         <nav
           id="chapter-step-controls"
           aria-label="Chapter step controls"
-          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 sm:gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-md transition-all duration-500 opacity-90 hover:opacity-100 whitespace-nowrap flex-nowrap shrink-0 max-w-[calc(100vw-1.5rem)] ${
+          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 p-0.5 sm:p-1 rounded-full border border-white/[0.08] bg-black/50 backdrop-blur-md transition-all duration-500 opacity-95 hover:opacity-100 whitespace-nowrap flex-nowrap shrink-0 max-w-[calc(100vw-1.5rem)] ${
             bootReady ? "translate-y-0" : "translate-y-4 opacity-0 pointer-events-none"
           } ${
             chapter?.id === "intro"
-              ? "bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:bottom-12"
-              : "bottom-[max(1rem,env(safe-area-inset-bottom,0px))] sm:bottom-5"
+              ? isLandscape
+                ? "bottom-9 sm:bottom-10"
+                : isMobile
+                  ? "bottom-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+2rem))]"
+                  : "bottom-10 sm:bottom-12"
+              : isLandscape
+                ? "bottom-2.5 sm:bottom-3"
+                : isMobile
+                  ? "bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
+                  : "bottom-5 sm:bottom-6"
           }`}
         >
           <button
@@ -784,12 +955,12 @@ function Portfolio() {
             onClick={() => go(index - 1)}
             disabled={index === 0}
             aria-label="Previous chapter"
-            className="rounded-full px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-mono text-white/60 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1 min-h-[36px] sm:min-h-[40px] whitespace-nowrap flex-nowrap shrink-0"
+            className="rounded-full px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-mono text-white/60 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1 min-h-[28px] sm:min-h-[34px] whitespace-nowrap flex-nowrap shrink-0"
           >
             <span>←</span>
             <span>Prev</span>
           </button>
-          <span className="h-3 w-px bg-white/10" />
+          <span className="h-2.5 w-px bg-white/10" />
           <button
             id="next-chapter-btn"
             onClick={() => {
@@ -800,7 +971,7 @@ function Portfolio() {
             aria-label={
               index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"
             }
-            className="rounded-full px-3.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.14] hover:bg-cyan-400/[0.24] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.15)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer min-h-[36px] sm:min-h-[40px] whitespace-nowrap flex-nowrap shrink-0"
+            className="rounded-full px-3 sm:px-3.5 py-1 text-[10px] sm:text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.14] hover:bg-cyan-400/[0.24] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_10px_rgba(34,211,238,0.15)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer min-h-[28px] sm:min-h-[34px] whitespace-nowrap flex-nowrap shrink-0"
           >
             <span className="whitespace-nowrap">
               {index === 0

@@ -63,10 +63,31 @@ function GroundControlLabel({
   onHover: (v: boolean) => void;
   onActivate: () => void;
 }) {
-  const isMobile = useIsMobile();
+  const isMobileHook = useIsMobile();
+  const [isShortViewport, setIsShortViewport] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      if (typeof window === "undefined") return;
+      setIsShortViewport(window.innerHeight <= 560 || window.innerWidth <= 768);
+    };
+    check();
+    window.addEventListener("resize", check);
+    window.addEventListener("orientationchange", check);
+    return () => {
+      window.removeEventListener("resize", check);
+      window.removeEventListener("orientationchange", check);
+    };
+  }, []);
+
+  const isMobile = isMobileHook || isShortViewport;
 
   return (
-    <Html position={[1.35, -1.35, 0]} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
+    <Html
+      position={isMobile ? [0, -1.35, 0] : [1.35, -1.35, 0]}
+      zIndexRange={[10, 0]}
+      style={{ pointerEvents: "none" }}
+    >
       <style>{`
         @keyframes gcBlink { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
         @keyframes gcSweep { 0% { transform: translateX(-120%) } 60%,100% { transform: translateX(220%) } }
@@ -75,7 +96,7 @@ function GroundControlLabel({
           0%, 86%, 100% { box-shadow: 0 0 18px rgba(34,211,238,.18), inset 0 0 12px rgba(34,211,238,.06) }
           90% { box-shadow: 0 0 34px rgba(34,211,238,.55), inset 0 0 18px rgba(34,211,238,.2) }
         }
-        @keyframes gcIn { from { opacity: 0; transform: translate(-100%, 6px) } to { opacity: 1; transform: translate(-100%, 0) } }
+        @keyframes gcIn { from { opacity: 0; transform: translate(var(--gc-tx, -100%), 6px) } to { opacity: 1; transform: translate(var(--gc-tx, -100%), 0) } }
         @keyframes gcBars { 0%,100% { transform: scaleY(.35) } 50% { transform: scaleY(1) } }
       `}</style>
       <button
@@ -93,15 +114,17 @@ function GroundControlLabel({
         className="group relative block select-none overflow-hidden whitespace-nowrap rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer"
         style={{
           pointerEvents: "auto",
-          transform: "translate(-100%, 0)",
+          transform: isMobile ? "translate(-50%, 0)" : "translate(-100%, 0)",
           animation: transmitting
             ? undefined
             : "gcIn .6s ease-out both, gcPing 6s ease-in-out 1.5s infinite",
           border: `1px solid ${hovered || transmitting ? "rgba(103,232,249,.75)" : "rgba(103,232,249,.3)"}`,
           background: "linear-gradient(135deg, rgba(8,20,38,.88), rgba(17,10,40,.82))",
           backdropFilter: "blur(14px)",
-          padding: isMobile ? "5px 9px 5px 8px" : "8px 12px 9px 10px",
+          padding: isMobile ? "3px 8px 3px 7px" : "8px 12px 9px 10px",
           minWidth: isMobile ? "auto" : 196,
+          maxWidth: "none",
+          width: "max-content",
           transition: "border-color .25s, box-shadow .25s",
           boxShadow: hovered
             ? "-3px -3px 10px rgba(103,232,249,.35), 6px 6px 18px rgba(0,0,0,.85), 0 0 30px rgba(34,211,238,.45), inset 1px 1px 1px rgba(255,255,255,0.25)"
@@ -127,13 +150,13 @@ function GroundControlLabel({
           className="pointer-events-none absolute bottom-1 right-1 h-2 w-2 border-b border-r border-cyan-300/70"
         />
 
-        <span className="relative flex items-center gap-2 sm:gap-2.5">
+        <span className="relative flex items-center gap-1.5 sm:gap-2.5">
           {/* signal meter */}
-          <span aria-hidden className="flex h-3.5 sm:h-5 items-end gap-[2px]">
+          <span aria-hidden className="flex h-3 sm:h-5 items-end gap-[2px]">
             {[0.45, 0.7, 1].map((hgt, i) => (
               <span
                 key={i}
-                className="w-[2.5px] sm:w-[3px] origin-bottom rounded-sm"
+                className="w-[2px] sm:w-[3px] origin-bottom rounded-sm"
                 style={{
                   height: `${hgt * 100}%`,
                   background: transmitting
@@ -148,7 +171,15 @@ function GroundControlLabel({
           </span>
 
           {isMobile ? (
-            <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+            <span className="flex items-center gap-1.5 font-display text-[9px] font-bold uppercase tracking-[0.14em] text-white">
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{
+                  background: transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#38bdf8",
+                  boxShadow: `0 0 6px ${transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#38bdf8"}`,
+                  animation: "gcBlink 1.1s steps(2) infinite",
+                }}
+              />
               {transmitting ? "Linking…" : "Ground Control"}
             </span>
           ) : (
@@ -221,6 +252,7 @@ export function CompanionShip({
   onContact: () => void;
   isWormhole?: boolean;
 }) {
+  const isMobileHook = useIsMobile();
   const { camera, scene } = useThree();
   const root = useRef<THREE.Group>(null);
   const sat = useRef<THREE.Group>(null);
@@ -308,7 +340,11 @@ export function CompanionShip({
     const halfH = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * D;
     const halfW = halfH * cam.aspect;
     const px = (2 * halfH) / state.size.height; // world units per CSS pixel
-    const compact = state.size.width < 640;
+    const isMobileViewport = state.size.height <= 560 || state.size.width <= 768 || isMobileHook;
+    const isLandscapeMobile =
+      (state.size.height <= 520 && state.size.width > state.size.height) ||
+      (isMobileHook && state.size.width > state.size.height);
+    const compact = state.size.width < 640 || isMobileViewport;
 
     hoverAmt.current = THREE.MathUtils.damp(hoverAmt.current, hoveredRef.current ? 1 : 0, 7, dt);
     const h = hoverAmt.current;
@@ -317,11 +353,13 @@ export function CompanionShip({
     const burstPulse = b >= 0 ? Math.sin(b * Math.PI) : 0;
 
     g.position.set(
-      halfW - (compact ? 70 : 115) * px,
-      halfH - (compact ? 150 : 175) * px + Math.sin(t * 1.1) * 5 * px,
+      halfW - (isLandscapeMobile ? 60 : isMobileViewport ? 70 : 115) * px,
+      halfH - (isLandscapeMobile ? 110 : isMobileViewport ? 120 : 175) * px + Math.sin(t * 1.1) * 3 * px,
       -D,
     );
-    g.scale.setScalar(px * (compact ? 30 : 40) * (1 + h * 0.12 + burstPulse * 0.15));
+    g.scale.setScalar(
+      px * (isLandscapeMobile ? 16 : isMobileViewport ? 20 : 40) * (1 + h * 0.12 + burstPulse * 0.15),
+    );
 
     // ── satellite attitude ──
     if (sat.current) {
@@ -571,12 +609,14 @@ export function CompanionShip({
       <pointLight position={[1.5, 2, 3]} intensity={4} distance={4} color="#e0ecff" />
       <pointLight position={[-2, -1, 1]} intensity={2} distance={4} color="#67e8f9" />
 
-      <GroundControlLabel
-        hovered={hovered}
-        transmitting={transmitting}
-        onHover={setHovered}
-        onActivate={transmit}
-      />
+      {!isMobileHook && (
+        <GroundControlLabel
+          hovered={hovered}
+          transmitting={transmitting}
+          onHover={setHovered}
+          onActivate={transmit}
+        />
+      )}
     </group>
   );
 }
