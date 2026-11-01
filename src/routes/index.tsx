@@ -143,6 +143,43 @@ function Portfolio() {
   const [luminosity, setLuminosity] = useState(1);
   const [freeRoam, setFreeRoam] = useState(false);
   const [mapOpen, setMapOpen] = useState(true);
+  const [captionCollapsed, setCaptionCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Mobile touch swipe gestures for chapter traversal
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now(),
+      };
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const dx = endX - touchStartRef.current.x;
+    const dy = endY - touchStartRef.current.y;
+    const dt = Date.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    if (contactOpen || projectIndex !== null || selectedAchievementIndex !== null) return;
+
+    // Fast horizontal swipe (< 450ms, |dx| > 45px, horizontal dominance)
+    if (dt < 450 && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+      if (dx < 0) {
+        if (index === 0) playLaunchSound();
+        go(index + 1);
+      } else {
+        go(index - 1);
+      }
+    }
+  };
 
   const {
     enabled: musicOn,
@@ -269,6 +306,8 @@ function Portfolio() {
       <main
         id="main-content"
         role="main"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         className="fixed inset-0 bg-[#03020a] text-white overflow-hidden select-none"
       >
         {/* Precision Tracking Reticle */}
@@ -323,22 +362,22 @@ function Portfolio() {
             className={`pointer-events-none fixed inset-0 z-30 flex flex-col justify-between transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0"
               }`}
           >
-            <div className="h-10 w-full bg-black/85 border-b border-cyan-400/20 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-cyan-300 backdrop-blur-md">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-                <span>STARPORT ALPHA // SECTOR 07-B</span>
+            <div className="h-9 sm:h-10 w-full bg-black/85 border-b border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[9px] sm:text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] text-cyan-300 backdrop-blur-md">
+              <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping flex-shrink-0" />
+                <span className="truncate">STARPORT ALPHA // SECTOR 07-B</span>
               </div>
-              <span className="text-white/40 hidden sm:inline">
+              <span className="text-white/40 hidden md:inline">
                 TELEMETRY: ALL 12 CHANNELS NOMINAL
               </span>
-              <span className="text-cyan-200">ORBITAL LAUNCH PAD READY</span>
+              <span className="text-cyan-200 truncate hidden xs:inline">ORBITAL LAUNCH PAD READY</span>
             </div>
-            <div className="h-10 w-full bg-black/85 border-t border-cyan-400/20 px-6 flex items-center justify-between text-[10px] font-mono tracking-[0.25em] text-white/50 backdrop-blur-md">
-              <span>MISSION CLOCK: T-00:00:00</span>
-              <span className="text-cyan-300 hidden sm:inline">
+            <div className="h-9 sm:h-10 w-full bg-black/85 border-t border-cyan-400/20 px-3 sm:px-6 flex items-center justify-between text-[9px] sm:text-[10px] font-mono tracking-[0.15em] sm:tracking-[0.25em] text-white/50 backdrop-blur-md">
+              <span className="truncate">MISSION CLOCK: T-00:00:00</span>
+              <span className="text-cyan-300 hidden md:inline">
                 COORDINATES: 28.5721° N, 80.6480° W
               </span>
-              <span className="text-emerald-400">HYPERDRIVE: ARMED</span>
+              <span className="text-emerald-400 truncate">HYPERDRIVE: ARMED</span>
             </div>
           </div>
         )}
@@ -359,32 +398,32 @@ function Portfolio() {
         <header
           id="site-header"
           role="banner"
-          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-4 px-6 transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-            } ${chapter?.id === "intro" ? "top-12" : "top-4"}`}
+          className={`absolute left-0 right-0 z-40 flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+            } ${chapter?.id === "intro" ? "top-11 sm:top-14" : "top-3 sm:top-4"}`}
         >
           {/* Brand */}
-          <div className="pointer-events-none">
-            <h1 className="text-xs tracking-[0.4em] text-white/80 font-mono">
+          <div className="pointer-events-none max-w-[130px] xs:max-w-[180px] sm:max-w-none">
+            <h1 className="text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.4em] text-white/80 font-mono truncate">
               ✧ {BRAND.name.toUpperCase().split(" ").join(" · ")}
             </h1>
-            <p className="text-[10px] uppercase tracking-widest text-white/40 font-mono">
+            <p className="text-[8px] sm:text-[10px] uppercase tracking-widest text-white/40 font-mono hidden sm:block">
               a cosmic journey
             </p>
           </div>
 
           {/* Center Glass Controls - Subtle & Minimalist */}
-          <div className="flex items-center gap-2.5 sm:gap-3 rounded-full border border-white/[0.08] bg-black/30 px-3.5 py-1 backdrop-blur-md opacity-75 hover:opacity-100 transition-all duration-300">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 sm:gap-3 rounded-full border border-white/[0.08] bg-black/30 px-2.5 sm:px-3.5 py-1 backdrop-blur-md opacity-85 sm:opacity-75 hover:opacity-100 transition-all duration-300">
             <button
               id="music-toggle-btn"
               onClick={toggleMusic}
-              className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.15em] text-white/60 hover:text-white transition whitespace-nowrap cursor-pointer px-2 py-0.5 rounded-full hover:bg-white/[0.05]"
+              className="flex items-center gap-1.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.1em] sm:tracking-[0.15em] text-white/60 hover:text-white transition whitespace-nowrap cursor-pointer px-1.5 sm:px-2 py-0.5 rounded-full hover:bg-white/[0.05]"
               title={musicOn ? "Mute soundtrack" : "Play space atmospheric soundtrack"}
             >
               <span
                 className={`inline-block h-1.5 w-1.5 rounded-full ${musicOn ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-white/30"
                   }`}
               />
-              ♪ {musicOn ? "Audio" : "Muted"}
+              ♪ <span className="hidden xs:inline">{musicOn ? "Audio" : "Muted"}</span>
             </button>
 
             <div className="hidden sm:flex items-center gap-1.5">
@@ -412,9 +451,9 @@ function Portfolio() {
               />
             </div>
 
-            <span className="hidden sm:inline-block h-3 w-px bg-white/10" />
+            <span className="hidden md:inline-block h-3 w-px bg-white/10" />
 
-            <div className="flex items-center gap-1.5">
+            <div className="hidden md:flex items-center gap-1.5">
               <label
                 htmlFor="light-control"
                 className="text-[9px] font-mono uppercase tracking-[0.15em] text-white/40 whitespace-nowrap"
@@ -436,12 +475,12 @@ function Portfolio() {
               />
             </div>
 
-            <span className="h-3 w-px bg-white/10" />
+            <span className="hidden md:inline-block h-3 w-px bg-white/10" />
 
             <button
               id="roam-toggle-btn"
               onClick={() => setFreeRoam((v) => !v)}
-              className={`text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
+              className={`hidden md:inline-flex text-[10px] font-mono uppercase tracking-[0.15em] px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer hover:bg-white/[0.05] ${freeRoam ? "text-emerald-300" : "text-white/60 hover:text-white"
                 }`}
               title="Free roam (WASD + mouse look, Shift boost, Space/Ctrl ascend/descend, Esc release)"
             >
@@ -457,10 +496,11 @@ function Portfolio() {
           <nav
             id="chapter-nav"
             aria-label="Cosmic Journey Chapters"
-            className="flex flex-col items-end gap-1.5"
+            className="flex flex-col items-end gap-1"
           >
+            {/* Desktop 12 Dots */}
             <div
-              className="flex items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md p-1.5 shadow-inner"
+              className="hidden md:flex items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md p-1.5 shadow-inner"
               role="tablist"
               aria-label="Chapter Indicators"
             >
@@ -482,87 +522,120 @@ function Portfolio() {
                 />
               ))}
             </div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40">
+
+            {/* Mobile Compact Chapter Indicator */}
+            <div
+              className="flex md:hidden items-center gap-1.5 rounded-full bg-black/40 border border-white/[0.08] backdrop-blur-md px-2.5 py-1 text-[9px] font-mono tracking-widest shadow-inner"
+              role="status"
+              aria-label={`Chapter ${index + 1} of ${CHAPTERS.length}`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_#22d3ee]" />
+              <span className="text-cyan-300 font-bold tabular-nums">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="text-white/30">/</span>
+              <span className="text-white/50 tabular-nums">
+                {String(CHAPTERS.length).padStart(2, "0")}
+              </span>
+            </div>
+
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 hidden md:block">
               chapter <span className="text-cyan-300 font-bold tabular-nums">{index + 1}</span> / {CHAPTERS.length}
             </p>
           </nav>
         </header>
 
-        {/* Chapter Caption Card - bottom-left */}
+        {/* Chapter Caption Card - bottom-left on desktop, bottom docked above nav on mobile */}
         {chapter?.id !== "intro" && (
           <section
             id="chapter-caption-panel"
             aria-labelledby="chapter-caption-title"
-            className={`absolute left-6 z-20 w-[380px] max-w-[min(380px,calc(50vw-180px))] transition-all duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
-              } bottom-24`}
+            className={`absolute left-3 right-3 sm:left-6 sm:right-auto z-20 w-auto sm:w-[380px] sm:max-w-[min(380px,calc(50vw-180px))] transition-all duration-700 ${
+              bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
+            } bottom-[max(4.25rem,calc(env(safe-area-inset-bottom,0px)+3.5rem))] sm:bottom-24`}
           >
             <div
               key={chapter?.id}
-              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-5 sm:p-6 backdrop-blur-2xl ring-1 ring-cyan-400/20"
+              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-3.5 sm:p-5 md:p-6 backdrop-blur-2xl ring-1 ring-cyan-400/20 max-h-[46vh] sm:max-h-none overflow-y-auto"
               style={{ animation: "fadein .4s ease-out" }}
             >
-              <h2
-                id="chapter-caption-title"
-                className="font-display text-xs font-bold uppercase tracking-[0.3em] text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all duration-300"
-              >
-                {chapter?.title}
-              </h2>
-              {/* Neomorphed debossed container for the description like the initial Card */}
-              <div className="mt-3 rounded-xl neo-inset p-4 border border-white/5">
-                <p
-                  className="text-[15px] text-white/90 leading-relaxed font-sans font-normal"
-                  style={{ letterSpacing: "normal" }}
+              <div className="flex items-center justify-between gap-2">
+                <h2
+                  id="chapter-caption-title"
+                  className="font-display text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] transition-all duration-300 truncate"
                 >
-                  {chapter?.caption}
-                </p>
+                  {chapter?.title}
+                </h2>
+                {/* Mobile collapse / expand toggle */}
+                <button
+                  onClick={() => setCaptionCollapsed((v) => !v)}
+                  className="sm:hidden text-[9px] font-mono uppercase tracking-wider text-cyan-300/80 hover:text-white px-2 py-0.5 rounded-full border border-cyan-400/30 neo-btn flex-shrink-0 cursor-pointer"
+                  aria-label={captionCollapsed ? "Expand chapter summary" : "Collapse chapter summary"}
+                >
+                  {captionCollapsed ? "▲ Expand" : "▼ Hide"}
+                </button>
               </div>
 
-              {/* Pantheon: Quick Trophy Exhibition Drawer */}
-              {chapter?.id === "pantheon" && (
-                <div className="mt-4 pt-3 border-t border-amber-400/20">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] uppercase tracking-[0.25em] text-amber-300 font-mono">
-                      🏆 Curated Honors & Credentials
-                    </p>
-                    <span className="text-[10px] font-mono text-white/50">
-                      {achievementsList.length} Credentials
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
-                    {achievementsList.map((a, i) => (
-                      <button
-                        key={i}
-                        id={`pantheon-artifact-btn-${i}`}
-                        onClick={() => setSelectedAchievementIndex(i)}
-                        className="group flex items-center gap-2 rounded-xl neo-btn-amber px-2.5 py-1.5 text-left text-xs text-white/90 transition border border-amber-400/25 cursor-pointer"
-                      >
-                        <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
-                        <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
-                          {a.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Finale: Telemetry & Course Map Toggle */}
-              {chapter?.id === "finale" && (
-                <div className="mt-3.5 pt-3 border-t border-cyan-400/20">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] uppercase tracking-[0.25em] text-cyan-300 font-mono font-bold whitespace-nowrap">
-                      ✓ 12 / 12 SECTORS LOGGED
-                    </span>
-                    <button
-                      id="toggle-course-map-btn"
-                      onClick={() => setMapOpen((v) => !v)}
-                      className="text-[10px] font-mono text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/35 px-2.5 py-1 rounded-full transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+              {!captionCollapsed && (
+                <>
+                  {/* Neomorphed debossed container for the description like the initial Card */}
+                  <div className="mt-2.5 sm:mt-3 rounded-xl neo-inset p-3 sm:p-4 border border-white/5">
+                    <p
+                      className="text-[12px] sm:text-[15px] text-white/90 leading-relaxed font-sans font-normal"
+                      style={{ letterSpacing: "normal" }}
                     >
-                      <span>🌐</span>
-                      <span>{mapOpen ? "Hide Map" : "3D Course Map"}</span>
-                    </button>
+                      {chapter?.caption}
+                    </p>
                   </div>
-                </div>
+
+                  {/* Pantheon: Quick Trophy Exhibition Drawer */}
+                  {chapter?.id === "pantheon" && (
+                    <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-amber-400/20">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-amber-300 font-mono">
+                          🏆 Curated Honors & Credentials
+                        </p>
+                        <span className="text-[9px] sm:text-[10px] font-mono text-white/50">
+                          {achievementsList.length} Credentials
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 xs:grid-cols-2 gap-1.5 max-h-28 sm:max-h-36 overflow-y-auto pr-1">
+                        {achievementsList.map((a, i) => (
+                          <button
+                            key={i}
+                            id={`pantheon-artifact-btn-${i}`}
+                            onClick={() => setSelectedAchievementIndex(i)}
+                            className="group flex items-center gap-2 rounded-xl neo-btn-amber px-2.5 py-1.5 text-left text-xs text-white/90 transition border border-amber-400/25 cursor-pointer min-h-[36px]"
+                          >
+                            <span className="text-amber-300 font-bold text-xs">{a.icon ?? "✦"}</span>
+                            <span className="truncate text-[11px] font-medium group-hover:text-amber-200">
+                              {a.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Finale: Telemetry & Course Map Toggle */}
+                  {chapter?.id === "finale" && (
+                    <div className="mt-3 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-cyan-400/20">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-cyan-300 font-mono font-bold whitespace-nowrap">
+                          ✓ 12 / 12 SECTORS LOGGED
+                        </span>
+                        <button
+                          id="toggle-course-map-btn"
+                          onClick={() => setMapOpen((v) => !v)}
+                          className="text-[9px] sm:text-[10px] font-mono text-cyan-300 hover:text-white bg-cyan-500/15 hover:bg-cyan-500/30 border border-cyan-400/35 px-2.5 py-1 rounded-full transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
+                        >
+                          <span>🌐</span>
+                          <span>{mapOpen ? "Hide Map" : "3D Course Map"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </section>
@@ -573,8 +646,9 @@ function Portfolio() {
           <aside
             id="floating-cosmic-mini-map"
             aria-label="Interactive 3D Cosmic Course Mini Map"
-            className={`fixed right-6 sm:right-10 bottom-20 z-35 w-[440px] sm:w-[500px] max-w-[calc(100vw-3rem)] transition-all duration-500 ${bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-              }`}
+            className={`fixed left-3 right-3 sm:left-auto sm:right-10 bottom-[max(4.5rem,calc(env(safe-area-inset-bottom,0px)+3.5rem))] sm:bottom-20 z-35 w-auto sm:w-[500px] sm:max-w-[min(500px,calc(100vw-3rem))] transition-all duration-500 ${
+              bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+            }`}
           >
             <CosmicStoryTrailMiniMap
               chapters={CHAPTERS}
@@ -602,7 +676,7 @@ function Portfolio() {
           <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
         )}
 
-        {/* Spacebar Orbit Prompt when Idle - Subtle & Glassy */}
+        {/* Spacebar / Swipe Orbit Prompt when Idle */}
         <div
           className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-2 transition-all duration-700 ${bootReady &&
             isIdle &&
@@ -612,15 +686,15 @@ function Portfolio() {
             index < CHAPTERS.length - 1 &&
             chapter?.id !== "intro" &&
             chapter?.id !== "wormhole"
-            ? "opacity-55 translate-y-0 scale-100"
+            ? "opacity-60 translate-y-0 scale-100"
             : "opacity-0 translate-y-2 scale-95 pointer-events-none"
-            } bottom-15`}
+            } bottom-[max(3.8rem,calc(env(safe-area-inset-bottom,0px)+3rem))] sm:bottom-15`}
         >
-          <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 backdrop-blur-md">
-            <kbd className="rounded px-1.5 py-0.5 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-400/25 bg-cyan-950/40">
-              SPACE
+          <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/40 px-3 py-1 backdrop-blur-md shadow-md">
+            <kbd className="rounded px-1.5 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-400/25 bg-cyan-950/40">
+              {isMobile ? "SWIPE" : "SPACE"}
             </kbd>
-            <span className="text-[10px] font-mono tracking-[0.15em] uppercase text-white/55">
+            <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.12em] sm:tracking-[0.15em] uppercase text-white/60">
               Advance Orbit ➔
             </span>
           </div>
@@ -630,15 +704,20 @@ function Portfolio() {
         <nav
           id="chapter-step-controls"
           aria-label="Chapter step controls"
-          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/35 backdrop-blur-md transition-all duration-500 opacity-75 hover:opacity-100 ${bootReady ? "translate-y-0" : "translate-y-4 opacity-0 pointer-events-none"
-            } ${chapter?.id === "intro" ? "bottom-12" : "bottom-5"}`}
+          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-md transition-all duration-500 opacity-90 hover:opacity-100 ${
+            bootReady ? "translate-y-0" : "translate-y-4 opacity-0 pointer-events-none"
+          } ${
+            chapter?.id === "intro"
+              ? "bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] sm:bottom-12"
+              : "bottom-[max(1rem,env(safe-area-inset-bottom,0px))] sm:bottom-5"
+          }`}
         >
           <button
             id="prev-chapter-btn"
             onClick={() => go(index - 1)}
             disabled={index === 0}
             aria-label="Previous chapter"
-            className="rounded-full px-3.5 py-1.5 text-xs font-mono text-white/50 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
+            className="rounded-full px-3 sm:px-3.5 py-2 sm:py-1.5 text-xs font-mono text-white/60 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1 min-h-[40px]"
           >
             <span>←</span>
             <span>Prev</span>
@@ -654,7 +733,7 @@ function Portfolio() {
             aria-label={
               index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"
             }
-            className="rounded-full px-4 py-1.5 text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.12] hover:bg-cyan-400/[0.22] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.1)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer"
+            className="rounded-full px-4 sm:px-4 py-2 sm:py-1.5 text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.14] hover:bg-cyan-400/[0.24] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.15)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer min-h-[40px]"
           >
             <span>
               {index === 0
