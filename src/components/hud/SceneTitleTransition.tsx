@@ -80,26 +80,26 @@ export function SceneTitleTransition({
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed top-16 sm:top-20 left-1/2 -translate-x-1/2 z-35 flex flex-col items-center transition-all duration-500 ease-out ${
+      className={`pointer-events-none fixed top-24 sm:top-36 left-0 right-0 z-35 flex flex-col items-center justify-center text-center px-4 transition-all duration-500 ease-out ${
         isExit
           ? "opacity-0 -translate-y-2.5 scale-98 blur-sm"
           : "opacity-100 translate-y-0 scale-100 blur-none"
       }`}
     >
-      <div className="flex flex-col items-center px-6 py-2">
+      <div className="flex flex-col items-center justify-center text-center max-w-[92vw]">
         {/* Aerospace Waypoint Telemetry Tag */}
-        <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-mono tracking-[0.35em] text-cyan-300/80 uppercase">
-          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-          <span>// {sectorLabel} · WAYPOINT ACQUIRED</span>
+        <div className="flex items-center justify-center gap-2 text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.35em] text-cyan-300/80 uppercase">
+          <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping flex-shrink-0" />
+          <span className="truncate">// {sectorLabel} · WAYPOINT ACQUIRED</span>
         </div>
 
         {/* Cinematic Main Scene Title */}
-        <h2 className="mt-1 text-center font-display text-xs sm:text-base md:text-lg font-black uppercase tracking-[0.18em] sm:tracking-[0.25em] text-white drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] max-w-[88vw]">
+        <h2 className="mt-1.5 text-center font-display text-xs sm:text-base md:text-lg font-black uppercase tracking-[0.14em] sm:tracking-[0.25em] text-white drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] max-w-[90vw]">
           {cleanTitle}
         </h2>
 
         {/* Animated Expanding Glow Divider */}
-        <div className="relative mt-2 flex items-center justify-center w-full max-w-[240px]">
+        <div className="relative mt-2 flex items-center justify-center w-44 sm:w-60">
           <div
             className={`h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent transition-all duration-700 ${
               isExit ? "w-0 opacity-0" : "w-full opacity-80"

@@ -585,22 +585,22 @@ export function CosmicStoryTrailMiniMap({
     <div
       role="region"
       aria-label="Interactive 3D Cosmic Course Mini Map"
-      className="relative flex flex-col w-full rounded-2xl border border-cyan-400/30 bg-black/80 backdrop-blur-xl shadow-[0_0_35px_rgba(0,0,0,0.85),0_0_20px_rgba(34,211,238,0.15)] overflow-hidden"
+      className="relative flex flex-col w-full rounded-2xl border border-cyan-400/30 bg-black/80 backdrop-blur-xl shadow-[0_0_35px_rgba(0,0,0,0.85),0_0_20px_rgba(34,211,238,0.15)] overflow-hidden max-h-[85vh]"
     >
       {/* Top Header — Clean Single-Line */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/[0.03]">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 border-b border-white/10 bg-white/[0.03]">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
-          <h3 className="text-[10px] font-mono uppercase tracking-[0.25em] text-cyan-300 font-bold whitespace-nowrap">
+          <h3 className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em] text-cyan-300 font-bold whitespace-nowrap">
             3D COSMIC COURSE TRAIL
           </h3>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={handleResetOrientation}
             title="Reset 3D Camera"
-            className="text-[9px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
+            className="text-[8px] sm:text-[9px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
           >
             ↺ Reset
           </button>
@@ -608,7 +608,7 @@ export function CosmicStoryTrailMiniMap({
             <button
               onClick={onClose}
               title="Close Map View"
-              className="text-[10px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/15 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
+              className="text-[9px] sm:text-[10px] font-mono text-white/50 hover:text-white bg-white/5 hover:bg-white/15 px-2 py-0.5 rounded-full transition whitespace-nowrap cursor-pointer"
             >
               ✕
             </button>
@@ -617,7 +617,7 @@ export function CosmicStoryTrailMiniMap({
       </div>
 
       {/* Main Interactive 3D Canvas — Pure 3D Viewport */}
-      <div className="relative w-full h-[280px] sm:h-[320px] bg-gradient-to-b from-transparent to-[#02050f]/80">
+      <div className="relative w-full h-[180px] xs:h-[220px] sm:h-[280px] md:h-[320px] landscape:h-[160px] bg-gradient-to-b from-transparent to-[#02050f]/80">
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
@@ -630,12 +630,12 @@ export function CosmicStoryTrailMiniMap({
         />
 
         {/* Intuitive 3D Flight Controls Hint — Clean Single-Line */}
-        <div className="pointer-events-none absolute bottom-2 left-3 flex items-center gap-2 text-[9px] font-mono tracking-widest text-white/40 uppercase whitespace-nowrap">
+        <div className="pointer-events-none absolute bottom-1.5 left-2.5 sm:bottom-2 sm:left-3 flex items-center gap-1.5 sm:gap-2 text-[8px] sm:text-[9px] font-mono tracking-wider sm:tracking-widest text-white/40 uppercase whitespace-nowrap">
           <span>DRAG TO ORBIT</span>
           <span>·</span>
           <span>SCROLL TO ZOOM</span>
-          <span>·</span>
-          <span className="text-cyan-300">CLICK NODE TO WARP</span>
+          <span className="hidden xs:inline">·</span>
+          <span className="text-cyan-300 hidden xs:inline">CLICK TO WARP</span>
         </div>
 
         {/* Hover Inspection HUD Pill — Single-Line Layered */}

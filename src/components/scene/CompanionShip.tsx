@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const easeInOutCubic = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
@@ -62,6 +63,8 @@ function GroundControlLabel({
   onHover: (v: boolean) => void;
   onActivate: () => void;
 }) {
+  const isMobile = useIsMobile();
+
   return (
     <Html position={[1.35, -1.35, 0]} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
       <style>{`
@@ -87,7 +90,7 @@ function GroundControlLabel({
           e.stopPropagation();
           onActivate();
         }}
-        className="group relative block select-none overflow-hidden whitespace-nowrap rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+        className="group relative block select-none overflow-hidden whitespace-nowrap rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer"
         style={{
           pointerEvents: "auto",
           transform: "translate(-100%, 0)",
@@ -97,13 +100,12 @@ function GroundControlLabel({
           border: `1px solid ${hovered || transmitting ? "rgba(103,232,249,.75)" : "rgba(103,232,249,.3)"}`,
           background: "linear-gradient(135deg, rgba(8,20,38,.88), rgba(17,10,40,.82))",
           backdropFilter: "blur(14px)",
-          padding: "8px 12px 9px 10px",
-          minWidth: 196,
+          padding: isMobile ? "5px 9px 5px 8px" : "8px 12px 9px 10px",
+          minWidth: isMobile ? "auto" : 196,
           transition: "border-color .25s, box-shadow .25s",
           boxShadow: hovered
             ? "-3px -3px 10px rgba(103,232,249,.35), 6px 6px 18px rgba(0,0,0,.85), 0 0 30px rgba(34,211,238,.45), inset 1px 1px 1px rgba(255,255,255,0.25)"
             : "-3px -3px 8px rgba(255,255,255,.06), 5px 5px 14px rgba(0,0,0,.8), inset 1px 1px 1px rgba(255,255,255,0.12), inset -1px -1px 1px rgba(0,0,0,0.5)",
-          cursor: "pointer",
         }}
       >
         {/* shine sweep */}
@@ -125,13 +127,13 @@ function GroundControlLabel({
           className="pointer-events-none absolute bottom-1 right-1 h-2 w-2 border-b border-r border-cyan-300/70"
         />
 
-        <span className="relative flex items-center gap-2.5">
+        <span className="relative flex items-center gap-2 sm:gap-2.5">
           {/* signal meter */}
-          <span aria-hidden className="flex h-5 items-end gap-[2px]">
+          <span aria-hidden className="flex h-3.5 sm:h-5 items-end gap-[2px]">
             {[0.45, 0.7, 1].map((hgt, i) => (
               <span
                 key={i}
-                className="w-[3px] origin-bottom rounded-sm"
+                className="w-[2.5px] sm:w-[3px] origin-bottom rounded-sm"
                 style={{
                   height: `${hgt * 100}%`,
                   background: transmitting
@@ -145,60 +147,68 @@ function GroundControlLabel({
             ))}
           </span>
 
-          <span className="flex flex-col leading-tight">
-            <span
-              className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em]"
-              style={{ color: transmitting ? "#f5d0fe" : "rgba(165,243,252,.85)" }}
-            >
+          {isMobile ? (
+            <span className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+              {transmitting ? "Linking…" : "Ground Control"}
+            </span>
+          ) : (
+            <span className="flex flex-col leading-tight">
               <span
-                className="inline-block h-1.5 w-1.5 rounded-full"
+                className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em]"
+                style={{ color: transmitting ? "#f5d0fe" : "rgba(165,243,252,.85)" }}
+              >
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{
+                    background: transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#ff3b6b",
+                    boxShadow: `0 0 6px ${transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#ff3b6b"}`,
+                    animation: "gcBlink 1.1s steps(2) infinite",
+                  }}
+                />
+                {transmitting ? "Uplink · CH-07" : hovered ? "Channel open" : "Incoming signal"}
+              </span>
+              <span className="font-display mt-0.5 text-[12px] font-bold uppercase tracking-[0.2em] text-white">
+                {transmitting ? "Establishing link…" : "Ground Control"}
+              </span>
+              <span
+                className="overflow-hidden font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-200/80 transition-all duration-300"
                 style={{
-                  background: transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#ff3b6b",
-                  boxShadow: `0 0 6px ${transmitting ? "#f0abfc" : hovered ? "#22d3ee" : "#ff3b6b"}`,
-                  animation: "gcBlink 1.1s steps(2) infinite",
+                  maxHeight: hovered && !transmitting ? 16 : 0,
+                  opacity: hovered && !transmitting ? 1 : 0,
                 }}
-              />
-              {transmitting ? "Uplink · CH-07" : hovered ? "Channel open" : "Incoming signal"}
+              >
+                ▸ click to transmit
+              </span>
             </span>
-            <span className="font-display mt-0.5 text-[12px] font-bold uppercase tracking-[0.2em] text-white">
-              {transmitting ? "Establishing link…" : "Ground Control"}
-            </span>
-            <span
-              className="overflow-hidden font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-200/80 transition-all duration-300"
-              style={{
-                maxHeight: hovered && !transmitting ? 16 : 0,
-                opacity: hovered && !transmitting ? 1 : 0,
-              }}
-            >
-              ▸ click to transmit
-            </span>
-          </span>
+          )}
 
           <span
             aria-hidden
-            className="ml-auto pl-2 text-sm text-cyan-200 transition-transform duration-300"
+            className="ml-auto pl-1 sm:pl-2 text-xs sm:text-sm text-cyan-200 transition-transform duration-300"
             style={{ transform: hovered ? "translate(2px,-2px)" : undefined }}
           >
             ↗
           </span>
         </span>
 
-        {/* uplink progress */}
-        <span
-          aria-hidden
-          className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-white/10"
-        >
+        {/* uplink progress (desktop only) */}
+        {!isMobile && (
           <span
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{
-              width: transmitting ? undefined : hovered ? "100%" : "18%",
-              background: "linear-gradient(90deg,#22d3ee,#a78bfa,#f0abfc)",
-              boxShadow: "0 0 8px #22d3ee",
-              transition: "width .4s ease",
-              animation: transmitting ? "gcFill .9s cubic-bezier(.4,0,.2,1) forwards" : undefined,
-            }}
-          />
-        </span>
+            aria-hidden
+            className="relative mt-2 block h-[2px] w-full overflow-hidden rounded-full bg-white/10"
+          >
+            <span
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{
+                width: transmitting ? undefined : hovered ? "100%" : "18%",
+                background: "linear-gradient(90deg,#22d3ee,#a78bfa,#f0abfc)",
+                boxShadow: "0 0 8px #22d3ee",
+                transition: "width .4s ease",
+                animation: transmitting ? "gcFill .9s cubic-bezier(.4,0,.2,1) forwards" : undefined,
+              }}
+            />
+          </span>
+        )}
       </button>
     </Html>
   );

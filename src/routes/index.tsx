@@ -144,7 +144,29 @@ function Portfolio() {
   const [freeRoam, setFreeRoam] = useState(false);
   const [mapOpen, setMapOpen] = useState(true);
   const [captionCollapsed, setCaptionCollapsed] = useState(false);
+  const [hintsModalOpen, setHintsModalOpen] = useState(false);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [showRotateBanner, setShowRotateBanner] = useState(() => {
+    if (typeof window === "undefined") return true;
+    try {
+      return !sessionStorage.getItem("cosmic_rotate_dismissed");
+    } catch {
+      return true;
+    }
+  });
   const isMobile = useIsMobile();
+
+  // Detect portrait orientation for mobile panoramic suggestion
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(orientation: portrait)");
+    setIsPortrait(mql.matches);
+    const handler = (e: MediaQueryListEvent) => {
+      setIsPortrait(e.matches);
+    };
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   // Mobile touch swipe gestures for chapter traversal
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -426,6 +448,17 @@ function Portfolio() {
               ♪ <span className="hidden xs:inline">{musicOn ? "Audio" : "Muted"}</span>
             </button>
 
+            {/* Mobile Touch Avionics Hints Pill */}
+            <button
+              id="mobile-hints-btn"
+              onClick={() => setHintsModalOpen(true)}
+              className="flex sm:hidden items-center gap-1 text-[9px] font-mono uppercase tracking-[0.1em] text-cyan-200/90 hover:text-white transition whitespace-nowrap cursor-pointer px-2 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/35 hover:bg-cyan-400/25 shadow-[0_0_8px_rgba(34,211,238,0.2)]"
+              title="View touch avionics gestures"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              Hints
+            </button>
+
             <div className="hidden sm:flex items-center gap-1.5">
               <label
                 htmlFor="volume-control"
@@ -545,18 +578,50 @@ function Portfolio() {
           </nav>
         </header>
 
-        {/* Chapter Caption Card - bottom-left on desktop, bottom docked above nav on mobile */}
+        {/* Rotate Device Suggestion for Mobile Portrait Users */}
+        {bootReady && isMobile && isPortrait && showRotateBanner && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`fixed left-1/2 -translate-x-1/2 z-40 w-[92vw] max-w-[340px] animate-in fade-in slide-in-from-top-2 duration-300 pointer-events-auto ${
+              chapter?.id === "intro" ? "top-20 sm:top-24" : "top-14 sm:top-16"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 rounded-full border border-cyan-400/35 bg-black/85 px-3 py-1.5 text-white/90 shadow-[0_0_20px_rgba(34,211,238,0.25)] backdrop-blur-xl">
+              <div className="flex items-center gap-2 text-[10px] font-mono text-cyan-200">
+                <span className="text-sm animate-pulse">🔄</span>
+                <span className="font-medium tracking-wide">
+                  Rotate phone sideways for panoramic cosmic flight
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setShowRotateBanner(false);
+                  try {
+                    sessionStorage.setItem("cosmic_rotate_dismissed", "1");
+                  } catch {}
+                }}
+                aria-label="Dismiss rotate suggestion"
+                className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-white/50 hover:bg-white/10 hover:text-white transition cursor-pointer flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Chapter Caption Card - bottom-left on desktop, bottom docked above nav on mobile, corner docked on landscape */}
         {chapter?.id !== "intro" && (
           <section
             id="chapter-caption-panel"
             aria-labelledby="chapter-caption-title"
-            className={`absolute left-3 right-3 sm:left-6 sm:right-auto z-20 w-auto sm:w-[380px] sm:max-w-[min(380px,calc(50vw-180px))] transition-all duration-700 ${
+            className={`absolute left-3 right-3 sm:left-6 sm:right-auto landscape:left-3 landscape:right-auto landscape:bottom-3 landscape:w-[320px] landscape:max-w-[44vw] z-20 w-auto sm:w-[380px] sm:max-w-[380px] transition-all duration-700 pointer-events-auto ${
               bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
             } bottom-[max(4.25rem,calc(env(safe-area-inset-bottom,0px)+3.5rem))] sm:bottom-24`}
           >
             <div
               key={chapter?.id}
-              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-3.5 sm:p-5 md:p-6 backdrop-blur-2xl ring-1 ring-cyan-400/20 max-h-[46vh] sm:max-h-none overflow-y-auto"
+              className="rounded-2xl border border-cyan-400/30 neo-surface-cyan p-3.5 sm:p-5 md:p-6 landscape:p-3 backdrop-blur-2xl ring-1 ring-cyan-400/20 max-h-[46vh] sm:max-h-none landscape:max-h-[82vh] overflow-y-auto"
               style={{ animation: "fadein .4s ease-out" }}
             >
               <div className="flex items-center justify-between gap-2">
@@ -566,10 +631,10 @@ function Portfolio() {
                 >
                   {chapter?.title}
                 </h2>
-                {/* Mobile collapse / expand toggle */}
+                {/* Mobile & Landscape collapse / expand toggle */}
                 <button
                   onClick={() => setCaptionCollapsed((v) => !v)}
-                  className="sm:hidden text-[9px] font-mono uppercase tracking-wider text-cyan-300/80 hover:text-white px-2 py-0.5 rounded-full border border-cyan-400/30 neo-btn flex-shrink-0 cursor-pointer"
+                  className="md:hidden text-[9px] font-mono uppercase tracking-wider text-cyan-300/80 hover:text-white px-2 py-0.5 rounded-full border border-cyan-400/30 neo-btn flex-shrink-0 cursor-pointer"
                   aria-label={captionCollapsed ? "Expand chapter summary" : "Collapse chapter summary"}
                 >
                   {captionCollapsed ? "▲ Expand" : "▼ Hide"}
@@ -646,7 +711,7 @@ function Portfolio() {
           <aside
             id="floating-cosmic-mini-map"
             aria-label="Interactive 3D Cosmic Course Mini Map"
-            className={`fixed left-3 right-3 sm:left-auto sm:right-10 bottom-[max(4.5rem,calc(env(safe-area-inset-bottom,0px)+3.5rem))] sm:bottom-20 z-35 w-auto sm:w-[500px] sm:max-w-[min(500px,calc(100vw-3rem))] transition-all duration-500 ${
+            className={`fixed left-3 right-3 sm:left-auto sm:right-6 md:right-10 bottom-[max(4.25rem,calc(env(safe-area-inset-bottom,0px)+3.25rem))] sm:bottom-20 landscape:left-auto landscape:right-3 landscape:bottom-3 landscape:w-[360px] landscape:max-w-[48vw] z-35 w-auto sm:w-[460px] md:w-[500px] transition-all duration-500 pointer-events-auto ${
               bootReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
             }`}
           >
@@ -660,7 +725,7 @@ function Portfolio() {
           </aside>
         )}
 
-        {/* Controls Cheat Sheet - bottom-right */}
+        {/* Controls Cheat Sheet - bottom-right on desktop, triggered modal on mobile */}
         <div
           className={`transition-opacity duration-700 ${bootReady ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
@@ -668,6 +733,8 @@ function Portfolio() {
           <ControlsCheatSheet
             freeRoam={freeRoam}
             isIntro={chapter?.id === "intro"}
+            mobileOpen={hintsModalOpen}
+            onMobileClose={() => setHintsModalOpen(false)}
           />
         </div>
 
@@ -676,9 +743,9 @@ function Portfolio() {
           <AmbientKeySuggestions isIdle={isIdle} isIntro={false} />
         )}
 
-        {/* Spacebar / Swipe Orbit Prompt when Idle */}
+        {/* Spacebar / Swipe Orbit Prompt when Idle (Desktop only to prevent mobile clutter) */}
         <div
-          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 flex items-center gap-2 transition-all duration-700 ${bootReady &&
+          className={`pointer-events-none fixed left-1/2 -translate-x-1/2 z-35 hidden sm:flex items-center gap-2 transition-all duration-700 ${bootReady &&
             isIdle &&
             !contactOpen &&
             projectIndex === null &&
@@ -700,11 +767,11 @@ function Portfolio() {
           </div>
         </div>
 
-        {/* Subtle Bottom Navigation Buttons */}
+        {/* Subtle Bottom Navigation Buttons — Strictly Single-Line */}
         <nav
           id="chapter-step-controls"
           aria-label="Chapter step controls"
-          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-md transition-all duration-500 opacity-90 hover:opacity-100 ${
+          className={`absolute left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 sm:gap-1.5 p-1 rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-md transition-all duration-500 opacity-90 hover:opacity-100 whitespace-nowrap flex-nowrap shrink-0 max-w-[calc(100vw-1.5rem)] ${
             bootReady ? "translate-y-0" : "translate-y-4 opacity-0 pointer-events-none"
           } ${
             chapter?.id === "intro"
@@ -717,7 +784,7 @@ function Portfolio() {
             onClick={() => go(index - 1)}
             disabled={index === 0}
             aria-label="Previous chapter"
-            className="rounded-full px-3 sm:px-3.5 py-2 sm:py-1.5 text-xs font-mono text-white/60 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1 min-h-[40px]"
+            className="rounded-full px-2.5 sm:px-3.5 py-1.5 text-[11px] sm:text-xs font-mono text-white/60 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20 disabled:pointer-events-none cursor-pointer flex items-center gap-1 min-h-[36px] sm:min-h-[40px] whitespace-nowrap flex-nowrap shrink-0"
           >
             <span>←</span>
             <span>Prev</span>
@@ -733,9 +800,9 @@ function Portfolio() {
             aria-label={
               index === CHAPTERS.length - 1 ? "Journey complete" : "Continue to next chapter"
             }
-            className="rounded-full px-4 sm:px-4 py-2 sm:py-1.5 text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.14] hover:bg-cyan-400/[0.24] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.15)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer min-h-[40px]"
+            className="rounded-full px-3.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-mono font-medium text-cyan-200/90 hover:text-cyan-100 bg-cyan-400/[0.14] hover:bg-cyan-400/[0.24] border border-cyan-400/25 hover:border-cyan-400/50 shadow-[0_0_12px_rgba(34,211,238,0.15)] transition-all flex items-center gap-1.5 disabled:opacity-25 disabled:pointer-events-none cursor-pointer min-h-[36px] sm:min-h-[40px] whitespace-nowrap flex-nowrap shrink-0"
           >
-            <span>
+            <span className="whitespace-nowrap">
               {index === 0
                 ? "Initiate Odyssey"
                 : index === CHAPTERS.length - 1
