@@ -34,6 +34,17 @@ export interface SceneLayout {
 export const EXP_SPACING = 30;
 export const EXP_FIRST_Z = -90;
 
+/**
+ * Linear radius progression with a moderate slope:
+ * R(i) = R_base + slope * i
+ * i = 0: R = 1.85 (not too small, solid presence)
+ * i = 1: R = 2.40 (visibly larger with moderate growth)
+ * i = 2: R = 2.95 (commanding, but not excessively huge)
+ */
+export function getExperienceRadius(index: number): number {
+  return 1.85 + 0.55 * index;
+}
+
 export function computeLayout(experiences: Experience[]): SceneLayout {
   const experienceZs = experiences.map((e, i) =>
     typeof e.z === "number" ? e.z! : EXP_FIRST_Z - i * EXP_SPACING,
@@ -69,12 +80,14 @@ export function buildChapters(
     const num = String(i + 2).padStart(2, "0");
     const heading = e.place ? `${e.place} — ${e.name}` : e.name;
     const isArsenal = /arsenal/i.test(heading);
+    const r = getExperienceRadius(i);
+    const side = i % 2 === 0 ? -1 : 1;
     chapters.push({
       id: `experience-${i + 1}` as ChapterId,
       title: `${num} · ${e.year} — ${heading}`,
       caption: e.description ?? `Waypoint ${i + 1}: ${heading}.`,
-      camera: [0, 2.2, z + (isArsenal ? 10 : 14)],
-      lookAt: [0, 0.5, z],
+      camera: [0, 2.2 + (r - 2) * 0.15, z + (isArsenal ? 10 : 14)],
+      lookAt: [side * 0.8, 0.5 + (r - 2) * 0.1, z],
       ...(i === 0
         ? {
             via: {

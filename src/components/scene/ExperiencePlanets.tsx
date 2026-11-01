@@ -23,6 +23,8 @@ export function ExperiencePlanet({
   pattern,
   isIntroActive = false,
   isActiveWaypoint = false,
+  radius = 2,
+  index = 0,
 }: {
   z: number;
   color: string;
@@ -34,6 +36,8 @@ export function ExperiencePlanet({
   pattern: ProjectPattern;
   isIntroActive?: boolean;
   isActiveWaypoint?: boolean;
+  radius?: number;
+  index?: number;
 }) {
   const planetRef = useRef<THREE.Mesh>(null);
   const cloudRef = useRef<THREE.Mesh>(null);
@@ -91,7 +95,7 @@ export function ExperiencePlanet({
     }
   });
 
-  const x = side * 5;
+  const x = side * (5.0 + (radius - 2.0) * 0.6);
   const isLeft = side === -1;
 
   return (
@@ -108,7 +112,7 @@ export function ExperiencePlanet({
             setHovered(false);
           }}
         >
-          <sphereGeometry args={[2.5, 24, 24]} />
+          <sphereGeometry args={[radius * 1.25, 24, 24]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
       )}
@@ -133,7 +137,7 @@ export function ExperiencePlanet({
             : undefined
         }
       >
-        <sphereGeometry args={[2, 64, 64]} />
+        <sphereGeometry args={[radius, 64, 64]} />
         <meshPhysicalMaterial
           map={tex}
           roughness={
@@ -154,7 +158,7 @@ export function ExperiencePlanet({
       {/* Rotating spherical cloud deck with real parallax depth */}
       {telemetry.hasClouds && cloudTex && (
         <mesh ref={cloudRef} scale={1.018} raycast={() => null}>
-          <sphereGeometry args={[2, 48, 48]} />
+          <sphereGeometry args={[radius, 48, 48]} />
           <meshStandardMaterial
             map={cloudTex}
             transparent
@@ -168,7 +172,7 @@ export function ExperiencePlanet({
 
       {/* Luminous Rayleigh atmospheric scattering limb shell */}
       <RealisticAtmosphereShell
-        radius={2}
+        radius={radius}
         atmosphereColor={telemetry.atmosphereColor}
         sunsetLimbColor={telemetry.sunsetLimbColor}
         power={3.2}
@@ -179,7 +183,7 @@ export function ExperiencePlanet({
       {/* Realistic planetary rings with dust gaps */}
       {telemetry.hasRings && ringTex && (
         <mesh rotation={[Math.PI / 2.3, 0.18, 0]} raycast={() => null}>
-          <ringGeometry args={[telemetry.ringInner ?? 2.5, telemetry.ringOuter ?? 3.5, 96]} />
+          <ringGeometry args={[telemetry.ringInner ? (telemetry.ringInner / 2) * radius : radius * 1.25, telemetry.ringOuter ? (telemetry.ringOuter / 2) * radius : radius * 1.75, 96]} />
           <meshBasicMaterial
             map={ringTex}
             transparent
@@ -192,17 +196,17 @@ export function ExperiencePlanet({
 
       {/* Subtle planetary local illumination */}
       <pointLight
-        position={[0, 0, 2.5]}
+        position={[0, 0, radius * 1.25]}
         intensity={0.7}
         color={telemetry.atmosphereColor}
-        distance={12}
+        distance={12 + radius * 2}
       />
 
       {/* Orbiting holographic telemetry scan rings when hovered */}
       {isActiveWaypoint && hovered && (
         <group ref={scanRingRef} raycast={() => null}>
           <mesh rotation={[Math.PI / 2, 0, 0]} raycast={() => null}>
-            <ringGeometry args={[2.3, 2.34, 64]} />
+            <ringGeometry args={[radius * 1.15, radius * 1.17, 64]} />
             <meshBasicMaterial
               color={telemetry.atmosphereColor}
               transparent
@@ -211,7 +215,7 @@ export function ExperiencePlanet({
             />
           </mesh>
           <mesh rotation={[0, Math.PI / 2, 0]} raycast={() => null}>
-            <ringGeometry args={[2.35, 2.38, 48]} />
+            <ringGeometry args={[radius * 1.175, radius * 1.195, 48]} />
             <meshBasicMaterial
               color={telemetry.sunsetLimbColor}
               transparent
@@ -226,7 +230,7 @@ export function ExperiencePlanet({
       {isActiveWaypoint && hovered && (
         <group>
           {/* Target Reticle on Planet Limb */}
-          <group position={[isLeft ? -2.15 : 2.15, 0.15, 0]}>
+          <group position={[isLeft ? -(radius * 1.075) : radius * 1.075, 0.15, 0]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
               <ringGeometry args={[0.07, 0.12, 24]} />
               <meshBasicMaterial
@@ -244,9 +248,12 @@ export function ExperiencePlanet({
 
           {/* 3D Glowing Neon Vector Leader Line connecting limb to HUD card */}
           {(() => {
-            const start = new THREE.Vector3(isLeft ? -2.15 : 2.15, 0.15, 0);
-            const elbow = new THREE.Vector3(isLeft ? -2.8 : 2.8, 0.45, 0);
-            const end = new THREE.Vector3(isLeft ? -3.3 : 3.3, 0.45, 0);
+            const startX = isLeft ? -(radius * 1.075) : radius * 1.075;
+            const elbowX = isLeft ? -(radius + 0.75) : radius + 0.75;
+            const endX = isLeft ? -(radius + 1.25) : radius + 1.25;
+            const start = new THREE.Vector3(startX, 0.15, 0);
+            const elbow = new THREE.Vector3(elbowX, 0.45, 0);
+            const end = new THREE.Vector3(endX, 0.45, 0);
             const geom = new THREE.BufferGeometry().setFromPoints([start, elbow, end]);
             return (
               <primitive
@@ -270,7 +277,7 @@ export function ExperiencePlanet({
       {isActiveWaypoint && hovered && (
         <Html
           distanceFactor={13}
-          position={[isLeft ? -4.5 : 4.5, 0.45, 0]}
+          position={[isLeft ? -(radius + 2.45) : radius + 2.45, 0.45, 0]}
           center
           pointerEvents="none"
         >
@@ -353,6 +360,7 @@ export function ExperiencePlanet({
           accent={accent}
           hasPlace={Boolean(place)}
           isHovered={hovered}
+          radius={radius}
         />
       )}
     </group>
@@ -375,6 +383,7 @@ function AnimatedPlanetTitle({
   accent,
   hasPlace,
   isHovered = false,
+  radius = 2,
 }: {
   displayPlace: string;
   name: string;
@@ -383,6 +392,7 @@ function AnimatedPlanetTitle({
   accent: string;
   hasPlace: boolean;
   isHovered?: boolean;
+  radius?: number;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const lineRef = useRef<THREE.Mesh>(null);
@@ -417,7 +427,8 @@ function AnimatedPlanetTitle({
 
     // Vertical position: smoothly rises into final orbital altitude
     const entryY = (1 - p) * -0.6;
-    groupRef.current.position.y = entryY + floatY;
+    const yOffset = radius - 2;
+    groupRef.current.position.y = entryY + floatY + yOffset;
     groupRef.current.rotation.z = floatRotZ;
 
     // Scale: springs up from 0.82 to 1.0 with subtle rhythmic breathing + hover magnification

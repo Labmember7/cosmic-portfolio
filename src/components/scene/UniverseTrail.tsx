@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import type { SceneLayout } from "@/config/story";
+import { type SceneLayout, getExperienceRadius } from "@/config/story";
 import type { Experience } from "@/content/portfolio";
 
 export function UniverseTrail({
@@ -24,7 +24,8 @@ export function UniverseTrail({
     experiences.forEach((_, i) => {
       const z = layout.experienceZs[i];
       const side = i % 2 === 0 ? -1 : 1;
-      pts.push(new THREE.Vector3(side * 4.5, 0.35, z));
+      const r = getExperienceRadius(i);
+      pts.push(new THREE.Vector3(side * (r + 2.2), 0.35, z));
     });
 
     // Wormhole corridor center

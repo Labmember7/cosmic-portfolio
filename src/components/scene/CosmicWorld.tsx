@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { usePortfolio, type Experience } from "@/content/portfolio";
-import type { SceneLayout } from "@/config/story";
+import { type SceneLayout, getExperienceRadius } from "@/config/story";
 import { UniversalCosmicStars } from "./CameraRig";
 import { ShootingStars } from "./Environment";
 import { IntroAstronaut } from "./StarportGantry";
@@ -263,21 +263,28 @@ export function CosmicWorld({
       {/* Radiant Journey Constellation Flight Trail */}
       <UniverseTrail layout={layout} experiences={EXPERIENCES} />
 
-      {EXPERIENCES.map((e: Experience, i: number) => (
-        <ExperiencePlanet
-          key={`${e.name}-${i}`}
-          z={layout.experienceZs[i]}
-          color={e.color}
-          accent={e.accent}
-          name={e.name}
-          year={e.year}
-          place={e.place}
-          pattern={e.pattern}
-          side={i % 2 === 0 ? -1 : 1}
-          isIntroActive={isIntroActive}
-          isActiveWaypoint={activeExperienceIndex === i}
-        />
-      ))}
+      {EXPERIENCES.map((e: Experience, i: number) => {
+        // Logarithmic scale progression: R(i) = R_base + growth * ln(1 + i)
+        // Visually demonstrates escalating challenge & accumulated knowledge
+        const radius = getExperienceRadius(i);
+        return (
+          <ExperiencePlanet
+            key={`${e.name}-${i}`}
+            index={i}
+            radius={radius}
+            z={layout.experienceZs[i]}
+            color={e.color}
+            accent={e.accent}
+            name={e.name}
+            year={e.year}
+            place={e.place}
+            pattern={e.pattern}
+            side={i % 2 === 0 ? -1 : 1}
+            isIntroActive={isIntroActive}
+            isActiveWaypoint={activeExperienceIndex === i}
+          />
+        );
+      })}
 
       <Wormhole position={[0, 0, layout.wormholeZ]} isWormhole={isWormhole} />
       <Galaxy onSelectProject={onSelectProject} centerZ={layout.galaxyZ} />

@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { Trail } from "@react-three/drei";
 import type { SceneLayout } from "@/config/story";
 import { getBiomeTexture, getPlanetCloudTexture } from "@/lib/planetGenerator";
+import { EarthPlanet } from "./EarthPlanet";
 
 export function RealisticAtmosphereShell({
   radius,
@@ -155,57 +156,18 @@ export function MoonDust() {
 }
 
 export function CelestialHorizonGiant() {
-  const planetRef = useRef<THREE.Mesh>(null);
-  const cloudRef = useRef<THREE.Mesh>(null);
-
-  // Gaia/Earth-like exoplanet texture
-  const tex = useMemo(() => getBiomeTexture("oceanic", "#38bdf8", "#0369a1", "HorizonGiant"), []);
-  const cloudTex = useMemo(() => getPlanetCloudTexture("oceanic", "#ffffff"), []);
-
-  useFrame((_, dt) => {
-    if (planetRef.current) planetRef.current.rotation.y += dt * 0.04;
-    if (cloudRef.current) cloudRef.current.rotation.y += dt * 0.06;
-  });
-
   return (
     <group position={[15, 12, -50]}>
-      {/* Massive celestial body */}
-      <mesh ref={planetRef}>
-        <sphereGeometry args={[8.5, 64, 64]} />
-        <meshPhysicalMaterial
-          map={tex}
-          roughness={0.3}
-          metalness={0.08}
-          clearcoat={0.7}
-          clearcoatRoughness={0.2}
-          sheen={0.5}
-          sheenColor={new THREE.Color("#67e8f9")}
-          emissive="#0284c7"
-          emissiveIntensity={0.08}
-        />
-      </mesh>
-
-      {/* Swirling celestial cloud layer */}
-      <mesh ref={cloudRef} scale={1.018}>
-        <sphereGeometry args={[8.5, 48, 48]} />
-        <meshStandardMaterial
-          map={cloudTex}
-          transparent
-          opacity={0.65}
-          depthWrite={false}
-          roughness={0.9}
-          color="#ffffff"
-        />
-      </mesh>
-
-      {/* Ethereal Rayleigh limb scattering glow */}
-      <RealisticAtmosphereShell
+      <EarthPlanet
         radius={8.5}
-        atmosphereColor="#38bdf8"
-        sunsetLimbColor="#f59e0b"
-        power={3.2}
-        intensity={1.7}
-        scale={1.12}
+        rotationSpeed={0.04}
+        cloudDriftSpeed={0.02}
+        axialTilt={0.4091}
+        atmosphereIntensity={0.85}
+        atmosphereScale={1.055}
+        atmosphereColor="#4a9fe0"
+        sunsetLimbColor="#2b6cb0"
+        atmospherePower={4.2}
       />
     </group>
   );
