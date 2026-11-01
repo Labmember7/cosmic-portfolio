@@ -64,15 +64,15 @@ export function TerminalContact({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-[640px] max-w-[94vw] font-mono text-cyan-300"
+        className="relative w-[640px] max-w-[96vw] font-mono text-cyan-300"
       >
         {/* Aerospace Terminal Bezel */}
-        <div className="relative overflow-hidden rounded-3xl border border-cyan-500/40 neo-surface-cyan backdrop-blur-2xl ring-1 ring-cyan-400/20">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-cyan-500/40 neo-surface-cyan backdrop-blur-2xl ring-1 ring-cyan-400/20 max-h-[90vh] overflow-y-auto">
           {/* Subtle phosphor grid texture */}
           <div
             className="pointer-events-none absolute inset-0 opacity-15"
@@ -84,36 +84,36 @@ export function TerminalContact({
           />
 
           {/* Top Aerospace Telemetry Bar */}
-          <div className="relative flex items-center justify-between border-b border-cyan-500/30 bg-cyan-950/50 px-5 py-3 text-[11px] uppercase tracking-[0.25em]">
-            <div className="flex items-center gap-2">
+          <div className="relative flex items-center justify-between border-b border-cyan-500/30 bg-cyan-950/50 px-3.5 py-2.5 sm:px-5 sm:py-3 text-[9px] sm:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em]">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
               <span className="font-bold text-cyan-200">GROUND CONTROL · CH-07</span>
             </div>
-            <div className="text-cyan-400/80 text-[10px]">
+            <div className="text-cyan-400/80 text-[9px] sm:text-[10px] hidden xs:block">
               CARRIER {ready ? "LOCKED" : "TUNING"} · {new Date().toISOString().slice(11, 19)}Z
             </div>
             <button
               id="close-contact-btn"
               onClick={onClose}
-              className="text-cyan-300 hover:text-white transition-all px-2.5 py-1 rounded-lg neo-btn border border-cyan-500/30 hover:border-cyan-400 cursor-pointer text-[10px]"
+              className="text-cyan-300 hover:text-white transition-all px-2.5 py-1.5 rounded-lg neo-btn border border-cyan-500/30 hover:border-cyan-400 cursor-pointer text-[9px] sm:text-[10px]"
             >
               [ESC] DISCONNECT
             </button>
           </div>
 
           {/* Terminal Body */}
-          <div className="relative px-6 py-5 text-[13px] leading-relaxed text-cyan-300 min-h-[380px]">
+          <div className="relative px-4 py-3.5 sm:px-6 sm:py-5 text-xs sm:text-[13px] leading-relaxed text-cyan-300 min-h-[300px] sm:min-h-[380px]">
             {/* Boot log */}
-            <div className="whitespace-pre-wrap space-y-0.5 text-cyan-200/90 font-mono text-xs neo-inset-cyan rounded-xl p-3 border border-cyan-500/15">
+            <div className="whitespace-pre-wrap space-y-0.5 text-cyan-200/90 font-mono text-[11px] sm:text-xs neo-inset-cyan rounded-xl p-2.5 sm:p-3 border border-cyan-500/15 max-h-28 sm:max-h-none overflow-y-auto">
               {booted.map((l, i) => (
                 <div key={i}>{l}</div>
               ))}
             </div>
 
             {ready && !sent && (
-              <form onSubmit={handleSend} className="mt-4 space-y-4">
+              <form onSubmit={handleSend} className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
                 <div>
-                  <label htmlFor="contact-title" className="block text-[10px] uppercase tracking-widest text-cyan-400/80 mb-1 font-semibold">
+                  <label htmlFor="contact-title" className="block text-[9px] sm:text-[10px] uppercase tracking-widest text-cyan-400/80 mb-1 font-semibold">
                     &gt; TRANSMISSION SUBJECT:
                   </label>
                   <input
@@ -123,11 +123,11 @@ export function TerminalContact({
                     onChange={(e) => setTitle(e.target.value.slice(0, 80))}
                     maxLength={80}
                     placeholder="ENTER MISSION / INQUIRY TOPIC..."
-                    className="w-full rounded-xl neo-input px-3.5 py-2.5 text-white placeholder-cyan-700 outline-none font-mono text-xs"
+                    className="w-full rounded-xl neo-input px-3 sm:px-3.5 py-2 sm:py-2.5 text-white placeholder-cyan-700 outline-none font-mono text-sm sm:text-xs"
                   />
                 </div>
                 <div>
-                  <label htmlFor="contact-message" className="block text-[10px] uppercase tracking-widest text-cyan-400/80 mb-1 font-semibold">
+                  <label htmlFor="contact-message" className="block text-[9px] sm:text-[10px] uppercase tracking-widest text-cyan-400/80 mb-1 font-semibold">
                     &gt; MESSAGE PAYLOAD:
                   </label>
                   <textarea
@@ -135,21 +135,21 @@ export function TerminalContact({
                     value={content}
                     onChange={(e) => setContent(e.target.value.slice(0, 2000))}
                     maxLength={2000}
-                    rows={6}
+                    rows={4}
                     placeholder="TYPE TRANSMISSION DETAILS (ROBOTICS, HARDWARE, VISION COLLABORATION)..."
-                    className="w-full resize-none rounded-xl neo-input px-3.5 py-2.5 text-white placeholder-cyan-700 outline-none font-mono text-xs"
+                    className="w-full resize-none rounded-xl neo-input px-3 sm:px-3.5 py-2 sm:py-2.5 text-white placeholder-cyan-700 outline-none font-mono text-sm sm:text-xs"
                   />
-                  <div className="mt-1 text-right text-[10px] text-cyan-500/70">{content.length}/2000 BYTES</div>
+                  <div className="mt-1 text-right text-[9px] sm:text-[10px] text-cyan-500/70">{content.length}/2000 BYTES</div>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <div className="text-[11px] text-cyan-400/70">
-                    STATUS: READY TO DISPATCH {cursor}
+                  <div className="text-[10px] sm:text-[11px] text-cyan-400/70 truncate">
+                    STATUS: READY {cursor}
                   </div>
                   <button
                     id="contact-transmit-btn"
                     type="submit"
                     disabled={!title.trim() || !content.trim()}
-                    className="rounded-xl border border-cyan-400 neo-btn-cyan px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-950 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+                    className="rounded-xl border border-cyan-400 neo-btn-cyan px-4 py-2 sm:px-6 sm:py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-slate-950 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer whitespace-nowrap"
                   >
                     ▶ TRANSMIT TO GROUND
                   </button>

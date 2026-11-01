@@ -106,15 +106,15 @@ export function BootSequence({
       {/* Skip Button (Top Right) */}
       <button
         onClick={finishBoot}
-        className="absolute top-6 right-6 font-mono text-[10px] uppercase tracking-[0.25em] text-cyan-300 hover:text-white border border-cyan-500/40 neo-btn px-4 py-2 rounded-full backdrop-blur-md transition-all z-20 cursor-pointer"
+        className="absolute top-[max(1rem,env(safe-area-inset-top,0px))] right-[max(1rem,env(safe-area-inset-right,0px))] font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-cyan-300 hover:text-white border border-cyan-500/40 neo-btn px-3 py-1.5 sm:px-4 sm:py-2 rounded-full backdrop-blur-md transition-all z-20 cursor-pointer shadow-md"
       >
         [SKIP INTRO ⏭]
       </button>
 
       {/* Central Counter-Rotating Quantum Singularity Rings */}
-      <div className="relative flex items-center justify-center mb-8">
+      <div className="relative flex items-center justify-center mb-4 sm:mb-8">
         {/* Outer Ring: Degree Markings & Ticks */}
-        <svg className="w-56 h-56 sm:w-64 sm:h-64 animate-[spin_20s_linear_infinite]" viewBox="0 0 200 200">
+        <svg className="w-36 h-36 xs:w-44 xs:h-44 sm:w-56 sm:h-56 md:w-64 md:h-64 animate-[spin_20s_linear_infinite]" viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(34,211,238,0.25)" strokeWidth="1.5" />
           <circle
             cx="100"
@@ -140,7 +140,7 @@ export function BootSequence({
         </svg>
 
         {/* Middle Ring: Counter-Rotating Reticle */}
-        <svg className="absolute w-44 h-44 sm:w-52 sm:h-52 animate-[spin_12s_linear_infinite_reverse]" viewBox="0 0 160 160">
+        <svg className="absolute w-28 h-28 xs:w-36 xs:h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 animate-[spin_12s_linear_infinite_reverse]" viewBox="0 0 160 160">
           <circle
             cx="80"
             cy="80"
@@ -162,7 +162,7 @@ export function BootSequence({
         </svg>
 
         {/* Inner Ring: Concentric Tech Core */}
-        <svg className="absolute w-32 h-32 sm:w-36 sm:h-36 animate-[spin_6s_linear_infinite]" viewBox="0 0 120 120">
+        <svg className="absolute w-20 h-20 xs:w-28 xs:h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 animate-[spin_6s_linear_infinite]" viewBox="0 0 120 120">
           <circle
             cx="60"
             cy="60"
@@ -176,29 +176,29 @@ export function BootSequence({
 
         {/* Center Glowing Plasma Core with Live Percentage */}
         <div className="absolute flex flex-col items-center justify-center">
-          <span className="font-display text-4xl sm:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-emerald-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]">
+          <span className="font-display text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-emerald-300 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]">
             {progress}%
           </span>
-          <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-cyan-400/80 mt-0.5">
+          <span className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.3em] text-cyan-400/80 mt-0.5">
             WARP CORE
           </span>
         </div>
       </div>
 
       {/* Main Title Header */}
-      <div className="text-center mb-6 px-4">
-        <div className="flex items-center justify-center gap-2 font-mono text-[10px] tracking-[0.4em] text-cyan-300 uppercase">
+      <div className="text-center mb-4 sm:mb-6 px-4">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 font-mono text-[8px] sm:text-[10px] tracking-[0.25em] sm:tracking-[0.4em] text-cyan-300 uppercase truncate">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-          QUANTUM AVIONICS // HYPERSPACE BOOT SEQUENCE
+          QUANTUM AVIONICS // HYPERSPACE BOOT
         </div>
-        <h2 className="font-display mt-1 text-lg sm:text-xl font-bold uppercase tracking-[0.3em] text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+        <h2 className="font-display mt-1 text-sm xs:text-base sm:text-lg md:text-xl font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
           BACEM ZARAI · A COSMIC JOURNEY
         </h2>
       </div>
 
       {/* Segmented Glowing Progress Bar */}
-      <div className="w-[360px] max-w-[85vw] mb-6">
-        <div className="relative h-3 w-full rounded-full border border-cyan-400/40 neo-inset overflow-hidden p-0.5">
+      <div className="w-[360px] max-w-[85vw] mb-4 sm:mb-6">
+        <div className="relative h-2.5 sm:h-3 w-full rounded-full border border-cyan-400/40 neo-inset overflow-hidden p-0.5">
           {/* Calibration marks at 25%, 50%, 75% */}
           <div className="absolute inset-0 flex justify-between px-3 pointer-events-none z-10 opacity-30">
             <span className="w-px h-full bg-cyan-200" />
@@ -213,16 +213,16 @@ export function BootSequence({
           </div>
         </div>
         {/* Status badges */}
-        <div className="flex items-center justify-between mt-2.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white/50">
-          <span className="px-2 py-0.5 rounded-full neo-inset">CORE: <strong className="text-cyan-300">ONLINE</strong></span>
-          <span className="px-2 py-0.5 rounded-full neo-inset">BIOMES: <strong className="text-emerald-300">STABILIZED</strong></span>
-          <span className="px-2 py-0.5 rounded-full neo-inset">AVIONICS: <strong className="text-sky-300">READY</strong></span>
+        <div className="flex items-center justify-between mt-2 sm:mt-2.5 font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/50">
+          <span className="px-1.5 sm:px-2 py-0.5 rounded-full neo-inset">CORE: <strong className="text-cyan-300">ONLINE</strong></span>
+          <span className="px-1.5 sm:px-2 py-0.5 rounded-full neo-inset">BIOMES: <strong className="text-emerald-300">STABILIZED</strong></span>
+          <span className="px-1.5 sm:px-2 py-0.5 rounded-full neo-inset">AVIONICS: <strong className="text-sky-300">READY</strong></span>
         </div>
       </div>
 
       {/* Dynamic Telemetry Terminal Output */}
-      <div className="w-[480px] max-w-[90vw] rounded-2xl border border-cyan-400/30 neo-surface-cyan p-4 font-mono text-[11px] backdrop-blur-xl ring-1 ring-cyan-400/20">
-        <div className="flex items-center justify-between border-b border-cyan-400/20 pb-2 mb-2 text-[9px] uppercase tracking-widest text-cyan-400">
+      <div className="w-[480px] max-w-[92vw] rounded-2xl border border-cyan-400/30 neo-surface-cyan p-3 sm:p-4 font-mono text-[10px] sm:text-[11px] backdrop-blur-xl ring-1 ring-cyan-400/20">
+        <div className="flex items-center justify-between border-b border-cyan-400/20 pb-1.5 sm:pb-2 mb-1.5 sm:mb-2 text-[8px] sm:text-[9px] uppercase tracking-widest text-cyan-400">
           <span>◈ SYSTEM DIAGNOSTIC LOG</span>
           <span className="animate-pulse text-emerald-400">● REAL-TIME COMPILATION</span>
         </div>

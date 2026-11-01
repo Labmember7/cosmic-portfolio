@@ -74,16 +74,57 @@ export function CameraRig({ chapter }: { chapter: Chapter }) {
       }
     };
 
+    let isTouching = false;
+    let lastTouchPos = { x: 0, y: 0 };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest("button, a, input, textarea, [role='dialog'], aside, nav, select, kbd")) return;
+        isTouching = true;
+        lastTouchPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else {
+        isTouching = false;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (isTouching && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - lastTouchPos.x;
+        const dy = e.touches[0].clientY - lastTouchPos.y;
+        lastTouchPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+
+        const sensitivity = 0.0032;
+        const nextYaw = targetDragAngle.current.yaw + dx * sensitivity;
+        targetDragAngle.current.yaw = Math.atan2(Math.sin(nextYaw), Math.cos(nextYaw));
+        targetDragAngle.current.pitch = THREE.MathUtils.clamp(
+          targetDragAngle.current.pitch + dy * sensitivity,
+          -0.85,
+          0.85,
+        );
+      }
+    };
+
+    const onTouchEnd = () => {
+      isTouching = false;
+    };
+
     window.addEventListener("contextmenu", onContextMenu);
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("contextmenu", onContextMenu);
       window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
     };
   }, []);
 

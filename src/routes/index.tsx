@@ -3,6 +3,7 @@ import { Suspense, useRef, useState, useMemo, useEffect, useCallback } from "rea
 import { Canvas } from "@react-three/fiber";
 
 import { useSpaceMusic } from "@/hooks/useSpaceMusic";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   PortfolioContext,
   fetchPortfolio,

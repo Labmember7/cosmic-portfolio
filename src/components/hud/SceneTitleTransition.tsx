@@ -94,7 +94,7 @@ export function SceneTitleTransition({
         </div>
 
         {/* Cinematic Main Scene Title */}
-        <h2 className="mt-1 text-center font-display text-sm sm:text-base md:text-lg font-black uppercase tracking-[0.25em] text-white drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] whitespace-nowrap">
+        <h2 className="mt-1 text-center font-display text-xs sm:text-base md:text-lg font-black uppercase tracking-[0.18em] sm:tracking-[0.25em] text-white drop-shadow-[0_0_12px_rgba(34,211,238,0.7)] max-w-[88vw]">
           {cleanTitle}
         </h2>
 

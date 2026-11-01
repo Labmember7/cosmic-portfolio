@@ -34,14 +34,14 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label={achievement.name}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl border neo-surface-amber p-6 md:p-8 backdrop-blur-xl transition-all"
+        className="relative w-full max-w-lg rounded-2xl border neo-surface-amber p-4.5 sm:p-6 md:p-8 backdrop-blur-xl transition-all max-h-[88vh] overflow-y-auto"
         style={{
           borderColor: `${color}44`,
         }}
@@ -54,10 +54,10 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
         />
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <span
-              className="flex h-9 w-9 items-center justify-center rounded-xl neo-inset text-sm font-bold border"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl neo-inset text-xs sm:text-sm font-bold border"
               style={{
                 borderColor: `${color}66`,
                 color,
@@ -66,10 +66,10 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
               {achievement.icon ?? "✦"}
             </span>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-[0.25em]" style={{ color }}>
+              <p className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em]" style={{ color }}>
                 PANTHEON // VERIFIED HONORS
               </p>
-              <p className="text-[11px] font-mono text-white/50 tracking-wider">
+              <p className="text-[10px] sm:text-[11px] font-mono text-white/50 tracking-wider">
                 STATUS: CONFIRMED CREDENTIAL
               </p>
             </div>
@@ -78,7 +78,7 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
             id="close-achievement-modal-btn"
             aria-label="Close honors dossier modal"
             onClick={onClose}
-            className="rounded-xl neo-btn p-2 text-white/50 hover:text-white transition cursor-pointer"
+            className="rounded-xl neo-btn p-2 text-white/50 hover:text-white transition cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -92,75 +92,75 @@ export const AchievementDialog: React.FC<AchievementDialogProps> = ({
         </div>
 
         {/* Title & Metadata */}
-        <div className="mt-5">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-white leading-tight">
+        <div className="mt-4 sm:mt-5">
+          <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
             {achievement.name}
           </h2>
-          <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
+          <div className="mt-2 sm:mt-2.5 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs">
             {achievement.issuer && (
-                <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/80 font-mono">
-                  ISSUER: <strong className="text-white font-semibold">{achievement.issuer}</strong>
-                </span>
+              <span className="rounded-lg neo-inset border border-white/10 px-2.5 py-1 text-white/80 font-mono">
+                ISSUER: <strong className="text-white font-semibold">{achievement.issuer}</strong>
+              </span>
             )}
-                {achievement.year && (
-                    <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/80 font-mono">
-                      YEAR: <strong style={{ color }}>{achievement.year}</strong>
-                    </span>
+            {achievement.year && (
+              <span className="rounded-lg neo-inset border border-white/10 px-2.5 py-1 text-white/80 font-mono">
+                YEAR: <strong style={{ color }}>{achievement.year}</strong>
+              </span>
             )}
-                    {currentIndex !== null && totalCount > 0 && (
-                        <span className="rounded-lg neo-inset border border-white/10 px-3 py-1 text-white/50 font-mono ml-auto">
-                          {currentIndex + 1} / {totalCount}
-                        </span>
+            {currentIndex !== null && totalCount > 0 && (
+              <span className="rounded-lg neo-inset border border-white/10 px-2.5 py-1 text-white/50 font-mono ml-auto">
+                {currentIndex + 1} / {totalCount}
+              </span>
             )}
-                      </div>
+          </div>
         </div>
 
         {/* Description / Dossier */}
-                  <div className="mt-5 rounded-xl neo-inset border border-white/10 p-4.5">
-                    <p className="text-[10px] uppercase tracking-[0.25em] text-white/40 mb-2 font-mono">
+        <div className="mt-4 sm:mt-5 rounded-xl neo-inset border border-white/10 p-3.5 sm:p-4.5">
+          <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-white/40 mb-1.5 sm:mb-2 font-mono">
             // MILESTONE SUMMARY
-                    </p>
-                    <p className="text-[14px] leading-relaxed text-white/85 whitespace-pre-line font-sans">
-                      {achievement.description ??
-                        `Official credential recognized in ${achievement.year ?? "the archives"} by ${achievement.issuer ?? "accrediting body"
-                        }. Demonstrates advanced applied engineering mastery and autonomous systems execution.`}
-                    </p>
-                  </div>
+          </p>
+          <p className="text-[13px] sm:text-[14px] leading-relaxed text-white/85 whitespace-pre-line font-sans">
+            {achievement.description ??
+              `Official credential recognized in ${achievement.year ?? "the archives"} by ${achievement.issuer ?? "accrediting body"
+              }. Demonstrates advanced applied engineering mastery and autonomous systems execution.`}
+          </p>
+        </div>
 
-                  {/* Navigation & Done Button */}
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs">
-                    <div className="flex gap-2">
-                      {onPrev && (
-                        <button
-                          onClick={onPrev}
-                          className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer"
-                        >
-                          ← Prev Honor
-                        </button>
-                      )}
-                      {onNext && (
-                        <button
-                          onClick={onNext}
-                          className="rounded-xl neo-btn border border-white/20 px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer"
-                        >
-                          Next Honor →
-                        </button>
-                      )}
-                    </div>
+        {/* Navigation & Done Button */}
+        <div className="mt-5 sm:mt-6 flex items-center justify-between border-t border-white/10 pt-3.5 sm:pt-4 text-xs">
+          <div className="flex gap-1.5 sm:gap-2">
+            {onPrev && (
+              <button
+                onClick={onPrev}
+                className="rounded-xl neo-btn border border-white/20 px-3 sm:px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer min-h-[36px]"
+              >
+                ← Prev<span className="hidden sm:inline"> Honor</span>
+              </button>
+            )}
+            {onNext && (
+              <button
+                onClick={onNext}
+                className="rounded-xl neo-btn border border-white/20 px-3 sm:px-3.5 py-1.5 text-white/70 hover:text-white transition font-mono cursor-pointer min-h-[36px]"
+              >
+                Next<span className="hidden sm:inline"> Honor</span> →
+              </button>
+            )}
+          </div>
 
-                    <button
-                      id="achievement-done-btn"
-                      aria-label="Done inspecting honor"
-                      onClick={onClose}
-                      className="rounded-xl neo-btn-amber px-5 py-2 font-semibold text-black transition hover:opacity-95 font-mono cursor-pointer shadow-md"
-                      style={{
-                        background: color,
-                      }}
-                    >
-                      Done
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
+          <button
+            id="achievement-done-btn"
+            aria-label="Done inspecting honor"
+            onClick={onClose}
+            className="rounded-xl neo-btn-amber px-4 sm:px-5 py-1.5 sm:py-2 font-semibold text-black transition hover:opacity-95 font-mono cursor-pointer shadow-md min-h-[36px]"
+            style={{
+              background: color,
+            }}
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
